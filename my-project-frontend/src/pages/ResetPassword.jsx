@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import {useState, useEffect, useRef} from 'react';
 import { toast } from 'react-toastify';
 
 import { apiUrl } from '../services/http';
@@ -15,6 +15,10 @@ export default function ResetPassword() {
     const [isVerifying, setIsVerifying] = useState(true);
     const [tokenValid, setTokenValid] = useState(false);
     const location = useLocation();
+
+    const passwordRef = useRef(null)
+    const passwordConfirmRef = useRef(null)
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -68,11 +72,13 @@ export default function ResetPassword() {
 
         if (formData.password !== formData.password_confirmation) {
             toast.error('Passwords do not match');
+            passwordConfirmRef.current?.focus()
             return;
         }
 
         if (formData.password.length < 8) {
             toast.error('Password must be at least 8 characters');
+            passwordRef.current?.focus()
             return;
         }
 
@@ -101,11 +107,12 @@ export default function ResetPassword() {
             } else {
                 // Handle validation errors
                 if (result.errors) {
-                    Object.keys(result.errors).forEach(key => {
-                        result.errors[key].forEach(error => {
-                            toast.error(error);
-                        });
-                    });
+                    const firstField = Object.keys(result.errors)[0]
+                    const firstError = result.errors[firstField][0]
+                    toast.error(firstError)
+
+                    if (firstField === "password") passwordRef.current?.focus()
+                    if (firstField === "password_confirmation") passwordConfirmRef.current?.focus()
                 } else if (result.message) {
                     toast.error(result.message);
                 } else {
@@ -189,6 +196,7 @@ export default function ResetPassword() {
                                 New Password
                             </label>
                             <input
+                                ref={passwordRef}
                                 id="password"
                                 name="password"
                                 type="password"
@@ -207,6 +215,7 @@ export default function ResetPassword() {
                                 Confirm New Password
                             </label>
                             <input
+                                ref={passwordConfirmRef}
                                 id="password_confirmation"
                                 name="password_confirmation"
                                 type="password"
@@ -223,7 +232,7 @@ export default function ResetPassword() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
                             {isLoading ? 'Resetting...' : 'Reset Password'}
                         </button>

@@ -158,7 +158,7 @@ export default function ForgotPassword() {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                 >
                                     {isLoading ? 'Sending...' : 'Reset Password'}
                                 </button>
@@ -189,7 +189,7 @@ export default function ForgotPassword() {
                             <div className="space-y-4">
                                 <button
                                     onClick={handleResend}
-                                    className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium transition-colors duration-200"
+                                    className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium transition-colors duration-200 cursor-pointer"
                                 >
                                     Send Another Email
                                 </button>

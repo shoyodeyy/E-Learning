@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class GoogleController extends Controller
 {
@@ -36,17 +37,26 @@ class GoogleController extends Controller
             }
 
             if (!isset($payload['email_verified']) || $payload['email_verified'] !== 'true') {
-                throw new \Exception('Email not verified');
+                throw new \Exception('Email not verified by Google');
             }
 
+            // Auto-verify Google users
             $user = User::updateOrCreate(
                 ['email' => $payload['email']],
                 [
                     'google_id' => $payload['sub'],
                     'name' => $payload['name'] ?? 'Google User',
-                    'role' => 'student'
+                    'email_verified_at' => Carbon::now(), // Auto verify Google accounts
                 ]
             );
+
+            // If user already exists but wasn't Google user before, update google_id and verify
+            if (!$user->google_id) {
+                $user->update([
+                    'google_id' => $payload['sub'],
+                    'email_verified_at' => Carbon::now(),
+                ]);
+            }
 
             $token = $user->createToken('google_token')->plainTextToken;
 
@@ -59,6 +69,7 @@ class GoogleController extends Controller
                     'email' => $user->email,
                     'role' => $user->role,
                     'google_id' => $user->google_id,
+                    'email_verified_at' => $user->email_verified_at,
                 ],
             ]);
         } catch (\Exception $e) {
