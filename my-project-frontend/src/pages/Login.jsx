@@ -5,6 +5,7 @@ import {EyeIcon, EyeSlashIcon} from "@heroicons/react/24/outline";
 
 import {apiUrl} from "../services/http";
 import {GoogleLogin} from "@react-oauth/google";
+import {useAuth} from "../context/AuthContext";
 
 export default function Login() {
     const [step, setStep] = useState(1);
@@ -15,12 +16,28 @@ export default function Login() {
         password: '',
     });
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleEmailSubmit = (e) => {
         e.preventDefault();
         if (data.email) {
             setStep(2);
+        }
+    };
+
+    const navigateByRole = (userRole) => {
+        switch (userRole) {
+            case "admin":
+                navigate("/admin/dashboard");
+                break;
+            case "instructor":
+                navigate("/instructor/dashboard");
+                break;
+            case "student":
+            default:
+                navigate("/dashboard");
+                break;
         }
     };
 
@@ -44,43 +61,22 @@ export default function Login() {
             const result = await response.json();
 
             if (response.ok) {
-                // Store token and user data
-                localStorage.setItem('auth_token', result.token);
-                localStorage.setItem('user', JSON.stringify(result.user));
+                // Use AuthContext login method
+                login(result.user, result.token);
 
                 toast.success('Login successful!');
 
-                // Check email verification status - user có email_verified_at thì đã verify
-                const isEmailVerified = result.user.email_verified_at !== null;
+                // Check email verification status - only for non-Google users
+                const needsVerification = result.user.needs_email_verification || false;
 
-                if (!isEmailVerified) {
-                    console.log('Email not verified, redirecting to verify-email');
+                if (needsVerification) {
                     navigate("/verify-email");
                     return;
                 }
 
                 // Navigate based on role
                 const userRole = result.user?.role || 'student';
-                console.log('User role:', userRole, 'Navigating...');
-
-                // Use setTimeout to ensure state is updated
-                setTimeout(() => {
-                    switch (userRole) {
-                        case "admin":
-                            console.log('Navigating to admin dashboard');
-                            window.location.href = "/admin/dashboard";
-                            break;
-                        case "instructor":
-                            console.log('Navigating to instructor dashboard');
-                            window.location.href = "/instructor/dashboard";
-                            break;
-                        case "student":
-                        default:
-                            console.log('Navigating to student dashboard');
-                            window.location.href = "/dashboard";
-                            break;
-                    }
-                }, 100);
+                navigateByRole(userRole);
             } else {
                 // Handle validation errors
                 if (result.errors) {
@@ -95,8 +91,7 @@ export default function Login() {
                     toast.error('Login failed. Please try again.');
                 }
             }
-        } catch
-            (error) {
+        } catch (error) {
             console.error('Login error:', error);
             toast.error('Network error. Please check your connection.');
         } finally {
@@ -131,26 +126,14 @@ export default function Login() {
             const result = await response.json();
 
             if (result.status === 200) {
-                localStorage.setItem('auth_token', result.token);
-                localStorage.setItem('user', JSON.stringify(result.user));
+                // Use AuthContext login method
+                login(result.user, result.token);
 
                 toast.success('Login successful!');
 
-                // Google users are auto-verified, navigate based on role
+                // Navigate based on role immediately
                 const userRole = result.user?.role || 'student';
-
-                switch (userRole) {
-                    case "admin":
-                        navigate("/admin/dashboard");
-                        break;
-                    case "instructor":
-                        navigate("/instructor/dashboard");
-                        break;
-                    case "student":
-                    default:
-                        navigate("/dashboard");
-                        break;
-                }
+                navigateByRole(userRole);
             } else {
                 toast.error(result.message || 'Google login failed');
             }

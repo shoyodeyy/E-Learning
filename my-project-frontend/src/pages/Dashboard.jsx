@@ -1,59 +1,64 @@
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Dashboard() {
-    const [user, setUser] = useState(null)
-    const [showMessage, setShowMessage] = useState(false)
-    const [messageContent, setMessageContent] = useState('')
-    const [messageType, setMessageType] = useState('success')
+    const [showMessage, setShowMessage] = useState(false);
+    const [messageContent, setMessageContent] = useState('');
+    const [messageType, setMessageType] = useState('success');
+
+    const navigate = useNavigate();
+    const { user, logout, refreshUser } = useAuth();
 
     useEffect(() => {
-        // Get user data from localStorage
-        const userData = localStorage.getItem("user")
-        const token = localStorage.getItem("auth_token")
-
-        if (!token || !userData) {
-            // Redirect to login if no auth
-            window.location.href = '/login'
-            return
-        }
-
-        setUser(JSON.parse(userData))
-
         // Check for messages in URL
-        const urlParams = new URLSearchParams(window.location.search)
-        const message = urlParams.get('message')
+        const urlParams = new URLSearchParams(window.location.search);
+        const message = urlParams.get('message');
 
         if (message) {
-            handleUrlMessage(message)
+            handleUrlMessage(message);
             // Clean URL without refreshing page
-            window.history.replaceState({}, document.title, window.location.pathname)
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
-    }, [])
+    }, []);
+
+    useEffect(() => {
+        if (!user) return;
+
+        if (!user.email_verified_at) {
+            refreshUser();
+        }
+    }, [user, refreshUser]);
 
     const handleUrlMessage = (message) => {
         switch (message) {
             case 'email_verified':
-                setMessageContent('🎉 Email verified successfully! Welcome to Udemy Business.')
-                setMessageType('success')
-                setShowMessage(true)
-                break
+                setMessageContent('🎉 Email verified successfully! Welcome to Udemy Business.');
+                setMessageType('success');
+                setShowMessage(true);
+                break;
             case 'already_verified':
-                setMessageContent('ℹ️ Your email is already verified.')
-                setMessageType('info')
-                setShowMessage(true)
-                break
+                setMessageContent('ℹ️ Your email is already verified.');
+                setMessageType('info');
+                setShowMessage(true);
+                break;
             default:
-                break
+                break;
         }
 
         // Auto hide message after 5 seconds
         setTimeout(() => {
-            setShowMessage(false)
-        }, 5000)
-    }
+            setShowMessage(false);
+        }, 5000);
+    };
+
+    const handleLogout = () => {
+        logout();
+        navigate("/login");
+    };
 
     if (!user) {
-        return <div className="min-h-screen flex items-center justify-center">Loading...</div>
+        return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     }
 
     return (
@@ -97,11 +102,7 @@ export default function Dashboard() {
                                         </span>
                                     )}
                                     <button
-                                        onClick={() => {
-                                            localStorage.removeItem("auth_token")
-                                            localStorage.removeItem("user")
-                                            window.location.href = '/login'
-                                        }}
+                                        onClick={handleLogout}
                                         className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm cursor-pointer"
                                     >
                                         Logout
@@ -121,8 +122,8 @@ export default function Dashboard() {
                                     Dashboard
                                 </h1>
 
-                                {/* Email Verification Alert */}
-                                {!user.email_verified_at && (
+                                {/* Email Verification Alert - Only show for non-Google users */}
+                                {!user.email_verified_at && !user.is_google_user && (
                                     <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-md p-4">
                                         <div className="flex">
                                             <div className="flex-shrink-0">

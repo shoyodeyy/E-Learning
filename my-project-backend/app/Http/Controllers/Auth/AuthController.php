@@ -81,7 +81,17 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Login successful',
-            'user' => $user->only(['id', 'name', 'email', 'role', 'email_verified_at', 'profile']),
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'email_verified_at' => $user->email_verified_at,
+                'profile' => $user->profile,
+                'google_id' => $user->google_id,
+                'is_google_user' => $user->isGoogleUser(),
+                'needs_email_verification' => $user->needsEmailVerification(),
+            ],
             'token' => $token,
             'email_verified' => $user->hasVerifiedEmail(),
         ], 200);

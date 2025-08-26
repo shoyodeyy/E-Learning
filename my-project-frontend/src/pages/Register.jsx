@@ -5,6 +5,7 @@ import {GoogleLogin} from "@react-oauth/google";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"
 
 import { apiUrl } from "../services/http"
+import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
     const [showPassword, setShowPassword] = useState(false)
@@ -24,6 +25,22 @@ export default function Register() {
     const passwordConfirmRef = useRef(null)
 
     const navigate = useNavigate()
+    const { login } = useAuth();
+
+    const navigateByRole = (userRole) => {
+        switch (userRole) {
+            case "admin":
+                navigate("/admin/dashboard");
+                break;
+            case "instructor":
+                navigate("/instructor/dashboard");
+                break;
+            case "student":
+            default:
+                navigate("/dashboard");
+                break;
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -55,13 +72,13 @@ export default function Register() {
             const result = await response.json()
 
             if (response.ok) {
-                // Store token in localStorage
-                localStorage.setItem("auth_token", result.token)
-                localStorage.setItem("user", JSON.stringify(result.user))
+                // Use AuthContext login method
+                login(result.user, result.token);
 
-                toast.success("Registration successful!")
+                toast.success("Registration successful! Please check your email to verify your account.");
 
-                navigate("/dashboard")
+                // Regular email/password users need to verify email
+                navigate("/verify-email");
             } else {
                 // Handle validation errors
                 if (result.errors) {
@@ -109,27 +126,25 @@ export default function Register() {
             const result = await response.json();
 
             if (result.status === 200) {
-                const userInfo = {
-                    ...result.user,
-                    token: result.token,
-                };
+                // Use AuthContext login method
+                login(result.user, result.token);
 
-                localStorage.setItem('auth_token', result.token);
-                localStorage.setItem('user', JSON.stringify(result.user));
+                toast.success('Registration successful!');
 
-                navigate("/dashboard");
-                toast.success('Login successful!');
+                // Google users are auto-verified, navigate based on role
+                const userRole = result.user?.role || 'student';
+                navigateByRole(userRole);
             } else {
-                toast.error(result.message || 'Google login failed');
+                toast.error(result.message || 'Google registration failed');
             }
         } catch (error) {
-            console.error('Error during Google login:', error);
-            toast.error('An error occurred during Google login');
+            console.error('Error during Google registration:', error);
+            toast.error('An error occurred during Google registration');
         }
     };
 
     const handleGoogleError = () => {
-        toast.error('Google login failed');
+        toast.error('Google registration failed');
     };
 
     return (

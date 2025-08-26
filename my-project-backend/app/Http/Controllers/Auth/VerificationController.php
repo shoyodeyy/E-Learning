@@ -26,6 +26,24 @@ class VerificationController extends Controller
     }
 
     /**
+     * Get dashboard URL based on user role
+     */
+    private function getDashboardByRole($user, $message = null)
+    {
+        $dashboardUrl = match($user->role) {
+            'admin' => 'admin/dashboard',
+            'instructor' => 'instructor/dashboard',
+            default => 'dashboard'
+        };
+
+        if ($message) {
+            $dashboardUrl .= '?message=' . $message;
+        }
+
+        return $this->getFrontendUrl($dashboardUrl);
+    }
+
+    /**
      * Send email verification notification
      */
     public function send(Request $request): JsonResponse
@@ -55,24 +73,24 @@ class VerificationController extends Controller
             (string) $request->route('hash'),
             sha1($user->getEmailForVerification())
         )) {
-            return redirect($this->getFrontendUrl('verify-email?error=invalid_link'));
+            return redirect($this->getFrontendUrl('email-verification-result?error=invalid_link'));
         }
 
         // Check if the URL signature is valid
         if (!$request->hasValidSignature()) {
-            return redirect($this->getFrontendUrl('verify-email?error=expired_link'));
+            return redirect($this->getFrontendUrl('email-verification-result?error=expired_link'));
         }
 
         if ($user->hasVerifiedEmail()) {
-            return redirect($this->getFrontendUrl('dashboard?message=already_verified'));
+            return redirect($this->getDashboardByRole($user, 'already_verified'));
         }
 
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
         }
 
-        // Redirect to frontend with success
-        return redirect($this->getFrontendUrl('dashboard?message=email_verified'));
+        // Redirect to appropriate dashboard based on role
+        return redirect($this->getDashboardByRole($user, 'email_verified'));
     }
 
     /**
@@ -100,7 +118,9 @@ class VerificationController extends Controller
     {
         return response()->json([
             'verified' => $request->user()->hasVerifiedEmail(),
+            'email_verified_at' => $request->user()->email_verified_at,
             'email' => $request->user()->email,
+            'role' => $request->user()->role,
         ]);
     }
 }

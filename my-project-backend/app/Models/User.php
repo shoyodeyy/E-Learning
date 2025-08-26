@@ -56,4 +56,35 @@ class User extends Authenticatable
     {
         $this->notify(new ResetPasswordNotification($token, $this->email));
     }
+
+    /**
+     * Check if user is a Google user
+     */
+    public function isGoogleUser(): bool
+    {
+        return !is_null($this->google_id);
+    }
+
+    /**
+     * Check if user needs email verification
+     * Google users are auto-verified, regular users need to verify
+     */
+    public function needsEmailVerification(): bool
+    {
+        // Google users don't need email verification
+        if ($this->isGoogleUser()) {
+            return false;
+        }
+
+        // Regular users need verification if email_verified_at is null
+        return is_null($this->email_verified_at);
+    }
+
+    /**
+     * Check if user has verified email
+     */
+    public function hasVerifiedEmail(): bool
+    {
+        return !is_null($this->email_verified_at);
+    }
 }
