@@ -13,39 +13,53 @@ import ForgotPassword from "./pages/ForgotPassword.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
 import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
+import Footer from "./components/Footer.jsx";
+import AboutUs from "./pages/AboutUs.jsx";
 
 function App() {
     return (
         <BrowserRouter>
             <AuthProvider>
-                <Routes>
-                    {/* Student routes */}
-                    {StudentRouter()}
+                <div className="flex flex-col min-h-screen">
+                    {/* Header */}
 
-                    {/* Admin routes */}
-                    {AdminRouter()}
+                    {/* Main */}
+                    <main className="flex-grow">
+                        <Routes>
+                            {/* Student routes */}
+                            {StudentRouter()}
 
-                    {/* Instructor routes */}
-                    {InstructorRouter()}
+                            {/* Admin routes */}
+                            {AdminRouter()}
 
-                    {/* Common */}
-                    <Route path="/" element={<Navigate to="/login" replace />} />
+                            {/* Instructor routes */}
+                            {InstructorRouter()}
 
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/user/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/user/reset-password" element={<ResetPassword />} />
+                            {/* Common */}
+                            <Route path="/" element={<Navigate to="/login" replace/>}/>
 
-                    {/* Email verification routes */}
-                    <Route path="/email-verification-result" element={<VerificationResult />} />
+                            <Route path="/login" element={<Login/>}/>
+                            <Route path="/register" element={<Register/>}/>
+                            <Route path="/user/forgot-password" element={<ForgotPassword/>}/>
+                            <Route path="/user/reset-password" element={<ResetPassword/>}/>
 
-                    {/* Protected email verification page */}
-                    <Route element={<ProtectedRoute />}>
-                        <Route path="/verify-email" element={<VerifyEmail />} />
-                    </Route>
-                    <Route path="/403" element={<Forbidden/>}/>
-                    <Route path="*" element={<NotFound/>}/>
-                </Routes>
+                            <Route path="/about-us" element={<AboutUs/>}/>
+
+                            {/* Email verification routes */}
+                            <Route path="/email-verification-result" element={<VerificationResult/>}/>
+
+                            {/* Protected email verification page */}
+                            <Route element={<ProtectedRoute/>}>
+                                <Route path="/verify-email" element={<VerifyEmail/>}/>
+                            </Route>
+                            <Route path="/403" element={<Forbidden/>}/>
+                            <Route path="*" element={<NotFound/>}/>
+                        </Routes>
+                    </main>
+
+                    {/* Footer */}
+                    <Footer/>
+                </div>
             </AuthProvider>
         </BrowserRouter>
     )
