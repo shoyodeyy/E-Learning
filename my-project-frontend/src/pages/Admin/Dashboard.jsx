@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import {Outlet, useNavigate} from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
+import AdminSidebar from "./AdminSidebar.jsx";
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -44,12 +45,15 @@ export default function Dashboard() {
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto p-6">
-                <div className="bg-white rounded-lg shadow p-6">
-                    <h2 className="text-lg font-bold">Admin Controls</h2>
-                    <p className="mt-2 text-gray-600">Manage users, courses, and settings here.</p>
+            <div className="flex h-[calc(100vh-5rem)] overflow-hidden flex gap-3">
+                <div className="flex-[2] ">
+                    <AdminSidebar />
                 </div>
-            </main>
+
+                <div className="flex-[14] bg-white p-6 rounded-lg shadow">
+                    <Outlet />
+                </div>
+            </div>
         </div>
     );
 }
