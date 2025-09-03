@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\VoucherController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\VerificationController;
@@ -37,3 +38,19 @@ Route::post('/user/verify-reset-token', [ResetPasswordController::class, 'verify
 Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');
+
+
+//Admin-Voucher
+//Route::post('/vouchers', [VoucherController::class, 'store']);
+//Route::delete('/vouchers/{id}', [VoucherController::class, 'destroy']);
+//Route::get('/vouchers', [VoucherController::class, 'index']);
+//Route::get('/vouchers/{id}', [VoucherController::class, 'show']);
+//Route::put('/vouchers/{id}', [VoucherController::class, 'update']);
+
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    Route::post('/vouchers', [VoucherController::class, 'store']);
+    Route::put('/vouchers/{id}', [VoucherController::class, 'update']);
+    Route::delete('/vouchers/{id}', [VoucherController::class, 'destroy']);
+    Route::get('/vouchers', [VoucherController::class, 'index']);
+    Route::get('/vouchers/{id}', [VoucherController::class, 'show']);
+});
