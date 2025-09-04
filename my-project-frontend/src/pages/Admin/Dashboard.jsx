@@ -3,7 +3,7 @@ import {Outlet, useNavigate} from "react-router-dom"
 import {Menu, X} from "lucide-react"
 
 import {useAuth} from "../../context/AuthContext.jsx"
-import AdminSidebar from "./AdminSidebar.jsx"
+import AdminSidebar from "./components/AdminSidebar.jsx"
 
 export default function Dashboard() {
     const navigate = useNavigate()
@@ -13,7 +13,6 @@ export default function Dashboard() {
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
     const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
-    // theo dõi resize
     useEffect(() => {
         const handleResize = () => setWindowWidth(window.innerWidth)
         window.addEventListener("resize", handleResize)
@@ -21,7 +20,6 @@ export default function Dashboard() {
         return () => window.removeEventListener("resize", handleResize)
     }, [])
 
-    // khi resize về mobile => auto collapse
     useEffect(() => {
         if (windowWidth < 768) {
             setIsSidebarCollapsed(true)
