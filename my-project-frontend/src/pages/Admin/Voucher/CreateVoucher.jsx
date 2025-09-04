@@ -1,12 +1,15 @@
-import {useState} from "react";
-import axios from "axios";
-import {useNavigate} from "react-router-dom";
-import {ArrowLeft} from "lucide-react";
-import {useAuth} from "../../context/AuthContext.jsx";
+import { useState, useRef } from "react"
+import axios from "axios"
+import { useNavigate } from "react-router-dom"
+import { ArrowLeft } from "lucide-react"
+import { toast } from "react-toastify"
+
+import { useAuth } from "../../../context/AuthContext.jsx"
 
 export default function CreateVoucher() {
-    const navigate = useNavigate();
-    const {token} = useAuth();
+    const navigate = useNavigate()
+    const { token } = useAuth()
+
     const [formData, setFormData] = useState({
         code: "",
         discount_type: "",
@@ -18,54 +21,70 @@ export default function CreateVoucher() {
         start_date: "",
         end_date: "",
         enable_time_limit: false,
-    });
+    })
 
-    const [errors, setErrors] = useState({});
+    const [errors, setErrors] = useState({})
+
+    const inputRefs = {
+        code: useRef(null),
+        discount_type: useRef(null),
+        discount_value: useRef(null),
+        min_order: useRef(null),
+        usage_limit: useRef(null),
+        status: useRef(null),
+        start_date: useRef(null),
+        end_date: useRef(null),
+    }
 
     const getInputClass = (field) => {
         return `w-full border rounded-md p-2 focus:ring transition duration-300 ${
             errors[field]
                 ? "border-2 border-red-500 bg-red-50 shadow-md shadow-red-200 animate-pulse focus:ring-red-400"
                 : "border border-gray-300 focus:border-blue-400 focus:ring-blue-200"
-        }`;
-    };
+        }`
+    }
 
     const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
+        const { name, value, type, checked } = e.target
         setFormData({
             ...formData,
             [name]: type === "checkbox" ? checked : value,
-        });
+        })
         if (errors[name]) {
             setErrors((prev) => {
-                const newErrors = { ...prev};
-                delete newErrors[name];
-                return newErrors;
-            });
+                const newErrors = { ...prev }
+                delete newErrors[name]
+                return newErrors
+            })
         }
-    };
+    }
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setErrors({});
+        e.preventDefault()
+        setErrors({})
         try {
             await axios.post("http://localhost:8000/api/vouchers", formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     Accept: "application/json",
                 },
-            });
-            alert("Voucher created successfully!");
-            navigate("/admin/vouchers");
+            })
+            toast.success("Voucher created successfully!")
+            navigate("/admin/vouchers")
         } catch (err) {
-            console.error("API error:", err.response?.data || err.message);
+            console.error("API error:", err.response?.data || err.message)
             if (err.response && err.response.status === 422) {
-                setErrors(err.response.data.errors);
+                setErrors(err.response.data.errors)
+
+                const firstErrorField = Object.keys(err.response.data.errors)[0]
+                if (inputRefs[firstErrorField]?.current) {
+                    inputRefs[firstErrorField].current.focus()
+                }
             } else {
-                alert("Something went wrong!");
+                toast.error("Something went wrong!")
             }
         }
-    };
+    }
 
     return (
         <div className="max-w-3xl mx-auto bg-white shadow rounded-xl p-6">
@@ -73,7 +92,7 @@ export default function CreateVoucher() {
                 <h2 className="text-xl font-bold text-gray-700">✏️ Create Voucher</h2>
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-400 hover:bg-gray-300 text-gray-700 rounded-lg shadow"
+                    className="flex items-center gap-2 px-4 py-2 bg-green-400 hover:bg-gray-300 text-gray-700 rounded-lg shadow cursor-pointer"
                 >
                     <ArrowLeft size={18} />
                     Back
@@ -83,6 +102,7 @@ export default function CreateVoucher() {
                 <div>
                     <label className="block text-gray-700 mb-1">Code</label>
                     <input
+                        ref={inputRefs.code}
                         type="text"
                         name="code"
                         value={formData.code}
@@ -90,15 +110,14 @@ export default function CreateVoucher() {
                         placeholder="Code"
                         className={getInputClass("code")}
                     />
-                    {errors.code && (
-                        <p className="text-red-500 text-sm mt-1">{errors.code[0]}</p>
-                    )}
+                    {errors.code && <p className="text-red-500 text-sm mt-1">{errors.code[0]}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="block text-gray-700 mb-1">Discount Type</label>
                         <select
+                            ref={inputRefs.discount_type}
                             name="discount_type"
                             value={formData.discount_type}
                             onChange={handleChange}
@@ -108,13 +127,12 @@ export default function CreateVoucher() {
                             <option value="percent">Percent</option>
                             <option value="fixed">Fixed</option>
                         </select>
-                        {errors.discount_type && (
-                            <p className="text-red-500 text-sm mt-1">{errors.discount_type[0]}</p>
-                        )}
+                        {errors.discount_type && <p className="text-red-500 text-sm mt-1">{errors.discount_type[0]}</p>}
                     </div>
                     <div>
                         <label className="block text-gray-700 mb-1">Discount Value</label>
                         <input
+                            ref={inputRefs.discount_value}
                             type="number"
                             name="discount_value"
                             value={formData.discount_value}
@@ -122,15 +140,14 @@ export default function CreateVoucher() {
                             placeholder="Enter discount"
                             className={getInputClass("discount_value")}
                         />
-                        {errors.discount_value && (
-                            <p className="text-red-500 text-sm mt-1">{errors.discount_value[0]}</p>
-                        )}
+                        {errors.discount_value && <p className="text-red-500 text-sm mt-1">{errors.discount_value[0]}</p>}
                     </div>
                 </div>
 
                 <div>
                     <label className="block text-gray-700 mb-1">Order Minimum</label>
                     <input
+                        ref={inputRefs.min_order}
                         type="number"
                         name="min_order"
                         value={formData.min_order}
@@ -138,15 +155,14 @@ export default function CreateVoucher() {
                         placeholder="Minimum order amount"
                         className={getInputClass("min_order")}
                     />
-                    {errors.min_order && (
-                        <p className="text-red-500 text-sm mt-1">{errors.min_order[0]}</p>
-                    )}
+                    {errors.min_order && <p className="text-red-500 text-sm mt-1">{errors.min_order[0]}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="block text-gray-700 mb-1">Usage Limit</label>
                         <input
+                            ref={inputRefs.usage_limit}
                             type="number"
                             name="usage_limit"
                             value={formData.usage_limit}
@@ -154,13 +170,12 @@ export default function CreateVoucher() {
                             placeholder="Leave empty for unlimited"
                             className={getInputClass("usage_limit")}
                         />
-                        {errors.usage_limit && (
-                            <p className="text-red-500 text-sm mt-1">{errors.usage_limit[0]}</p>
-                        )}
+                        {errors.usage_limit && <p className="text-red-500 text-sm mt-1">{errors.usage_limit[0]}</p>}
                     </div>
                     <div>
                         <label className="block text-gray-700 mb-1">Status</label>
                         <select
+                            ref={inputRefs.status}
                             name="status"
                             value={formData.status}
                             onChange={handleChange}
@@ -169,9 +184,7 @@ export default function CreateVoucher() {
                             <option value="1">Active</option>
                             <option value="0">Inactive</option>
                         </select>
-                        {errors.status && (
-                            <p className="text-red-500 text-sm mt-1">{errors.status[0]}</p>
-                        )}
+                        {errors.status && <p className="text-red-500 text-sm mt-1">{errors.status[0]}</p>}
                     </div>
                 </div>
 
@@ -190,6 +203,7 @@ export default function CreateVoucher() {
                     <div className="grid grid-cols-2 gap-4 mt-2">
                         <div>
                             <input
+                                ref={inputRefs.start_date}
                                 type="date"
                                 name="start_date"
                                 value={formData.start_date}
@@ -197,12 +211,11 @@ export default function CreateVoucher() {
                                 className={getInputClass("start_date")}
                                 disabled={!formData.enable_time_limit}
                             />
-                            {errors.start_date && (
-                                <p className="text-red-500 text-sm mt-1">{errors.start_date[0]}</p>
-                            )}
+                            {errors.start_date && <p className="text-red-500 text-sm mt-1">{errors.start_date[0]}</p>}
                         </div>
                         <div>
                             <input
+                                ref={inputRefs.end_date}
                                 type="date"
                                 name="end_date"
                                 value={formData.end_date}
@@ -210,20 +223,15 @@ export default function CreateVoucher() {
                                 className={getInputClass("end_date")}
                                 disabled={!formData.enable_time_limit}
                             />
-                            {errors.end_date && (
-                                <p className="text-red-500 text-sm mt-1">{errors.end_date[0]}</p>
-                            )}
+                            {errors.end_date && <p className="text-red-500 text-sm mt-1">{errors.end_date[0]}</p>}
                         </div>
                     </div>
                 </div>
 
-                <button
-                    type="submit"
-                    className="px-6 py-2 bg-[#8200DB] text-white rounded-md shadow hover:bg-teal-500"
-                >
+                <button type="submit" className="px-6 py-2 bg-[#8200DB] text-white rounded-md shadow hover:bg-teal-500 cursor-pointer">
                     Create
                 </button>
             </form>
         </div>
-    );
+    )
 }

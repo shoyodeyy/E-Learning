@@ -2,9 +2,9 @@ import {Route} from "react-router-dom";
 
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import Dashboard from "../pages/Admin/Dashboard.jsx";
-import VoucherList from "../pages/Admin/VoucherList.jsx";
-import CreateVoucher from "../pages/Admin/CreateVoucher.jsx";
-import EditVoucher from "../pages/Admin/components/EditVoucher.jsx";
+import VoucherList from "../pages/Admin/Voucher/VoucherList.jsx";
+import CreateVoucher from "../pages/Admin/Voucher/CreateVoucher.jsx";
+import EditVoucher from "../pages/Admin/Voucher/EditVoucher.jsx";
 // import CourseList from "../pages/Admin/components/CourseList.jsx";
 // import UserList from "../pages/Admin/components/UserList.jsx";
 
