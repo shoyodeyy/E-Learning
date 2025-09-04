@@ -10,9 +10,12 @@ use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return User::whereIn('role', ['student', 'instructor'])->get();
+        $perPage = $request->get('per_page', 100);
+        return User::whereIn('role', ['student', 'instructor'])
+            ->orderBy('id')
+            ->paginate($perPage, ['*'], 'page', $request->get('page', 1));
     }
 
     public function ban(Request $request, $id)

@@ -1,17 +1,25 @@
-import {useEffect, useState} from "react"
-import {Outlet, useNavigate} from "react-router-dom"
-import {Menu, X} from "lucide-react"
+import { useEffect, useState } from "react"
+import { Outlet, useNavigate } from "react-router-dom"
+import { Menu, X } from "lucide-react"
 
-import {useAuth} from "../../context/AuthContext.jsx"
+import { useAuth } from "../../context/AuthContext.jsx"
 import AdminSidebar from "./components/AdminSidebar.jsx"
 
 export default function Dashboard() {
     const navigate = useNavigate()
-    const {user, logout, refreshUser} = useAuth()
+    const { user, logout, refreshUser } = useAuth()
 
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
     const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+
+    useEffect(() => {
+        if (isMobileSidebarOpen) {
+            document.body.classList.add("overflow-hidden")
+        } else {
+            document.body.classList.remove("overflow-hidden")
+        }
+    }, [isMobileSidebarOpen])
 
     useEffect(() => {
         const handleResize = () => setWindowWidth(window.innerWidth)
@@ -61,37 +69,34 @@ export default function Dashboard() {
                             className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
                             aria-label="Toggle sidebar"
                         >
-                            {windowWidth < 768
-                                ? isMobileSidebarOpen
-                                    ? <X size={20}/>
-                                    : <Menu size={20}/>
-                                : isSidebarCollapsed
-                                    ? <Menu size={20}/>
-                                    : <X size={20}/>}
+                            {windowWidth < 768 ? (
+                                isMobileSidebarOpen ? (
+                                    <X size={20} />
+                                ) : (
+                                    <Menu size={20} />
+                                )
+                            ) : isSidebarCollapsed ? (
+                                <Menu size={20} />
+                            ) : (
+                                <X size={20} />
+                            )}
                         </button>
                         <h1 className="text-xl font-bold">Admin Dashboard</h1>
                     </div>
                     <div className="flex items-center space-x-3">
                         {user.email_verified_at ? (
-                            <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">
-                                ✓ Verified
-                            </span>
+                            <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">✓ Verified</span>
                         ) : (
-                            <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">
-                                ⚠ Unverified
-                            </span>
+                            <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">⚠ Unverified</span>
                         )}
-                        <button
-                            onClick={handleLogout}
-                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                        >
+                        <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
                             Logout
                         </button>
                     </div>
                 </div>
             </header>
 
-            <div className="flex h-[calc(100vh-5rem)] overflow-hidden">
+            <div className="flex">
                 <div
                     className={`
                         ${
@@ -103,10 +108,7 @@ export default function Dashboard() {
                     }
                     `}
                 >
-                    <AdminSidebar
-                        isCollapsed={isSidebarCollapsed}
-                        setIsMobileSidebarOpen={setIsMobileSidebarOpen}
-                    />
+                    <AdminSidebar isCollapsed={isSidebarCollapsed} setIsMobileSidebarOpen={setIsMobileSidebarOpen} />
                 </div>
 
                 {isMobileSidebarOpen && (
@@ -116,8 +118,8 @@ export default function Dashboard() {
                     />
                 )}
 
-                <div className="flex-1 bg-white p-6 shadow transition-all duration-300 ease-in-out">
-                    <Outlet/>
+                <div className="flex-1 bg-white p-6 shadow transition-all duration-300 ease-in-out min-h-screen">
+                    <Outlet />
                 </div>
             </div>
         </div>

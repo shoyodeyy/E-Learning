@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\UserAnalyticsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\Auth\AuthController;
@@ -44,6 +45,12 @@ Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'
 
 //Admin routes
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+//    Analytic
+    Route::get('/analytics/users/stats', [UserAnalyticsController::class, 'getStats']);
+    Route::get('/analytics/users/overview', [UserAnalyticsController::class, 'getOverview']);
+    Route::get('/analytics/users/recent', [UserAnalyticsController::class, 'getRecentUsers']);
+    Route::get('/analytics/users/hourly', [UserAnalyticsController::class, 'getHourlyStats']);
+
 //    Vouchers
     Route::post('/vouchers', [VoucherController::class, 'store']);
     Route::put('/vouchers/{id}', [VoucherController::class, 'update']);
