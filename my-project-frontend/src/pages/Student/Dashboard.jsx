@@ -1,0 +1,126 @@
+import { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext.jsx";
+import Header from "../../components/Header.jsx";
+import Courses from "../../components/Courses.jsx";
+import Feedback from "../../components/Feedback.jsx";
+import MyLearning from "../../components/MyLearning.jsx";
+import Slideshow from "../../components/HeroCarousel.jsx";
+
+
+
+export default function Dashboard() {
+    const [showMessage, setShowMessage] = useState(false);
+    const [messageContent, setMessageContent] = useState('');
+    const [messageType, setMessageType] = useState('success');
+
+    const { user, refreshUser } = useAuth();
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const message = urlParams.get('message');
+
+        if (message) {
+            handleUrlMessage(message);
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!user) return;
+        if (!user.email_verified_at) refreshUser();
+    }, [user, refreshUser]);
+
+    const handleUrlMessage = (message) => {
+        switch (message) {
+            case 'email_verified':
+                setMessageContent('🎉 Email verified successfully! Welcome to Udemy Business.');
+                setMessageType('success');
+                setShowMessage(true);
+                break;
+            case 'already_verified':
+                setMessageContent('ℹ️ Your email is already verified.');
+                setMessageType('info');
+                setShowMessage(true);
+                break;
+            default:
+                break;
+        }
+
+        setTimeout(() => setShowMessage(false), 5000);
+    };
+
+    if (!user) {
+        return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    }
+
+    return (
+        <div className="min-h-screen bg-gray-100">
+            {/* Banner */}
+            {showMessage && (
+                <div className={`fixed top-0 left-0 right-0 z-50 p-4 text-center text-white ${
+                    messageType === 'success' ? 'bg-green-600' : 'bg-blue-600'
+                }`}>
+                    <div className="max-w-4xl mx-auto flex items-center justify-between">
+                        <span className="flex-1">{messageContent}</span>
+                        <button
+                            onClick={() => setShowMessage(false)}
+                            className="ml-4 text-white hover:text-gray-200"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Header */}
+            <div className={`${showMessage ? 'pt-16' : ''}`}>
+                <Header />
+
+                {/* Main */}
+                <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+
+                    <div className="flex items-center space-x-4 p-6 bg-white">
+                        {/* Avatar chữ cái đầu */}
+                        <div
+                            className="flex items-center justify-center rounded-full bg-black text-white text-2xl font-bold"
+                            style={{ width: "6.4rem", height: "6.4rem" }}
+                        >
+                            {user.name
+                                ? user.name
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")
+                                    .toUpperCase()
+                                : "U"}
+                        </div>
+
+                        {/* Nội dung welcome */}
+                        <div>
+                            <h3 className="text-2xl font-bold">Welcome back, {user.name}</h3>
+                            {user.email_verified_at ? (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            ✓ Verified
+                                        </span>
+                            ) : (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            ⚠ Unverified
+                                        </span>
+                            )}
+
+                        </div>
+                    </div>
+                    <div className="px-4 py-6 sm:px-0">
+
+
+                        <Slideshow/>
+                        <MyLearning />
+                        <Courses />
+                        <Feedback />
+
+
+                    </div>
+                </main>
+            </div>
+        </div>
+    );
+}

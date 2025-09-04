@@ -1,5 +1,6 @@
 export default function AboutUs() {
     return (
+
         <div className="min-h-screen bg-white">
             {/* Hero Section */}
             <section className="relative bg-gradient-to-r from-white to-purple-50 pt-8 px-4">
