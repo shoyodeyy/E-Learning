@@ -4,10 +4,13 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Notifications\ResetPasswordNotification;
+use Illuminate\Support\Facades\Storage; // cần thêm để dùng Storage::url
+use App\Models\Course;
 
 class User extends Authenticatable
 {
@@ -27,7 +30,6 @@ class User extends Authenticatable
         'role',
         'google_id',
         'email_verified_at',
-
 
         // thêm mới
         'phone',
@@ -95,6 +97,7 @@ class User extends Authenticatable
     {
         return !is_null($this->email_verified_at);
     }
+
     /**
      * ✅ Trả về URL đầy đủ cho avatar
      */
@@ -103,5 +106,21 @@ class User extends Authenticatable
         return $this->avatar
             ? Storage::url($this->avatar)
             : null;
+    }
+
+    /**
+     * Relationship: các khoá học mà user này là giảng viên
+     */
+    public function coursesAsInstructors(): HasMany
+    {
+        return $this->hasMany(Course::class, 'instructorID', 'id');
+    }
+
+    /**
+     * Relationship: các khoá học mà user này phê duyệt
+     */
+    public function coursesApproved(): HasMany
+    {
+        return $this->hasMany(Course::class, 'approvedID', 'id');
     }
 }
