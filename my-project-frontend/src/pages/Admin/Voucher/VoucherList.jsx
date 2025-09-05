@@ -1,19 +1,33 @@
 import { useEffect, useState } from "react"
-import { Pencil, Trash2, Plus, Loader2 } from "lucide-react"
-import { Link } from "react-router-dom"
+import {Pencil, Trash2, Plus, Loader2, Search} from "lucide-react"
+import {Link, useOutletContext} from "react-router-dom"
 import { toast } from "react-toastify"
 import api from "../../../api/axios.js"
+
 
 export default function VoucherList() {
     const [vouchers, setVouchers] = useState([])
     const [loading, setLoading] = useState(true)
+    const [search, setSearch] = useState("");
+    const [showSearchMb, setShowSearchMb] = useState(false);
+    const {filters} = useOutletContext();
 
     useEffect(() => {
-        api.get("/vouchers")
-            .then((res) => setVouchers(res.data))
-            .catch((err) => console.log(err))
-            .finally(() => setLoading(false))
-    }, [])
+        console.log("Filter: ", filters, "search: ", search);
+
+        const delayDebounce = setTimeout(() => {
+            setLoading(true);
+            api.get("/vouchers", {params: {search, ...filters} })
+                .then((res) => {
+                    console.log("API response:", res.data);
+                    setVouchers(res.data);
+                })
+                .catch((err) => console.log(err))
+                .finally(() => setLoading(false))
+        }, 300);
+
+        return () => clearTimeout(delayDebounce);
+    }, [search,filters]);
 
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this voucher?")) return
@@ -29,15 +43,63 @@ export default function VoucherList() {
 
     return (
         <div className="p-4 md:p-6 bg-white rounded-2xl shadow-md">
-            <div className="flex justify-between items-center mb-4 md:mb-6">
-                <h2 className="text-xl md:text-2xl font-bold text-gray-800">🎟️ Vouchers</h2>
-                <Link
-                    to="/admin/vouchers/create"
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-4 md:px-6 py-2 rounded-lg shadow transition flex items-center gap-2"
-                >
-                    <Plus size={18} />
-                    <span>Create</span>
-                </Link>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="hidden md:block text-2xl font-bold text-gray-800">🎟️ Vouchers</h2>
+
+                <span className="block md:hidden text-purple-600 text-2xl">🎟️</span>
+
+                <div className="hidden md:block">
+                    <input
+                        type="text"
+                        placeholder="Enter Code Voucher"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="border border-gray-300 rounded-lg px-4 py-2 focus:ring
+                       focus:ring-purple-200 focus:border-purple-400 transition
+                       w-64 lg:w-180"
+                    />
+                </div>
+
+                <div className="block md:hidden relative">
+                    {!showSearchMb ? (
+                        <button
+                            onClick={() => setShowSearchMb(true)}
+                            className="p-2 rounded-full bg-purple-600 text-white"
+                        >
+                            <Search size={18} />
+                        </button>
+                    ) : (
+                        <input
+                            type="text"
+                            placeholder="Code Voucher..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            autoFocus
+                            className="border border-gray-300 rounded-lg px-3 py-2 focus:ring
+                           focus:ring-purple-200 focus:border-purple-400 transition
+                           w-48"
+                            onBlur={() => setShowSearchMb(false)}
+                        />
+                    )}
+                </div>
+
+                <div className="hidden md:block bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg shadow transition">
+                    <Link
+                        to="/admin/vouchers/create"
+                        className="flex items-center gap-2"
+                    >
+                        <Plus size={18} />
+                        <span>Create</span>
+                    </Link>
+                </div>
+
+                <div className="block md:hidden p-2 rounded-full bg-purple-600 text-white">
+                    <Link
+                        to="/admin/vouchers/create"
+                    >
+                        <Plus size={18} />
+                    </Link>
+                </div>
             </div>
 
             {loading ? (
@@ -113,7 +175,6 @@ export default function VoucherList() {
                         </table>
                     </div>
 
-                    {/* Card layout for mobile */}
                     <div className="md:hidden space-y-4">
                         {vouchers.map((v) => (
                             <div key={v.id} className="bg-gray-50 rounded-lg p-4 border">
