@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->enum('discount_type', ['percent', 'fixed']);
-            $table->decimal('discount_value', 8, 2);
+            $table->decimal('discount_value', 12, 2);
             $table->date('start_date');
             $table->date('end_date');
             $table->integer('usage_limit')->default(1);
