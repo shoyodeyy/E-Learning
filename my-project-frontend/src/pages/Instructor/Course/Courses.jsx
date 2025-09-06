@@ -1,9 +1,9 @@
 import {useNavigate} from "react-router-dom";
-import { useAuth } from "../../context/AuthContext.jsx";
+import { useAuth } from "../../../context/AuthContext.jsx";
 import {useEffect, useState} from "react";
 import axios from "axios";
 
-import ArrowDownIcon from "../../assets/images/icon/angle-small-down.png";
+import ArrowDownIcon from "../../../assets/images/icon/angle-small-down.png";
 import CourseItem from "./CourseItem.jsx";
 
 export default function Courses() {

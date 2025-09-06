@@ -1,7 +1,7 @@
 import {useNavigate} from "react-router-dom";
 
-import ArrowLeftIcon from "../../assets/images/icon/angle-small-left.png";
-import SettingIcon from "../../assets/images/icon/settings.png";
+import ArrowLeftIcon from "../../../assets/images/icon/angle-small-left.png";
+import SettingIcon from "../../../assets/images/icon/settings.png";
 
 export default function HeaderCourseManage({ title, status }) {
     const navigate = useNavigate();

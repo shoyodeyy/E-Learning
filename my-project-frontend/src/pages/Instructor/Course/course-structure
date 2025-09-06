@@ -1,0 +1,175 @@
+{
+  "data": [
+    {
+      "courseID": "C003",
+      "courseTitle": "Test Morning",
+      "courseDescription": null,
+      "price": "0.00",
+      "level": null,
+      "badge": "none",
+      "category": {
+        "categoryID": "CA01",
+        "categoryName": "Development"
+      },
+      "status": {
+        "statusID": "ST01",
+        "statusName": "draft"
+      },
+      "sections": [
+        {
+          sectionID: "S001",
+          sectionTitle: "Section 1",
+          sectionIndex: 1,
+          totalDuration: 0,
+          items: [
+            {
+              itemID: "IT01",
+              itemType: "Lecture",
+              itemIndex: 1,
+              itemTitle: "Introduction",
+              videoFile: null,
+              videoUrl: null,
+              thumbnail: null,
+              duration: null,
+            },
+            {
+              itemID: "IT02",
+              itemType: "Quiz",
+              itemIndex: 2,
+              itemTitle: "null",
+              quizDescription: null,
+              questions: [
+                {
+                  questionId: "Q01",
+                  questionText: null,
+                  options: [
+                    {
+                      optionId: "OP01",
+                      optionText: null,
+                      isCorrect: false
+                    },
+                    {
+                      optionId: "OP02",
+                      optionText: null,
+                      isCorrect: false
+                    },
+                    {
+                      optionId: "OP03",
+                      optionText: null,
+                      isCorrect: true
+                    },
+                  ]
+                },
+                {
+                  questionId: "Q02",
+                  questionText: null,
+                  options: [
+                    {
+                      optionId: "OP04",
+                      optionText: null,
+                      isCorrect: false
+                    },
+                    {
+                      optionId: "OP05",
+                      optionText: null,
+                      isCorrect: false
+                    },
+                    {
+                      optionId: "OP06",
+                      optionText: null,
+                      isCorrect: true
+                    },
+                    {
+                      optionId: "OP07",
+                      optionText: null,
+                      isCorrect: false
+                    },
+                  ]
+                },
+              ]
+            },
+          ]
+        },
+        {
+          sectionID: "S002",
+          sectionTitle: "Section 2",
+          sectionIndex: 1,
+          totalDuration: 0,
+          items: [
+            {
+              itemID: "IT01",
+              itemType: "Lecture",
+              itemIndex: 1,
+              itemTitle: "Introduction",
+              videoFile: null,
+              videoUrl: null,
+              thumbnail: null,
+              duration: null,
+            },
+            {
+              itemID: "IT02",
+              itemType: "Quiz",
+              itemIndex: 2,
+              itemTitle: "null",
+              quizDescription: null,
+              questions: [
+                {
+                  questionId: "Q01",
+                  questionText: null,
+                  options: [
+                    {
+                      optionId: "OP01",
+                      optionText: null,
+                      isCorrect: false
+                    },
+                    {
+                      optionId: "OP02",
+                      optionText: null,
+                      isCorrect: false
+                    },
+                    {
+                      optionId: "OP03",
+                      optionText: null,
+                      isCorrect: true
+                    },
+                  ]
+                },
+                {
+                  questionId: "Q02",
+                  questionText: null,
+                  options: [
+                    {
+                      optionId: "OP04",
+                      optionText: null,
+                      isCorrect: false
+                    },
+                    {
+                      optionId: "OP05",
+                      optionText: null,
+                      isCorrect: false
+                    },
+                    {
+                      optionId: "OP06",
+                      optionText: null,
+                      isCorrect: true
+                    },
+                    {
+                      optionId: "OP07",
+                      optionText: null,
+                      isCorrect: false
+                    },
+                  ]
+                },
+              ]
+            },
+          ]
+        }
+      ],
+      "instructor": null,
+      "approvedBy": null,
+      "avgRating": "0.00",
+      "totalStudents": 0,
+      "totalDuration": 0
+    }
+  ]
+}

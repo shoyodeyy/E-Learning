@@ -2,14 +2,14 @@ import { useState, useCallback } from "react";
 
 import QuizOptions from "./QuizOptions.jsx";
 
-import PencilIcon from "../../assets/images/icon/pencil.png";
-import TrashIcon from "../../assets/images/icon/trash.png";
-import PlusIcon from "../../assets/images/icon/plus.png";
-import CancelIcon from "../../assets/images/icon/cross-small.png";
-import LectureIcon from "../../assets/images/icon/check-circle.png";
-import ArrowUpIcon from "../../assets/images/icon/angle-up.png";
-import ArrowDownIcon from "../../assets/images/icon/angle-small-down.png";
-import QuestionIcon from "../../assets/images/icon/help.png";
+import PencilIcon from "../../../../assets/images/icon/pencil.png";
+import TrashIcon from "../../../../assets/images/icon/trash.png";
+import PlusIcon from "../../../../assets/images/icon/plus.png";
+import CancelIcon from "../../../../assets/images/icon/cross-small.png";
+import LectureIcon from "../../../../assets/images/icon/check-circle.png";
+import ArrowUpIcon from "../../../../assets/images/icon/angle-up.png";
+import ArrowDownIcon from "../../../../assets/images/icon/angle-small-down.png";
+import QuestionIcon from "../../../../assets/images/icon/help.png";
 
 export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRemoveItem }) {
     const [ editedNameQuiz, setEditedNameQuiz ] = useState("");
@@ -27,7 +27,7 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
     );
 
     const isEditingQuizLocal = isEditingQuizId === quiz.id;
-    const isAddingQuestionLocal = quiz.isAddingQuestion;
+    let isAddingQuestionLocal = quiz.isAddingQuestion;
 
     // Sử dụng useCallback để memoize các hàm callback
     const handleChangeOption = useCallback((optionId, changes) => {
@@ -114,6 +114,13 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
                 isCorrect: false,
             }))
         );
+
+        setIsNewQuestion(false);
+        isAddingQuestionLocal = false;
+
+        console.log("isAddingQuestionLocal: ", isAddingQuestionLocal);
+        console.log("isNewQuestion: ", isNewQuestion);
+        console.log("----------------------------------");
     }
 
     function handleRenameQuiz(sectionId, itemId, newTitle) {
@@ -159,6 +166,37 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
         }));
 
         setIsNewQuestion(isNewQuestion);
+
+        // check
+        console.log("isAddingQuestionLocal: ", isAddingQuestionLocal);
+        console.log("isNewQuestion: ", isNewQuestion);
+        console.log("----------------------------------");
+    }
+
+    function toggleArrowQuestion(sectionId, itemId, isNewQuestion) {
+        setCourse(prev => ({
+            ...prev,
+            sections: prev.sections.map(sec =>
+                sec.id === sectionId
+                    ? {
+                        ...sec,
+                        items: sec.items.map(it =>
+                            (it.id === itemId && it.type === "Quiz")
+                                ? {
+                                    ...it,
+                                    isAddingQuestion: !it.isAddingQuestion,
+                                } : it
+                        )
+                    } : sec
+            )
+        }));
+
+        setIsNewQuestion(!isNewQuestion);
+
+        // check
+        console.log("isAddingQuestionLocal: ", isAddingQuestionLocal);
+        console.log("isNewQuestion: ", isNewQuestion);
+        console.log("----------------------------------");
     }
 
     return (
@@ -210,7 +248,7 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
                     {/* Add Question Toggle */}
                     <div className="flex-1 flex justify-end">
                         {/* Plus Question Button */}
-                        {(!(isAddingQuestionLocal || quiz.hasMultipleQuestion) && !quiz.questions) && (
+                        {(!(isAddingQuestionLocal || isNewQuestion) && quiz.questions.length === 0) && (
                             <button
                                 onClick={() => toggleAddQuestion(sectionId, itemId, true)}
                                 className="flex items-center w-32 gap-x-2 px-5 py-1.5 cursor-pointer border bg-transparent text-purple-800 text-sm font-bold rounded-md hover:bg-gray-100">
@@ -220,7 +258,7 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
                         )}
 
                         {/* Add Multiple Choice Cancel */}
-                        {(((isAddingQuestionLocal || isNewQuestion) && !quiz.questions) || (quiz.hasMultipleQuestion && (isAddingQuestionLocal || isNewQuestion))) && (
+                        {(((isAddingQuestionLocal || isNewQuestion) && !quiz.questions) || ((isAddingQuestionLocal || isNewQuestion) && quiz.questions)) && (
                             <div className="relative">
                                 <div className="bg-white w-50 h-8 px-2 flex items-center justify-center gap-x-2 border border-b-0 absolute right-0 -top-[0.45rem]">
                                     <p className="cursor-text">
@@ -235,33 +273,33 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
                             </div>
                         )}
 
-                        {/* Arrow Up Icon */}
-                        {((quiz.questions && !(isAddingQuestionLocal || isNewQuestion) && (quiz.hasMultipleQuestion || !quiz.hasMultipleQuestion))) && (
-                            <div>
-                                <div className="w-32 h-8 px-2 flex items-center justify-end gap-x-2">
-                                    <div
-                                        onClick={() => {
-                                            toggleAddQuestion(sectionId, itemId, false);
-                                        }}
-                                        className="hover:bg-gray-200 p-1 rounded-sm cursor-pointer">
-                                        <img className="w-3" src={ArrowUpIcon} alt="cancel-icon"/>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                        {/*/!* Arrow Up Icon *!/*/}
+                        {/*{((quiz.questions.length > 0 && !(isAddingQuestionLocal || isNewQuestion))) && (*/}
+                        {/*    <div>*/}
+                        {/*        <div className="w-32 h-8 px-2 flex items-center justify-end gap-x-2">*/}
+                        {/*            <div*/}
+                        {/*                onClick={() => {*/}
+                        {/*                    toggleArrowQuestion(sectionId, itemId, false);*/}
+                        {/*                }}*/}
+                        {/*                className="hover:bg-gray-200 p-1 rounded-sm cursor-pointer">*/}
+                        {/*                <img className="w-3" src={ArrowUpIcon} alt="cancel-icon"/>*/}
+                        {/*            </div>*/}
+                        {/*        </div>*/}
+                        {/*    </div>*/}
+                        {/*)}*/}
 
-                        {/* Arrow Down Icon */}
-                        {((quiz.questions && (isAddingQuestionLocal || isNewQuestion) && !quiz.hasMultipleQuestion)) && (
-                            <div>
-                                <div className=" w-32 h-8 px-2 flex items-center justify-end gap-x-2">
-                                    <div
-                                        onClick={() => toggleAddQuestion(sectionId, itemId, false)}
-                                        className="hover:bg-gray-200 p-0 rounded-sm cursor-pointer">
-                                        <img className="w-5" src={ArrowDownIcon} alt="cancel-icon"/>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                        {/*/!* Arrow Down Icon *!/*/}
+                        {/*{(quiz.questions.length > 0 && isAddingQuestionLocal) || (quiz.questions.length > 0 && isNewQuestion) && (*/}
+                        {/*    <div>*/}
+                        {/*        <div className=" w-32 h-8 px-2 flex items-center justify-end gap-x-2">*/}
+                        {/*            <div*/}
+                        {/*                onClick={() => toggleArrowQuestion(sectionId, itemId, false)}*/}
+                        {/*                className="hover:bg-gray-200 p-0 rounded-sm cursor-pointer">*/}
+                        {/*                <img className="w-5" src={ArrowDownIcon} alt="cancel-icon"/>*/}
+                        {/*            </div>*/}
+                        {/*        </div>*/}
+                        {/*    </div>*/}
+                        {/*)}*/}
                     </div>
                 </div>
             )}
@@ -316,7 +354,11 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
             )}
 
             {/* Add Question Container */}
-            {((isAddingQuestionLocal && !quiz.questions) || (quiz.hasMultipleQuestion && isNewQuestion)) && (
+            {/*{((isNewQuestion || isAddingQuestionLocal) && (isNewQuestion && isAddingQuestionLocal) ||*/}
+            {/*(isNewQuestion || isAddingQuestionLocal) && (isNewQuestion || isAddingQuestionLocal)) &&*/}
+            {(((isNewQuestion || isAddingQuestionLocal) && quiz.questions) ||
+            ((isNewQuestion || isAddingQuestionLocal) && quiz.questions.length > 0)) &&
+            (
                 <div className="flex flex-col pb-3 w-full border-t bg-white">
                     {/* Add Questions */}
                     <div className="flex flex-col gap-x-5 px-3 py-2 pb-0">
@@ -377,8 +419,6 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
                             <button
                                 onClick={() => {
                                     handleAddQuestion(sectionId, itemId);
-                                    quiz.isAddingQuestion = false;
-                                    setIsNewQuestion(false);
                                 }}
                                 className="px-5 py-1.5 cursor-pointer bg-purple-800 text-white font-bold rounded-md shadow hover:bg-purple-800 disabled:opacity-30 disabled:cursor-not-allowed"
                                 // disabled={!editedNameLecture.trim()}
@@ -392,8 +432,9 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
 
             {/* Question List Added */}
             {(quiz.questions && quiz.questions.length > 0 &&
-                !((isAddingQuestionLocal || isNewQuestion) &&
-                    (quiz.hasMultipleQuestion || !quiz.hasMultipleQuestion))) && (
+            !((isAddingQuestionLocal && isNewQuestion) &&
+            (quiz.hasMultipleQuestion || !quiz.hasMultipleQuestion))) &&
+            (
                 <div className="flex flex-col space-y-4 w-full border-t bg-white p-3">
                     {/* Header List */}
                     <div className="flex items-center space-x-2">

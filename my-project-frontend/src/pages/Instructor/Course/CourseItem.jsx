@@ -1,5 +1,6 @@
-import CourseThumbnail from "../../assets/images/icon/video-tutorial-bro.png";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
+import CourseThumbnail from "../../../assets/images/icon/video-tutorial-bro.png";
 
 export default function CourseItem({ course }) {
     const navigate = useNavigate();
@@ -40,11 +41,6 @@ export default function CourseItem({ course }) {
                     {/* Course Status */}
                     <p className="text-sm font-semibold">
                         {course.status ? course.status.statusName.toUpperCase() : ""}
-                    </p>
-
-                    {/* Course Badge */}
-                    <p className="text-sm">
-                        {course.badge}
                     </p>
                 </div>
 

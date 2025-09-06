@@ -1,4 +1,4 @@
-import TrashIcon from "../../assets/images/icon/trash.png";
+import TrashIcon from "../../../../assets/images/icon/trash.png";
 import React from "react";
 
 export default function QuizOption({ option, onChangeOption, onDeleteOption, isAddingQuestion, isNewQuestion, hasMultipleQuestion }) {

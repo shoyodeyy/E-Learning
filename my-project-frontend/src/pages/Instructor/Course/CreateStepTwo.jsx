@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 import axios from 'axios';
-import ArrowDownIcon from "../../assets/images/icon/angle-small-down.png";
+import ArrowDownIcon from "../../../assets/images/icon/angle-small-down.png";
 
 export default function CreateStepTwo({ title, setTitle, category, setCategory }) {
     const navigate = useNavigate();

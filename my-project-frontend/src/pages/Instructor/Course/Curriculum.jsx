@@ -1,16 +1,17 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import axios from 'axios';
 
-import SidebarCourseManage from "../Instructor/SidebarCourseManage.jsx";
+import SidebarCourseManage from "./SidebarCourseManage.jsx";
 import HeaderCourseManage from "./HeaderCourseManage.jsx";
-import LectureItem from "./LectureItem.jsx";
-import QuizItem from "./QuizItem.jsx";
+import LectureItem from "./Lecture/LectureItem.jsx";
+import QuizItem from "./Quiz/QuizItem.jsx";
 
-import DocumentIcon from "../../assets/images/icon/document.png";
-import PencilIcon from "../../assets/images/icon/pencil.png";
-import TrashIcon from "../../assets/images/icon/trash.png";
-import PlusIcon from "../../assets/images/icon/plus.png";
-import CancelIcon from "../../assets/images/icon/cross-small.png";
+import DocumentIcon from "../../../assets/images/icon/document.png";
+import PencilIcon from "../../../assets/images/icon/pencil.png";
+import TrashIcon from "../../../assets/images/icon/trash.png";
+import PlusIcon from "../../../assets/images/icon/plus.png";
+import CancelIcon from "../../../assets/images/icon/cross-small.png";
 
 export default function Curriculum() {
     const { courseID } = useParams();
@@ -58,6 +59,7 @@ export default function Curriculum() {
         approvedBy: "",
         avgRating: "",
         totalStudents: 0,
+        totalDuration: 0,
         sections: [
             {
                 id: crypto.randomUUID(),
@@ -116,6 +118,7 @@ export default function Curriculum() {
                 id: crypto.randomUUID(),
                 title: `New Section ${nextIndex}`,
                 index: nextIndex,
+                totalDuration: 0,
                 items: []
             };
 
@@ -134,23 +137,27 @@ export default function Curriculum() {
         })
     }
 
-    function handleAddLecture(sectionId, itemId) {
+    async function handleAddLecture(sectionId, itemId) {
         if (!newLectureTitle.trim()) return;
 
+        // 1. Gửi request lên backend
+        const res = await axios.post(`http://localhost:8000/api/courses/${courseID}`,
+            {
+                'title': newLectureTitle,
+                'type': "Lecture"
+            }
+        );
+
+        const savedLecture = res.data.data;
+        // backend trả về { id, title, type, ... }
+
+        // 2. Update state cục bộ
         setCourse(prev => ({
             ...prev,
             sections: prev.sections.map(sec => {
                 if (sec.id !== sectionId) return sec;
 
                 const oldItems = sec.items || [];
-
-                // create new item
-                const newLecture = {
-                    id: crypto.randomUUID(),
-                    type: "Lecture",
-                    title: newLectureTitle,
-                    isAddingVideo: false
-                };
 
                 let newItems;
                 if (itemId) {
@@ -160,12 +167,12 @@ export default function Curriculum() {
                         // if not found itemId, push to the end
                         newItems = [
                             ...oldItems,
-                            newLecture
+                            savedLecture
                         ];
                     } else {
                         newItems = [
                             ...oldItems.slice(0, insertIndex + 1),
-                            newLecture,
+                            savedLecture,
                             ...oldItems.slice(insertIndex + 1)
                         ];
                     }
@@ -173,7 +180,7 @@ export default function Curriculum() {
                     // no itemId passed, also push to the end
                     newItems = [
                         ...oldItems,
-                        newLecture
+                        savedLecture
                     ];
                 }
 
@@ -197,6 +204,7 @@ export default function Curriculum() {
             })
         }));
 
+        // reset input
         setNewLectureTitle("");
         setIsNewLecture(false);
         setIsAddingCurrItem(false);
@@ -217,7 +225,10 @@ export default function Curriculum() {
                     id: crypto.randomUUID(),
                     type: "Quiz",
                     title: newQuizTitle,
-                    isAddingQuestion: false
+                    description: "",
+                    isAddingQuestion: false,
+                    hasMultipleQuestion: false,
+                    questions: []
                 };
 
                 let newItems;

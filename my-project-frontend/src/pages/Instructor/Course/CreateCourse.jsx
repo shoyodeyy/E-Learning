@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { useState } from "react";
-import CreateStepOne from "./CreateStepOne";
-import CreateStepTwo from "./CreateStepTwo";
+import CreateStepOne from "./CreateStepOne.jsx";
+import CreateStepTwo from "./CreateStepTwo.jsx";
 
 export default function CreateCourse() {
     const [title, setTitle] = useState("");

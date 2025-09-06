@@ -1,14 +1,14 @@
 import { useState } from "react";
 
-import VideoIcon from "../../assets/images/icon/play-alt.png";
-import LectureIcon from "../../assets/images/icon/check-circle.png";
-import DocumentIcon from "../../assets/images/icon/document.png";
-import PencilIcon from "../../assets/images/icon/pencil.png";
-import TrashIcon from "../../assets/images/icon/trash.png";
-import PlusIcon from "../../assets/images/icon/plus.png";
-import CancelIcon from "../../assets/images/icon/cross-small.png";
-import ArrowUpIcon from "../../assets/images/icon/angle-up.png";
-import ArrowDownIcon from "../../assets/images/icon/angle-small-down.png";
+import VideoIcon from "../../../../assets/images/icon/play-alt.png";
+import LectureIcon from "../../../../assets/images/icon/check-circle.png";
+import DocumentIcon from "../../../../assets/images/icon/document.png";
+import PencilIcon from "../../../../assets/images/icon/pencil.png";
+import TrashIcon from "../../../../assets/images/icon/trash.png";
+import PlusIcon from "../../../../assets/images/icon/plus.png";
+import CancelIcon from "../../../../assets/images/icon/cross-small.png";
+import ArrowUpIcon from "../../../../assets/images/icon/angle-up.png";
+import ArrowDownIcon from "../../../../assets/images/icon/angle-small-down.png";
 
 export default function LectureItem({ sectionId, itemId, lec, setCourse, isEditingSectionId, handleRemoveItem }) {
     const [ editedNameLecture, setEditedNameLecture ] = useState("");
