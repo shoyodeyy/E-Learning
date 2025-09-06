@@ -22,6 +22,7 @@ Route::apiResource('/courses', CourseController::class);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', static function (Request $request) {
         return $request->user();
+
     });
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -45,10 +46,11 @@ Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');
 
-Route::middleware('')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'show']);
-    Route::put('/profile', [ProfileController::class, 'update']);
+Route::middleware('auth:sanctum')->prefix('profile')->group(function () {
+    Route::get('/', [ProfileController::class, 'show']);   // show profile
+    Route::post('/update', [ProfileController::class, 'update']); // update profile
 });
+
 
 
 

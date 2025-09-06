@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../../context/AuthContext.jsx"
 import Header from "../../components/Header.jsx"
-import Courses from "../../components/Courses.js"
+import Courses from "../../components/Courses.jsx"
 import Feedback from "../../components/Feedback.jsx"
 import MyLearning from "../../components/MyLearning.jsx"
 import Slideshow from "../../components/HeroCarousel.jsx"

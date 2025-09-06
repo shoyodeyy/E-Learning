@@ -248,7 +248,10 @@ export default function Courses() {
             <div className="relative">
                 <button
                     onClick={() => scroll("left")}
-                    className="cursor-pointer hidden sm:block absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white shadow-md rounded-full p-2 hover:bg-gray-100"
+                    className="cursor-pointer block absolute top-1/2 -translate-y-1/2 z-20
+           left-0 sm:left-0 right-auto sm:right-auto
+           bg-white shadow-md rounded-full p-1 sm:p-2 hover:bg-gray-100"
+
                 >
                     <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
                 </button>
@@ -299,7 +302,9 @@ export default function Courses() {
 
                 <button
                     onClick={() => scroll("right")}
-                    className="cursor-pointer hidden sm:block absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white shadow-md rounded-full p-2 hover:bg-gray-100"
+                    className="cursor-pointer block absolute top-1/2 -translate-y-1/2 z-20
+           right-0 sm:right-0 left-auto
+           bg-white shadow-md rounded-full p-1 sm:p-2 hover:bg-gray-100"
                 >
                     <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
                 </button>

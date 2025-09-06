@@ -12,6 +12,27 @@ use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
+    public function show(Request $request): JsonResponse
+    {
+        if (!$request->user()) {
+            return response()->json([
+                'message' => 'Unauthorized. Please log in.'
+            ], 401);
+        }
+
+        $user = $request->user();
+
+        if ($user->role !== 'student') {
+            return response()->json([
+                'message' => 'Only students can view their profile.'
+            ], 403);
+        }
+
+        return response()->json([
+            'user' => $user,
+        ]);
+    }
+
     public function update(Request $request): JsonResponse
     {
         try {
@@ -23,14 +44,13 @@ class ProfileController extends Controller
 
             $user = $request->user();
 
-            // chống spam update profile
-            $key = Str::lower("profile:update:" . $request->ip());
-            if (RateLimiter::tooManyAttempts($key, 5)) {
+            // chỉ student mới được update
+            if ($user->role !== 'student') {
                 return response()->json([
-                    'message' => 'Too many update attempts. Please wait 5 minutes.'
-                ], 429);
+                    'message' => 'Only students can update their profile.'
+                ], 403);
             }
-            RateLimiter::hit($key, 300);
+
 
             // validate dữ liệu
             $validated = $request->validate([
@@ -52,26 +72,22 @@ class ProfileController extends Controller
                 'avatar.mimes' => 'Allowed formats: jpg, jpeg, png, gif.',
                 'avatar.max'   => 'Avatar size must be less than 2MB.',
             ]);
+
             // nếu user là Google login và chưa update thủ công
             if ($user->google_id && !$request->has('name')) {
-                $validated['name'] = $user->name; // giữ tên Google cũ
+                $validated['name'] = $user->name;
             }
 
             // xử lý avatar nếu có upload
             if ($request->hasFile('avatar')) {
-
-                // xóa avatar cũ nếu có
                 if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
                     Storage::disk('public')->delete($user->avatar);
                 }
-
-                // lưu avatar mới
                 $path = $request->file('avatar')->store('avatars', 'public');
                 $validated['avatar'] = $path;
             }
 
             $user->update($validated);
-
 
             return response()->json([
                 'message' => 'Profile updated successfully.',
