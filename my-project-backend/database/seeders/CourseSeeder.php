@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Category;
-use App\Models\Course;
-use App\Models\Status;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Course\Category;
+use App\Models\Course\Course;
+use App\Models\Course\Section;
+use App\Models\Course\Status;
 use Illuminate\Database\Seeder;
 
 class CourseSeeder extends Seeder
@@ -78,6 +78,7 @@ class CourseSeeder extends Seeder
             );
         }
 
+
         // ------------------- statuses -------------------
         $statuses = [
             [
@@ -109,10 +110,10 @@ class CourseSeeder extends Seeder
             );
         }
 
+
         // ------------------- courses -------------------
         $courses = [
             [
-                // 'courseID' => 'C001',
                 'courseTitle' => 'Laravel Basics',
                 'courseDescription' => 'Learn the basics of Laravel framework.',
                 'price' => 49.99,
@@ -120,10 +121,11 @@ class CourseSeeder extends Seeder
                 'badge' => 'bestseller',
                 'categoryID' => 'CA01',
                 'statusID' => 'ST01',
-                'instructorID' => 2, // giả sử user ID 2 là instructor
-                'approvedBy' => 1,   // giả sử user ID 1 là admin
+                'instructorID' => 2,
+                'approvedBy' => 1,
                 'avgRating' => 4.5,
                 'totalStudents' => 120,
+                'totalDuration' => 1200,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
@@ -135,8 +137,38 @@ class CourseSeeder extends Seeder
             $course['courseID'] = $courseID;
 
             Course::updateOrCreate(
-                ['courseTitle' => $course['courseTitle']],
+                ['courseID' => $course['courseID']],
                 $course
+            );
+        }
+
+
+        // ------------------- sections -------------------
+        $sections = [
+            [
+                'sectionId'     => 'S001',
+                'courseID'      => 'C001',
+                'sectionTitle'  => 'Getting Started',
+                'sectionIndex'  => 1,
+                'totalDuration' => 600,
+                'created_at'    => now(),
+                'updated_at'    => now(),
+            ],
+            [
+                'sectionId'     => 'S002',
+                'courseID'      => 'C001',
+                'sectionTitle'  => 'Laravel Basics',
+                'sectionIndex'  => 2,
+                'totalDuration' => 1200,
+                'created_at'    => now(),
+                'updated_at'    => now(),
+            ],
+        ];
+
+        foreach ($sections as $section) {
+            Section::updateOrCreate(
+                ['sectionId' => $section['sectionId']],
+                $section
             );
         }
     }

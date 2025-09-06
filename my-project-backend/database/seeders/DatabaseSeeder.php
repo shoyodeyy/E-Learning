@@ -15,9 +15,24 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+//        User::factory()->createMany([
+//           'name' => 'Test User',
+//           'email' => 'test@example.com'
+//        ]);
+
+        User::factory()->createMany([
+            [
+                'name' => 'Admin',
+                'email' => 'chunhau.py@gmail.com',
+                'role' => 'admin',
+                'password' => '$2y$12$0hX2X0KGQEPdJd83ymr7vexj13ZmZ6mpTLHa3L.YGKvA2xtUrOZ0m'
+            ],
+            [
+                'name' => 'Instructor',
+                'email' => 'tchunhau2006@gmail.com',
+                'role' => 'instructor',
+                'password' => '$2y$12$0hX2X0KGQEPdJd83ymr7vexj13ZmZ6mpTLHa3L.YGKvA2xtUrOZ0m'
+            ]
         ]);
 
         $this->call(CourseSeeder::class);

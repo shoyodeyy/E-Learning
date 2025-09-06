@@ -1,26 +1,25 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Course;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Category extends Model
+class Status extends Model
 {
     public $incrementing = false;
     public $timestamps = false;
-    protected $primaryKey = 'categoryID';
+    protected $primaryKey = 'statusID';
     protected $keyType = 'string';
-    protected $table = 'categories';
+    protected $table = 'statuses';
     protected $fillable = [
-        'categoryID',
-        'categoryName',
-        'categoryDescription',
+        'statusID',
+        'statusName',
     ];
 
     // Relationship
     function Course(): HasMany
     {
-        return $this->hasMany(Course::class, 'categoryID', 'categoryID');
+        return $this->hasMany(Course::class, 'statusID', 'statusID');
     }
 }

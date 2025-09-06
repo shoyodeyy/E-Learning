@@ -2,32 +2,40 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\CourseResource;
-use App\Models\Course;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Http\Resources\Course\CourseResource;
+use App\Models\Course\Course;
 use Illuminate\Http\Request;
-use Nette\Schema\ValidationException;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class CourseController
 {
     public function index(): AnonymousResourceCollection
     {
-        $courses = Course::with(['instructor', 'approvedByAdmin', 'category', 'status'])->get();
+        $courses = Course::with([
+            'instructor',
+            'approvedByAdmin',
+            'category',
+            'status',
+            'section'
+        ])->get();
         return CourseResource::collection($courses);
     }
 
-    public function show($id) {
-        $course = Course::with(['instructor', 'approvedByAdmin', 'category', 'status'])->find($id);
-        if (!$course) {
-            return response()->json([
-                "message" => "Course not found"
-            ], 404);
-        }
+    public function show($id): CourseResource|\Illuminate\Http\JsonResponse
+    {
+        $course = Course::with([
+            'instructor',
+            'approvedByAdmin',
+            'category',
+            'status',
+            'section'
+        ])->where('courseID', $id)->firstOrFail();
 
         return new CourseResource($course);
     }
 
-    public function store(Request $request) {
+    public function store(Request $request): CourseResource|\Illuminate\Http\JsonResponse
+    {
         try {
             $data = $request->validate([
                 'courseTitle' => 'required|string|max:255',
@@ -40,7 +48,8 @@ class CourseController
                 'instructorID' => 'nullable|exists:users,id',
                 'approvedBy' => 'nullable|exists:users,id',
                 'avgRating' => 'nullable|numeric|min:0|max:5',
-                'totalStudents' => 'nullable|integer'
+                'totalStudents' => 'nullable|integer',
+                'totalDuration' => 'nullable|integer|min:0',
             ]);
 
             $data['courseID'] = $this->generateCourseID();

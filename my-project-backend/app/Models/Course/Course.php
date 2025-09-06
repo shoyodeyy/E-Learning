@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Course;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Course extends Model
 {
@@ -25,6 +27,7 @@ class Course extends Model
         'approvedBy',
         'avgRating',
         'totalStudents',
+        'totalDuration',
         'created_at',
         'updated_at'
     ];
@@ -48,5 +51,10 @@ class Course extends Model
     public function status(): BelongsTo
     {
         return $this->belongsTo(Status::class, 'statusID', 'statusID');
+    }
+
+    public function section(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Section::class, 'courseID', 'courseID');
     }
 }

@@ -37,6 +37,7 @@ return new class extends Migration
             $table->string('level')->nullable(); // Beginner, Intermediate, Advanced...
             $table->decimal('avgRating', 3, 2)->default(0);
             $table->integer('totalStudents')->default(0);
+            $table->integer('totalDuration')->default(0);
 
             $table->enum('badge', ['none', 'bestseller', 'featured', 'new', 'hot', 'sale'])->default('none');
 
