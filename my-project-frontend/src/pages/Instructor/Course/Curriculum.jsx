@@ -1,27 +1,23 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import {useParams, useNavigate} from "react-router-dom";
+import {useState, useEffect} from "react";
 import axios from 'axios';
+import {X, File, Pencil, Trash, Plus} from "lucide-react";
 
 import SidebarCourseManage from "./SidebarCourseManage.jsx";
 import HeaderCourseManage from "./HeaderCourseManage.jsx";
 import LectureItem from "./Lecture/LectureItem.jsx";
 import QuizItem from "./Quiz/QuizItem.jsx";
-
-import DocumentIcon from "../../../assets/images/icon/document.png";
-import PencilIcon from "../../../assets/images/icon/pencil.png";
-import TrashIcon from "../../../assets/images/icon/trash.png";
-import PlusIcon from "../../../assets/images/icon/plus.png";
-import CancelIcon from "../../../assets/images/icon/cross-small.png";
+import { apiUrl } from "../../../services/http.jsx";
 
 export default function Curriculum() {
-    const { courseID } = useParams();
+    const {courseID} = useParams();
     const navigate = useNavigate();
 
     // fetch data by axios
     useEffect(() => {
         async function fetchCourse() {
             try {
-                const res = await fetch(`http://localhost:8000/api/courses/${courseID}`);
+                const res = await fetch(`${apiUrl}/courses/${courseID}`);
                 const data = await res.json();
 
                 setCourse(prev => ({
@@ -41,12 +37,12 @@ export default function Curriculum() {
 
     // auto scroll to top
     useEffect(() => {
-       window.scrollTo(0, 0);
+        window.scrollTo(0, 0);
     }, [courseID]);
 
-    const [ isAddingCurrItem, setIsAddingCurrItem ] = useState(false);
+    const [isAddingCurrItem, setIsAddingCurrItem] = useState(false);
 
-    const [ course, setCourse ] = useState({
+    const [course, setCourse] = useState({
         id: crypto.randomUUID(),
         title: "",
         description: "",
@@ -84,23 +80,23 @@ export default function Curriculum() {
     });
 
     // state Section
-    const [ editedSectionName, setEditedSectionName ] = useState("");
-    const [ isEditingSectionId, setIsEditingSectionId ] = useState(null);
+    const [editedSectionName, setEditedSectionName] = useState("");
+    const [isEditingSectionId, setIsEditingSectionId] = useState(null);
 
     // state Lecture
-    const [ newLectureTitle, setNewLectureTitle ] = useState("");
-    const [ isNewLecture, setIsNewLecture ] = useState(false);
+    const [newLectureTitle, setNewLectureTitle] = useState("");
+    const [isNewLecture, setIsNewLecture] = useState(false);
 
     // state Quiz
-    const [ newQuizTitle, setNewQuizTitle ] = useState("");
-    const [ isNewQuiz, setIsNewQuiz ] = useState(false);
+    const [newQuizTitle, setNewQuizTitle] = useState("");
+    const [isNewQuiz, setIsNewQuiz] = useState(false);
 
     function handleSaveRenamedSection(sectionId, newTitle) {
         setCourse(prev => ({
             ...prev,
             sections: prev.sections.map((sec) =>
                 sec.id === sectionId
-                    ? { ...sec, title: newTitle }
+                    ? {...sec, title: newTitle}
                     : sec
             ),
         }));
@@ -141,7 +137,7 @@ export default function Curriculum() {
         if (!newLectureTitle.trim()) return;
 
         // 1. Gửi request lên backend
-        const res = await axios.post(`http://localhost:8000/api/courses/${courseID}`,
+        const res = await axios.post(`${apiUrl}/courses/${courseID}`,
             {
                 'title': newLectureTitle,
                 'type': "Lecture"
@@ -403,7 +399,7 @@ export default function Curriculum() {
         });
     }
 
-    function SectionItem({ section }) {
+    function SectionItem({section}) {
         return (
             <div className="flex flex-col space-y-5 w-full">
                 {section.items.map((item) => (
@@ -443,7 +439,7 @@ export default function Curriculum() {
             <main className="pt-20 max-w-7xl mx-auto w-full flex flex-1 bg-white p-7">
                 <div className="flex w-full space-y-10 space-x-10">
                     {/* Sidebar */}
-                    {<SidebarCourseManage />}
+                    {<SidebarCourseManage/>}
 
                     {/* Content */}
                     <div className="bg-white flex-1 shadow-[0_0_20px_rgba(0,0,0,0.15)]">
@@ -456,23 +452,30 @@ export default function Curriculum() {
                             {/* Notice */}
                             <div className="flex flex-col gap-y-2">
                                 <p>
-                                    Start putting together your course by creating sections, lectures and practice (quizzes, coding exercises and assignments).
+                                    Start putting together your course by creating sections, lectures and practice
+                                    (quizzes, coding exercises and assignments).
                                 </p>
                                 <p>
-                                    Start putting together your course by creating sections, lectures and practice activities (<span className="font-semibold text-purple-800">quizzes, coding exercises and assignments</span>). Use your <span className="font-semibold text-purple-800">course outline</span> to structure your content and label your sections and lectures clearly. If you’re intending to offer your course for free, the total length of video content must be less than 2 hours.
+                                    Start putting together your course by creating sections, lectures and practice
+                                    activities (<span className="font-semibold text-purple-800">quizzes, coding exercises and assignments</span>).
+                                    Use your <span className="font-semibold text-purple-800">course outline</span> to
+                                    structure your content and label your sections and lectures clearly. If you’re
+                                    intending to offer your course for free, the total length of video content must be
+                                    less than 2 hours.
                                 </p>
                             </div>
 
                             {/* Section */}
                             <div className="w-full flex flex-col gap-y-18">
                                 {course.sections.map((section) => (
-                                    <div className="flex flex-col gap-y-5">
+                                    <div key={section.id} className="flex flex-col gap-y-5">
                                         <div className="flex flex-col gap-y-10 w-full px-2 py-5 bg-gray-100 border">
                                             {/* Title Section */}
                                             <div>
                                                 {/* nhớ sửa đk chỗ này lại */}
                                                 {!isEditingSectionId && (
-                                                    <div className="flex items-center justify-start space-x-3 cursor-move w-full group">
+                                                    <div
+                                                        className="flex items-center justify-start space-x-3 cursor-move w-full group">
                                                         {/* Section Index*/}
                                                         <p className="font-bold">
                                                             Section {section.index}:
@@ -482,7 +485,7 @@ export default function Curriculum() {
                                                             {/* Section Title */}
                                                             {!isEditingSectionId && (
                                                                 <div className="flex items-center space-x-2">
-                                                                    <img className="w-3 cursor-pointer" src={DocumentIcon} alt="document-icon" />
+                                                                    <File className="w-3 cursor-pointer"/>
                                                                     <p>{section.title}</p>
                                                                 </div>
                                                             )}
@@ -494,22 +497,16 @@ export default function Curriculum() {
                                                                     setIsEditingSectionId(section.id);
                                                                 }}
                                                                 className="p-1.5 rounded-md bg-transparent hover:bg-gray-200 transition-colors duration-200">
-                                                                <img
-                                                                    className="w-3 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                                                    src={PencilIcon}
-                                                                    alt="pencil-icon"
-                                                                />
+                                                                < Pencil
+                                                                    className="w-3 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"/>
                                                             </div>
 
                                                             {/* Trash Icon */}
                                                             <div
                                                                 onClick={() => handleRemoveSection(section.id)}
                                                                 className="p-1.5 rounded-md bg-transparent hover:bg-gray-200 transition-colors duration-200">
-                                                                <img
-                                                                    className="w-3 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                                                    src={TrashIcon}
-                                                                    alt="trash-icon"
-                                                                />
+                                                                <Trash
+                                                                    className="w-3 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"/>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -518,8 +515,10 @@ export default function Curriculum() {
                                                 {/* Edit Section */}
                                                 {/* nhớ sửa đk chỗ này lại */}
                                                 {isEditingSectionId && (
-                                                    <div className="flex flex-col items-center justify-start w-full space-y-5 px-2 py-5 bg-white border">
-                                                        <div className="flex items-center space-x-3 cursor-move w-full group">
+                                                    <div
+                                                        className="flex flex-col items-center justify-start w-full space-y-5 px-2 py-5 bg-white border">
+                                                        <div
+                                                            className="flex items-center space-x-3 cursor-move w-full group">
                                                             {/* Section Index*/}
                                                             <p className="font-bold w-21">
                                                                 Section {section.index}:
@@ -560,20 +559,22 @@ export default function Curriculum() {
                                             </div>
 
                                             {/* Curriculum */}
-                                            <div className="flex flex-col items-center justify-start space-y-5 w-full pl-14">
+                                            <div
+                                                className="flex flex-col items-center justify-start space-y-5 w-full pl-14">
                                                 {/* Curriculum Item */}
                                                 <SectionItem
                                                     section={section}
                                                 />
 
                                                 {/* Add more curriculum  */}
-                                                <div className="w-full flex flex-col items-start justify-start flex-1 space-x-2 h-14">
+                                                <div
+                                                    className="w-full flex flex-col items-start justify-start flex-1 space-x-2 h-14">
                                                     {/* Curriculum item button */}
                                                     {!isAddingCurrItem && (
                                                         <button
                                                             onClick={() => setIsAddingCurrItem(true)}
                                                             className="flex items-center justify-center gap-x-2 px-5 py-2 cursor-pointer border bg-white text-purple-800 text-sm font-bold rounded-md hover:bg-gray-200">
-                                                            <img className="w-3" src={PlusIcon} alt="plus-icon"/>
+                                                            <Plus className="w-3"/>
                                                             Curriculum item
                                                         </button>
                                                     )}
@@ -583,12 +584,13 @@ export default function Curriculum() {
                                                             {/* Select item */}
                                                             <div className="flex w-full bg-white">
                                                                 {!(isNewLecture || isNewQuiz) && (
-                                                                    <div className="flex border border-dashed px-3 py-2 w-full">
+                                                                    <div
+                                                                        className="flex border border-dashed px-3 py-2 w-full">
                                                                         {/* Lecture */}
                                                                         <div
                                                                             onClick={() => setIsNewLecture(true)}
                                                                             className="flex items-center justify-center gap-x-2 hover:bg-purple-100 text-purple-800 font-bold px-2 rounded-sm cursor-pointer">
-                                                                            <img className="w-3" src={PlusIcon} alt="plus-icon"/>
+                                                                            <Plus className="w-3"/>
                                                                             Lecture
                                                                         </div>
 
@@ -596,7 +598,7 @@ export default function Curriculum() {
                                                                         <div
                                                                             onClick={() => setIsNewQuiz(true)}
                                                                             className="flex items-center justify-center gap-x-2 hover:bg-purple-100 text-purple-800 font-bold p-1.5 rounded-sm cursor-pointer">
-                                                                            <img className="w-3" src={PlusIcon} alt="plus-icon"/>
+                                                                            <Plus className="w-3"/>
                                                                             Quiz
                                                                         </div>
                                                                     </div>
@@ -605,27 +607,31 @@ export default function Curriculum() {
                                                                 {/* Cancel select item */}
                                                                 <div
                                                                     className="p-0.5 rounded-sm cursor-pointer relative">
-                                                                    <img
+                                                                    <X
                                                                         onClick={() => {
                                                                             setIsNewLecture(false);
                                                                             setIsNewQuiz(false);
                                                                             setIsAddingCurrItem(false);
                                                                         }}
-                                                                        className="flex items-center min-w-5 w-5 absolute right-208 -top-5 rounded-sm hover:bg-gray-200" src={CancelIcon} alt="cancel-icon"/>
+                                                                        className="flex items-center min-w-5 w-5 absolute right-208 -top-5 rounded-sm hover:bg-gray-200"
+                                                                    />
                                                                 </div>
                                                             </div>
 
                                                             {/* When selected Lecture */}
                                                             {isNewLecture && (
-                                                                <div className="flex flex-col items-center justify-start w-full space-y-5 px-2 py-3 bg-white border">
-                                                                    <div className="flex items-center space-x-3 cursor-move w-full group">
+                                                                <div
+                                                                    className="flex flex-col items-center justify-start w-full space-y-5 px-2 py-3 bg-white border">
+                                                                    <div
+                                                                        className="flex items-center space-x-3 cursor-move w-full group">
                                                                         {/* Title Lecture */}
                                                                         <p className="font-bold w-30">
                                                                             New Lecture:
                                                                         </p>
 
                                                                         {/* Input New Lecture Title */}
-                                                                        <div className="flex items-center space-x-2 w-full">
+                                                                        <div
+                                                                            className="flex items-center space-x-2 w-full">
                                                                             <input
                                                                                 type="text"
                                                                                 autoFocus
@@ -638,7 +644,8 @@ export default function Curriculum() {
                                                                     </div>
 
                                                                     {/* Cancel and Save button */}
-                                                                    <div className="flex items-center justify-end w-full space-x-5">
+                                                                    <div
+                                                                        className="flex items-center justify-end w-full space-x-5">
                                                                         <button
                                                                             onClick={() => {
                                                                                 setIsNewLecture(false);
@@ -661,15 +668,18 @@ export default function Curriculum() {
 
                                                             {/* When selected Quiz */}
                                                             {isNewQuiz && (
-                                                                <div className="flex flex-col items-center justify-start w-full space-y-5 px-2 py-3 bg-white border">
-                                                                    <div className="flex items-center space-x-3 cursor-move w-full group">
+                                                                <div
+                                                                    className="flex flex-col items-center justify-start w-full space-y-5 px-2 py-3 bg-white border">
+                                                                    <div
+                                                                        className="flex items-center space-x-3 cursor-move w-full group">
                                                                         {/* Title Quiz */}
                                                                         <p className="font-bold w-23">
                                                                             New Quiz:
                                                                         </p>
 
                                                                         {/* Input New Quiz Title */}
-                                                                        <div className="flex items-center space-x-2 w-full">
+                                                                        <div
+                                                                            className="flex items-center space-x-2 w-full">
                                                                             <input
                                                                                 type="text"
                                                                                 autoFocus
@@ -682,7 +692,8 @@ export default function Curriculum() {
                                                                     </div>
 
                                                                     {/* Cancel and Save button */}
-                                                                    <div className="flex items-center justify-end w-full space-x-5">
+                                                                    <div
+                                                                        className="flex items-center justify-end w-full space-x-5">
                                                                         <button
                                                                             onClick={() => {
                                                                                 setIsNewQuiz(false);
@@ -693,7 +704,9 @@ export default function Curriculum() {
                                                                             Cancel
                                                                         </button>
                                                                         <button
-                                                                            onClick={() => {handleAddQuiz(section.id)}}
+                                                                            onClick={() => {
+                                                                                handleAddQuiz(section.id)
+                                                                            }}
                                                                             className="px-5 py-1.5 cursor-pointer bg-purple-800 text-white font-bold rounded-md shadow hover:bg-purple-800 disabled:opacity-30 disabled:cursor-not-allowed"
                                                                             disabled={!newQuizTitle.trim()}
                                                                         >
@@ -705,14 +718,16 @@ export default function Curriculum() {
 
                                                             {/* Cancel select item */}
                                                             {(isNewLecture || isNewQuiz) && (
-                                                                <div className="p-0.5 rounded-sm cursor-pointer relative">
-                                                                    <img
+                                                                <div
+                                                                    className="p-0.5 rounded-sm cursor-pointer relative">
+                                                                    <X
                                                                         onClick={() => {
                                                                             setIsNewLecture(false);
                                                                             setIsNewQuiz(false);
                                                                             setIsAddingCurrItem(false);
                                                                         }}
-                                                                        className="flex items-center min-w-5 w-5 absolute right-208 -top-34.5 rounded-sm hover:bg-gray-200" src={CancelIcon} alt="cancel-icon"/>
+                                                                        className="flex items-center min-w-5 w-5 absolute right-208 -top-34.5 rounded-sm hover:bg-gray-200"
+                                                                    />
                                                                 </div>
                                                             )}
                                                         </div>
@@ -728,7 +743,7 @@ export default function Curriculum() {
                                     <button
                                         onClick={handleAddSection}
                                         className="flex items-center justify-center gap-x-2 px-5 py-2 cursor-pointer border bg-white text-purple-800 text-sm font-bold rounded-md hover:bg-gray-200">
-                                        <img className="w-3.5" src={PlusIcon} alt="plus-icon"/>
+                                        <Plus className="w-3"/>
                                         Section
                                     </button>
                                 </div>

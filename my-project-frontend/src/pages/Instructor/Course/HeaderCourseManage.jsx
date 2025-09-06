@@ -1,7 +1,5 @@
 import {useNavigate} from "react-router-dom";
-
-import ArrowLeftIcon from "../../../assets/images/icon/angle-small-left.png";
-import SettingIcon from "../../../assets/images/icon/settings.png";
+import { MoveLeft, Settings } from "lucide-react";
 
 export default function HeaderCourseManage({ title, status }) {
     const navigate = useNavigate();
@@ -13,11 +11,7 @@ export default function HeaderCourseManage({ title, status }) {
                 <div
                     onClick={() => navigate("/instructor/courses")}
                     className="flex items-center justify-center space-x-2 h-14 cursor-pointer hover:opacity-90 transition-opacity">
-                    <img
-                        src={ ArrowLeftIcon }
-                        alt="arrow-left"
-                        className="w-5"
-                    />
+                    <MoveLeft className="w-5" />
                     <p className="text-white font-semibold">
                         Back to courses
                     </p>
@@ -56,11 +50,7 @@ export default function HeaderCourseManage({ title, status }) {
 
                 {/* Setting Icon */}
                 <div className="flex items-center justify-center space-x-2 h-14">
-                    <img
-                        className="w-5 cursor-pointer hover:opacity-90 transition-opacity"
-                        src={ SettingIcon }
-                        alt="setting-icon"
-                    />
+                    <Settings className="w-5 cursor-pointer hover:opacity-90 transition-opacity" />
                 </div>
             </div>
         </header>

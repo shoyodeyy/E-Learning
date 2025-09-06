@@ -1,19 +1,11 @@
-import { useState } from "react";
+import {useState} from "react";
 
-import VideoIcon from "../../../../assets/images/icon/play-alt.png";
-import LectureIcon from "../../../../assets/images/icon/check-circle.png";
-import DocumentIcon from "../../../../assets/images/icon/document.png";
-import PencilIcon from "../../../../assets/images/icon/pencil.png";
-import TrashIcon from "../../../../assets/images/icon/trash.png";
-import PlusIcon from "../../../../assets/images/icon/plus.png";
-import CancelIcon from "../../../../assets/images/icon/cross-small.png";
-import ArrowUpIcon from "../../../../assets/images/icon/angle-up.png";
-import ArrowDownIcon from "../../../../assets/images/icon/angle-small-down.png";
+import {ArrowUp, ArrowDown, X, Plus, Pencil, Trash, Book,} from "lucide-react";
 
-export default function LectureItem({ sectionId, itemId, lec, setCourse, isEditingSectionId, handleRemoveItem }) {
-    const [ editedNameLecture, setEditedNameLecture ] = useState("");
-    const [ isEditingLectureId, setIsEditingLectureId ] = useState(null);
-    const [ youtubeInput, setYoutubeInput ] = useState("");
+export default function LectureItem({sectionId, itemId, lec, setCourse, isEditingSectionId, handleRemoveItem}) {
+    const [editedNameLecture, setEditedNameLecture] = useState("");
+    const [isEditingLectureId, setIsEditingLectureId] = useState(null);
+    const [youtubeInput, setYoutubeInput] = useState("");
 
     const isEditingLectureLocal = isEditingLectureId === lec.id;
     const isAddingVideoLocal = lec.isAddingVideo;
@@ -120,7 +112,7 @@ export default function LectureItem({ sectionId, itemId, lec, setCourse, isEditi
 
     async function handleUploadVideoFile(sectionId, itemId, file) {
         try {
-            const { thumbnail, duration } = await extractVideoThumbnail(file);
+            const {thumbnail, duration} = await extractVideoThumbnail(file);
 
             setCourse(prev => ({
                 ...prev,
@@ -221,7 +213,7 @@ export default function LectureItem({ sectionId, itemId, lec, setCourse, isEditi
             {!isEditingLectureLocal && (
                 <div className="flex items-center justify-start space-x-3 cursor-move w-full group bg-white px-3 py-3">
                     {/* Lecture Index */}
-                    <img className="w-3" src={LectureIcon} alt="lecture-icon"/>
+                    <Book className="w-3"/>
                     <p className="font-bold">
                         {lec.type} {lec.index}:
                     </p>
@@ -232,12 +224,12 @@ export default function LectureItem({ sectionId, itemId, lec, setCourse, isEditi
                         {!isEditingSectionId && (
                             lec.videoFile ? (
                                 <div className="flex items-center space-x-2">
-                                    <img className="w-3 cursor-pointer" src={VideoIcon} alt="document-icon" />
+                                    <FilePlay className="w-3 cursor-pointer"/>
                                     <p>{lec.title}</p>
                                 </div>
                             ) : (
                                 <div className="flex items-center space-x-2">
-                                    <img className="w-3 cursor-pointer" src={DocumentIcon} alt="document-icon" />
+                                    <Book className="w-3 cursor-pointer" />
                                     <p>{lec.title}</p>
                                 </div>
                             )
@@ -250,10 +242,8 @@ export default function LectureItem({ sectionId, itemId, lec, setCourse, isEditi
                                 setIsEditingLectureId(lec.id);
                             }}
                             className="p-1.5 rounded-md bg-transparent hover:bg-gray-200 transition-colors duration-200">
-                            <img
+                            <Pencil
                                 className="w-3 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                src={PencilIcon}
-                                alt="pencil-icon"
                             />
                         </div>
 
@@ -263,10 +253,8 @@ export default function LectureItem({ sectionId, itemId, lec, setCourse, isEditi
                                 handleRemoveItem(sectionId, itemId);
                             }}
                             className="p-1.5 rounded-md bg-transparent hover:bg-gray-200 transition-colors duration-200">
-                            <img
+                            <Trash
                                 className="w-3 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                src={TrashIcon}
-                                alt="trash-icon"
                             />
                         </div>
                     </div>
@@ -278,7 +266,7 @@ export default function LectureItem({ sectionId, itemId, lec, setCourse, isEditi
                             <button
                                 onClick={() => toggleAddVideo(sectionId, itemId)}
                                 className="flex items-center gap-x-2 px-5 py-1.5 cursor-pointer border bg-transparent text-purple-800 text-sm font-bold rounded-md hover:bg-gray-100">
-                                <img className="w-3" src={PlusIcon} alt="plus-icon"/>
+                                <Plus className="w-3"/>
                                 Add Video
                             </button>
                         )}
@@ -286,7 +274,8 @@ export default function LectureItem({ sectionId, itemId, lec, setCourse, isEditi
                         {/* Add Video + Cancle Icon */}
                         {(isAddingVideoLocal && !(lec.videoFile || lec.videoUrl)) && (
                             <div className="relative">
-                                <div className="bg-white w-32 h-8 px-2 flex items-center justify-center gap-x-2 border border-b-0 absolute right-0 -top-[0.45rem]">
+                                <div
+                                    className="bg-white w-32 h-8 px-2 flex items-center justify-center gap-x-2 border border-b-0 absolute right-0 -top-[0.45rem]">
                                     <p className="cursor-text">
                                         Add Video
                                     </p>
@@ -299,7 +288,7 @@ export default function LectureItem({ sectionId, itemId, lec, setCourse, isEditi
                                             }
                                         }}
                                         className="hover:bg-gray-200 p-0.5 rounded-sm cursor-pointer">
-                                        <img className="w-5" src={CancelIcon} alt="cancel-icon"/>
+                                        <X className="w-5"/>
                                     </div>
                                 </div>
                             </div>
@@ -312,7 +301,7 @@ export default function LectureItem({ sectionId, itemId, lec, setCourse, isEditi
                                     <div
                                         onClick={() => toggleAddVideo(sectionId, itemId)}
                                         className="hover:bg-gray-200 p-1 rounded-sm cursor-pointer">
-                                        <img className="w-3" src={ArrowUpIcon} alt="cancel-icon"/>
+                                        <ArrowUp className="w-3"/>
                                     </div>
                                 </div>
                             </div>
@@ -325,7 +314,7 @@ export default function LectureItem({ sectionId, itemId, lec, setCourse, isEditi
                                     <div
                                         onClick={() => toggleAddVideo(sectionId, itemId)}
                                         className="hover:bg-gray-200 p-0 rounded-sm cursor-pointer">
-                                        <img className="w-5" src={ArrowDownIcon} alt="cancel-icon"/>
+                                        <ArrowDown className="w-5"/>
                                     </div>
                                 </div>
                             </div>
@@ -473,7 +462,8 @@ export default function LectureItem({ sectionId, itemId, lec, setCourse, isEditi
                                         className="min-w-40 h-20 object-cover"
                                     />
                                 ) : (
-                                    <div className="min-w-40 h-24 flex items-center justify-center text-xs text-gray-500">
+                                    <div
+                                        className="min-w-40 h-24 flex items-center justify-center text-xs text-gray-500">
                                         No thumbnail
                                     </div>
                                 )}
@@ -498,15 +488,15 @@ export default function LectureItem({ sectionId, itemId, lec, setCourse, isEditi
                                 <div
                                     className="w-19 flex items-center space-x-2 font-normal text-[16px] text-purple-800 hover:font-semibold py-1.5 cursor-pointer">
                                     {/* Pencil Icon */}
-                                    <img
+                                    <Pencil
                                         className="w-3"
-                                        src={PencilIcon}
-                                        alt="pencil-icon"
                                     />
 
                                     {/* Select Video Button */}
                                     <button
-                                        onClick={() => {handleReplaceVideo(sectionId, itemId)}}
+                                        onClick={() => {
+                                            handleReplaceVideo(sectionId, itemId)
+                                        }}
                                         className="min-w-24 py-1.5  text-purple-800 text-sm font-bold rounded-md hover:text-purple-600 cursor-pointer"
                                     >
                                         Replace Video

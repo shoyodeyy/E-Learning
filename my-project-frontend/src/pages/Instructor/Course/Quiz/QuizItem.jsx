@@ -1,15 +1,7 @@
 import { useState, useCallback } from "react";
+import {Book, FileQuestionMark, Pencil, Plus, Trash, X} from "lucide-react";
 
 import QuizOptions from "./QuizOptions.jsx";
-
-import PencilIcon from "../../../../assets/images/icon/pencil.png";
-import TrashIcon from "../../../../assets/images/icon/trash.png";
-import PlusIcon from "../../../../assets/images/icon/plus.png";
-import CancelIcon from "../../../../assets/images/icon/cross-small.png";
-import LectureIcon from "../../../../assets/images/icon/check-circle.png";
-import ArrowUpIcon from "../../../../assets/images/icon/angle-up.png";
-import ArrowDownIcon from "../../../../assets/images/icon/angle-small-down.png";
-import QuestionIcon from "../../../../assets/images/icon/help.png";
 
 export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRemoveItem }) {
     const [ editedNameQuiz, setEditedNameQuiz ] = useState("");
@@ -205,7 +197,7 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
             {!isEditingQuizLocal && (
                 <div className="flex items-center justify-start space-x-3 cursor-move w-full group bg-white px-3 py-3">
                     {/* Quiz Index */}
-                    <img className="w-3" src={LectureIcon} alt="lecture-icon"/>
+                    <Book className="w-3" />
                     <p className="font-bold">
                         {quiz.type} {quiz.index}:
                     </p>
@@ -214,7 +206,7 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
                         {/* Quiz Title */}
                         {!isEditingQuizLocal && (
                             <div className="flex items-center space-x-2">
-                                <img className="w-4 mt-0.5 cursor-pointer" src={QuestionIcon} alt="document-icon" />
+                                <FileQuestionMark className="w-4 mt-0.5 cursor-pointer" />
                                 <p>{quiz.title}</p>
                             </div>
                         )}
@@ -226,10 +218,8 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
                                 setIsEditingQuizId(quiz.id);
                             }}
                             className="p-1.5 rounded-md bg-transparent hover:bg-gray-200 transition-colors duration-200">
-                            <img
+                            <Pencil
                                 className="w-3 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                src={PencilIcon}
-                                alt="pencil-icon"
                             />
                         </div>
 
@@ -237,10 +227,8 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
                         <div
                             onClick={() => {handleRemoveItem(sectionId, itemId)}}
                             className="p-1.5 rounded-md bg-transparent hover:bg-gray-200 transition-colors duration-200">
-                            <img
+                            <Trash
                                 className="w-3 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                src={TrashIcon}
-                                alt="trash-icon"
                             />
                         </div>
                     </div>
@@ -252,7 +240,7 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
                             <button
                                 onClick={() => toggleAddQuestion(sectionId, itemId, true)}
                                 className="flex items-center w-32 gap-x-2 px-5 py-1.5 cursor-pointer border bg-transparent text-purple-800 text-sm font-bold rounded-md hover:bg-gray-100">
-                                <img className="w-3" src={PlusIcon} alt="plus-icon"/>
+                                <Plus className="w-3" />
                                 Questions
                             </button>
                         )}
@@ -267,7 +255,7 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
                                     <div
                                         onClick={() => toggleAddQuestion(sectionId, itemId, false)}
                                         className="hover:bg-gray-200 p-0.5 rounded-sm cursor-pointer">
-                                        <img className="w-5" src={CancelIcon} alt="cancel-icon"/>
+                                        <X className="w-5" />
                                     </div>
                                 </div>
                             </div>
@@ -450,7 +438,7 @@ export default function QuizItem({ sectionId, itemId, quiz, setCourse, handleRem
                                     toggleAddQuestion(sectionId, itemId, true)
                                 }}
                                 className="flex items-center w-32 gap-x-2 px-5 py-1.5 cursor-pointer border bg-transparent text-purple-800 text-sm font-bold rounded-md hover:bg-gray-100">
-                                <img className="w-3" src={PlusIcon} alt="plus-icon"/>
+                                <Plus className="w-3" />
                                 Questions
                             </button>
                         </div>

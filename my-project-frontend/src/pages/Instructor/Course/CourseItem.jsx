@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-import CourseThumbnail from "../../../assets/images/icon/video-tutorial-bro.png";
+import CourseThumbnail from "../../../assets/images/video-tutorial-bro.png";
 
 export default function CourseItem({ course }) {
     const navigate = useNavigate();

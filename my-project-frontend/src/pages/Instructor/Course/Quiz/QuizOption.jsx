@@ -1,5 +1,5 @@
-import TrashIcon from "../../../../assets/images/icon/trash.png";
 import React from "react";
+import {Trash} from "lucide-react";
 
 export default function QuizOption({ option, onChangeOption, onDeleteOption, isAddingQuestion, isNewQuestion, hasMultipleQuestion }) {
     return (
@@ -43,10 +43,8 @@ export default function QuizOption({ option, onChangeOption, onDeleteOption, isA
                     onClick={() => onDeleteOption(option.id)}
                     className="h-7 w-7 p-1.5 rounded-md hover:bg-gray-200 cursor-pointer"
                 >
-                    <img
+                    <Trash
                         className="opacity-0 group-hover:opacity-100"
-                        src={TrashIcon}
-                        alt="trash-icon"
                     />
                 </div>
             </div>

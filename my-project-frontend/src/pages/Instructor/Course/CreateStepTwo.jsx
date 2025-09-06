@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-
+import {ArrowDown} from "lucide-react";
 import axios from 'axios';
-import ArrowDownIcon from "../../../assets/images/icon/angle-small-down.png";
+
+import {apiUrl} from "../../../services/http.jsx";
 
 export default function CreateStepTwo({ title, setTitle, category, setCategory }) {
     const navigate = useNavigate();
@@ -19,7 +20,7 @@ export default function CreateStepTwo({ title, setTitle, category, setCategory }
 
     async function handleCreateCourse() {
         try {
-            const res = await axios.post('http://localhost:8000/api/courses', {
+            const res = await axios.post(`${apiUrl}/courses`, {
                 courseTitle: title,
                 categoryID: category
             });
@@ -99,7 +100,7 @@ export default function CreateStepTwo({ title, setTitle, category, setCategory }
 
                                 {/* Custom arrow */}
                                 <span className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-purple-800">
-                                        <img className="w-5" src={ ArrowDownIcon } alt="turn-down"/>
+                                        <ArrowDown className="w-5" />
                                     </span>
                             </div>
                         </div>

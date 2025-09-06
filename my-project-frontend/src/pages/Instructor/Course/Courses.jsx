@@ -1,20 +1,21 @@
 import {useNavigate} from "react-router-dom";
-import { useAuth } from "../../../context/AuthContext.jsx";
 import {useEffect, useState} from "react";
 import axios from "axios";
+import {MoveDown} from "lucide-react";
 
-import ArrowDownIcon from "../../../assets/images/icon/angle-small-down.png";
+import {useAuth} from "../../../context/AuthContext.jsx";
 import CourseItem from "./CourseItem.jsx";
+import {apiUrl} from "../../../services/http.jsx";
 
 export default function Courses() {
     const navigate = useNavigate();
-    const { user, logout, refreshUser } = useAuth();
+    const {user, logout, refreshUser} = useAuth();
 
-    const [ course, setCourse ] = useState([]);
+    const [course, setCourse] = useState([]);
 
     useEffect(() => {
         async function fetchCourses() {
-            const res = await axios.get("http://localhost:8000/api/courses");
+            const res = await axios.get(`${apiUrl}/courses`);
             const json = await res.data;
 
             setCourse(json.data || []);
@@ -51,17 +52,19 @@ export default function Courses() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center py-6">
                         <div className="flex items-center">
-                            <img src="/images/logo.webp" alt="Udemy Logo" className="h-8" />
+                            <img src="/images/logo.webp" alt="Udemy Logo" className="h-8"/>
                         </div>
                         <div className="flex items-center space-x-4">
                             <span className="text-gray-700">Welcome, {user.name}</span>
                             <div className="flex items-center space-x-2">
                                 {user.email_verified_at ? (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <span
+                                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                             ✓ Verified
                                         </span>
                                 ) : (
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    <span
+                                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                             ⚠ Unverified
                                         </span>
                                 )}
@@ -94,13 +97,15 @@ export default function Courses() {
                                 />
 
                                 {/* Search button with icon */}
-                                <button className="px-3 py-3 bg-purple-800 text-white rounded-md hover:bg-purple-800 flex items-center justify-center cursor-pointer">
+                                <button
+                                    className="px-3 py-3 bg-purple-800 text-white rounded-md hover:bg-purple-800 flex items-center justify-center cursor-pointer">
                                     🔍
                                 </button>
 
                                 {/* Sort dropdown */}
                                 <div className="relative">
-                                    <select className="appearance-none w-50 px-4 pr-10 py-3 border border-gray-300 rounded-md text-purple-800 font-semibold focus:outline-none focus:ring-2 focus:ring-purple-800 cursor-pointer">
+                                    <select
+                                        className="appearance-none w-50 px-4 pr-10 py-3 border border-gray-300 rounded-md text-purple-800 font-semibold focus:outline-none focus:ring-2 focus:ring-purple-800 cursor-pointer">
                                         <option>Newest</option>
                                         <option>Oldest</option>
                                         <option>A–Z</option>
@@ -110,14 +115,16 @@ export default function Courses() {
                                     </select>
 
                                     {/* Custom arrow */}
-                                    <span className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-purple-800">
-                                        <img className="w-5" src={ArrowDownIcon} alt="turn-down"/>
+                                    <span
+                                        className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-purple-800">
+                                        <MoveDown className="w-5"/>
                                     </span>
                                 </div>
                             </div>
 
                             {/* New Course Button */}
-                            <button onClick={handleCreateCourse} className="px-5 py-3 cursor-pointer bg-purple-800 text-white font-bold rounded-md shadow hover:bg-purple-800">
+                            <button onClick={handleCreateCourse}
+                                    className="px-5 py-3 cursor-pointer bg-purple-800 text-white font-bold rounded-md shadow hover:bg-purple-800">
                                 New course
                             </button>
                         </div>
