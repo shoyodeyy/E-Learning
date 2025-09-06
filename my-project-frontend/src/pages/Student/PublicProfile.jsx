@@ -1,57 +1,76 @@
-import React, { useEffect, useState } from "react";
-import {toast} from "react-toastify";
+
+import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
 import Header from "../../components/Header.jsx";
 import ProfileSidebar from "../../components/ProfileSidebar.jsx";
-import api from "../../api/axios.js";
+import { apiUrl } from "../../services/http.jsx";
 
 export default function PublicProfile() {
     const [user, setUser] = useState(null);
     const [formData, setFormData] = useState({});
-    const [errors, setErrors] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [processing, setProcessing] = useState(false);
 
-    // Load user profile từ backend
+    // Load user profile
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await api.get("/user"); // GET /api/user
-                setUser(res.data);
-                setFormData({
-                    name: res.data.name || "",
-                    email: res.data.email || "",
-                    gender: res.data.gender || "",
-                    profile: res.data.profile || "",
-                    address: res.data.address || "",
-                    phone: res.data.phone || "",
-                    avatar: null,
+                const response = await fetch(`${apiUrl}/profile`, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+                    },
                 });
-            } catch (err) {
-                toast.error("Failed to load user profile. Please login.");
+
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    setUser(result.user);
+                    setFormData({
+                        name: result.user?.name || "",
+                        email: result.user?.email || "",
+                        gender: result.user?.gender || "",
+                        profile: result.user?.profile || "",
+                        address: result.user?.address || "",
+                        phone: result.user?.phone || "",
+                        avatar: null,
+                    });
+                } else {
+                    toast.error(result.message || "Failed to load profile.");
+                }
+            } catch (error) {
+                console.error("Profile load error:", error);
+                toast.error("Network error. Please check your connection.");
+
             }
         };
+
         fetchUser();
     }, []);
 
     if (!user) {
         return (
-            <div className="min-h-screen flex items-center justify-center">Loading...</div>
+            <div className="min-h-screen flex items-center justify-center">
+                Loading...
+            </div>
         );
     }
 
-    const handleChange = (e) => {
+    const handleInputChange = (e) => {
         const { name, value, files } = e.target;
-        if (files) {
-            setFormData((prev) => ({ ...prev, [name]: files[0] }));
-        } else {
-            setFormData((prev) => ({ ...prev, [name]: value }));
-        }
+        const fieldValue = files ? files[0] : value;
+
+        setFormData((prev) => ({
+            ...prev,
+            [name]: fieldValue,
+        }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setErrors({});
-        setLoading(true);
+        setProcessing(true);
 
         try {
             const data = new FormData();
@@ -61,78 +80,86 @@ export default function PublicProfile() {
                 }
             });
 
-            const res = await api.post("/profile/update", data, {
-                headers: { "Content-Type": "multipart/form-data" },
+            const response = await fetch(`${apiUrl}/profile/update`, {
+                method: "POST",
+                headers: {
+                    Accept: "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+                },
+                body: data,
             });
 
-            setUser(res.data.user); // cập nhật state user
-            toast.success("Profile updated successfully!");
-            window.scrollTo({ top: 0, behavior: "smooth" })
-        } catch (err) {
-            if (err.response?.status === 422) {
-                setErrors(err.response.data.errors || {});
+
+            const result = await response.json();
+
+            if (response.ok) {
+                setUser(result.user);
+                toast.success(result.message || "Profile updated successfully ✅");
             } else {
-                toast.error("Update failed!");
+                toast.error(result.message || "Update failed ❌");
+
             }
+        } catch (error) {
+            console.error("Profile update error:", error);
+            toast.error("Network error. Please try again.");
         } finally {
-            setLoading(false);
+            setProcessing(false);
         }
     };
 
     return (
         <div className="min-h-screen bg-gray-50">
             <Header />
+
             <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-12 gap-6">
-                    <ProfileSidebar user={user} />
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    {/* Sidebar */}
+                    <div className="col-span-1 md:col-span-3 order-1 md:order-1">
+                        <ProfileSidebar user={user} />
+                    </div>
 
-                    <section className="col-span-9 bg-white shadow rounded p-6">
-                        <h1 className="text-2xl font-semibold mb-4">Public profile</h1>
+                    {/* Form */}
+                    <section className="col-span-1 md:col-span-9 order-2 md:order-2 bg-white shadow rounded p-6">
+                        <h1 className="text-2xl font-semibold mb-4">
+                            Public Profile
+                        </h1>
 
-                        <form className="space-y-6" onSubmit={handleSubmit} encType="multipart/form-data">
-                            {/* Name */}
+                        <form
+                            onSubmit={handleSubmit}
+                            className="space-y-6"
+                            encType="multipart/form-data"
+                        >
                             <div>
                                 <label className="block font-medium mb-2">Full Name</label>
                                 <input
                                     type="text"
                                     name="name"
                                     value={formData.name}
-                                    onChange={handleChange}
-                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 ${
-                                        errors.name
-                                            ? "border-red-500 focus:ring-red-500"
-                                            : "border-gray-300 focus:ring-purple-500"
-                                    }`}
+                                    onChange={handleInputChange}
+                                    className="w-full border rounded px-3 py-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
                                 />
-                                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name[0]}</p>}
                             </div>
 
-                            {/* Email */}
                             <div>
                                 <label className="block font-medium mb-2">Email</label>
                                 <input
                                     type="email"
                                     name="email"
                                     value={formData.email}
-                                    onChange={handleChange}
-                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 ${
-                                        errors.email
-                                            ? "border-red-500 focus:ring-red-500"
-                                            : "border-gray-300 focus:ring-purple-500"
-                                    }`}
+
                                     readOnly
+                                    className="w-full border rounded px-3 py-2 bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed"
+
                                 />
-                                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email[0]}</p>}
                             </div>
 
-                            {/* Gender */}
                             <div>
                                 <label className="block font-medium mb-2">Gender</label>
                                 <select
                                     name="gender"
                                     value={formData.gender}
-                                    onChange={handleChange}
-                                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    onChange={handleInputChange}
+                                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 border-gray-300 focus:ring-purple-500 cursor-pointer"
                                 >
                                     <option value="">Select gender</option>
                                     <option value="male">Male</option>
@@ -141,67 +168,58 @@ export default function PublicProfile() {
                                 </select>
                             </div>
 
-                            {/* Avatar */}
                             <div>
                                 <label className="block font-medium mb-2">Avatar</label>
                                 <input
                                     type="file"
                                     name="avatar"
                                     accept="image/*"
-                                    onChange={handleChange}
-                                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    onChange={handleInputChange}
+                                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 border-gray-300 focus:ring-purple-500 cursor-pointer"
                                 />
-                                {errors.avatar && <p className="text-red-500 text-sm mt-1">{errors.avatar[0]}</p>}
                             </div>
 
-                            {/* Profile */}
                             <div>
                                 <label className="block font-medium mb-2">Biography</label>
                                 <textarea
                                     name="profile"
                                     value={formData.profile}
-                                    onChange={handleChange}
+                                    onChange={handleInputChange}
                                     rows="3"
-                                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                    placeholder="Tell us a bit about yourself..."
+                                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 border-gray-300 focus:ring-purple-500"
                                 ></textarea>
                             </div>
 
-                            {/* Address */}
                             <div>
                                 <label className="block font-medium mb-2">Address</label>
                                 <input
                                     type="text"
                                     name="address"
                                     value={formData.address}
-                                    onChange={handleChange}
-                                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    onChange={handleInputChange}
+                                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 border-gray-300 focus:ring-purple-500"
                                 />
                             </div>
 
-                            {/* Phone */}
                             <div>
                                 <label className="block font-medium mb-2">Phone</label>
                                 <input
                                     type="text"
                                     name="phone"
                                     value={formData.phone}
-                                    onChange={handleChange}
-                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 ${
-                                        errors.phone
-                                            ? "border-red-500 focus:ring-red-500"
-                                            : "border-gray-300 focus:ring-purple-500"
-                                    }`}
+                                    onChange={handleInputChange}
+                                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 border-gray-300 focus:ring-purple-500"
                                 />
-                                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone[0]}</p>}
                             </div>
 
                             <button
                                 type="submit"
-                                disabled={loading}
-                                className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 disabled:opacity-50 cursor-pointer"
+
+                                disabled={processing}
+                                className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 disabled:opacity-50"
+
                             >
-                                {loading ? "Saving..." : "Save"}
+                                {processing ? "Saving..." : "Save"}
                             </button>
                         </form>
                     </section>
