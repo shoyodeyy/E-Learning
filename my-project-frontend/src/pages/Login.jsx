@@ -17,7 +17,7 @@ export default function Login() {
     });
 
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const {login} = useAuth();
 
     const handleEmailSubmit = (e) => {
         e.preventDefault();
@@ -85,8 +85,6 @@ export default function Login() {
                             toast.error(error);
                         });
                     });
-                } else if (result.message) {
-                    toast.error(result.message);
                 } else {
                     toast.error('Login failed. Please try again.');
                 }
@@ -135,7 +133,7 @@ export default function Login() {
                 const userRole = result.user?.role || 'student';
                 navigateByRole(userRole);
             } else {
-                toast.error(result.message || 'Google login failed');
+                toast.error('Google login failed');
             }
         } catch (error) {
             console.error('Error during Google login:', error);

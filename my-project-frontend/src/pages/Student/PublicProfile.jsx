@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import {toast} from "react-toastify";
+
 import Header from "../../components/Header.jsx";
 import ProfileSidebar from "../../components/ProfileSidebar.jsx";
 import api from "../../api/axios.js";
@@ -25,7 +27,7 @@ export default function PublicProfile() {
                     avatar: null,
                 });
             } catch (err) {
-                alert("Failed to load user profile. Please login.");
+                toast.error("Failed to load user profile. Please login.");
             }
         };
         fetchUser();
@@ -64,12 +66,13 @@ export default function PublicProfile() {
             });
 
             setUser(res.data.user); // cập nhật state user
-            alert("Profile updated successfully!");
+            toast.success("Profile updated successfully!");
+            window.scrollTo({ top: 0, behavior: "smooth" })
         } catch (err) {
             if (err.response?.status === 422) {
                 setErrors(err.response.data.errors || {});
             } else {
-                alert(err.response?.data?.message || "Update failed!");
+                toast.error("Update failed!");
             }
         } finally {
             setLoading(false);
@@ -117,6 +120,7 @@ export default function PublicProfile() {
                                             ? "border-red-500 focus:ring-red-500"
                                             : "border-gray-300 focus:ring-purple-500"
                                     }`}
+                                    readOnly
                                 />
                                 {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email[0]}</p>}
                             </div>
@@ -195,7 +199,7 @@ export default function PublicProfile() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 disabled:opacity-50"
+                                className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 disabled:opacity-50 cursor-pointer"
                             >
                                 {loading ? "Saving..." : "Save"}
                             </button>

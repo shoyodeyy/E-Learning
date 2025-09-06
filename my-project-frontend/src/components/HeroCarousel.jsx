@@ -76,7 +76,7 @@ export default function HeroCarousel() {
                                 {slide.title}
                             </h1>
                             <p className="text-gray-700 text-lg mb-5">{slide.subtitle}</p>
-                            <button className="px-5 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition">
+                            <button className="cursor-pointer px-5 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition">
                                 {slide.button}
                             </button>
                         </div>
@@ -87,13 +87,13 @@ export default function HeroCarousel() {
             {/* Prev & Next buttons */}
             <button
                 onClick={prevSlide}
-                className="absolute top-1/2 left-4 -translate-y-1/2 z-20 bg-white shadow-md rounded-full p-2 hover:bg-gray-100"
+                className="cursor-pointer absolute top-1/2 left-4 -translate-y-1/2 z-20 bg-white shadow-md rounded-full p-2 hover:bg-gray-100"
             >
                 <ChevronLeft size={28} />
             </button>
             <button
                 onClick={nextSlide}
-                className="absolute top-1/2 right-4 -translate-y-1/2 z-20 bg-white shadow-md rounded-full p-2 hover:bg-gray-100"
+                className="cursor-pointer absolute top-1/2 right-4 -translate-y-1/2 z-20 bg-white shadow-md rounded-full p-2 hover:bg-gray-100"
             >
                 <ChevronRight size={28} />
             </button>

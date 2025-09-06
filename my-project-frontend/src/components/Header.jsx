@@ -1,8 +1,9 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
-import { FaRegBell, FaRegHeart, FaSearch, FaShoppingCart, FaBars } from "react-icons/fa";
+import {FaRegBell, FaRegHeart, FaSearch, FaShoppingCart, FaBars, FaTimes} from "react-icons/fa";
 import { LogOut, User } from "lucide-react";
+
+import { useAuth } from "../context/AuthContext.jsx";
 import Avatar from "./Avatar.jsx";
 
 export default function Header() {
@@ -23,6 +24,7 @@ export default function Header() {
     };
 
     const handleLogout = () => {
+        if (!confirm("Are you sure you want to logout?")) return
         logout();
         navigate("/login");
     };
@@ -47,7 +49,7 @@ export default function Header() {
                             onMouseEnter={() => handleMouseEnter("explore")}
                             onMouseLeave={handleMouseLeave}
                         >
-                            <button className="px-3 py-2 text-sm font-medium hover:text-purple-600">
+                            <button className="px-3 py-2 text-sm font-medium hover:text-purple-600 cursor-pointer hover:transition-colors">
                                 Explore
                             </button>
                             {openMenu === "explore" && (
@@ -75,13 +77,13 @@ export default function Header() {
 
                     {/* Actions + Avatar */}
                     <div className="hidden md:flex items-center space-x-4 ml-4">
-                        <button className="p-2 rounded-md hover:bg-purple-100">
+                        <button className="p-2 rounded-md hover:bg-purple-100 cursor-pointer hover:transition-colors">
                             <FaRegHeart size={18} className="text-gray-600" />
                         </button>
-                        <button className="p-2 rounded-md hover:bg-purple-100">
+                        <button className="p-2 rounded-md hover:bg-purple-100 cursor-pointer hover:transition-colors">
                             <FaShoppingCart size={18} className="text-gray-600" />
                         </button>
-                        <button className="p-2 rounded-md hover:bg-purple-100">
+                        <button className="p-2 rounded-md hover:bg-purple-100 cursor-pointer hover:transition-colors">
                             <FaRegBell size={18} className="text-gray-600" />
                         </button>
 
@@ -97,8 +99,11 @@ export default function Header() {
 
                     {/* Mobile Hamburger */}
                     <div className="md:hidden flex items-center">
-                        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2">
-                            <FaBars size={20} />
+                        <button
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                            className="p-2 cursor-pointer"
+                        >
+                            {mobileMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
                         </button>
                     </div>
                 </div>
@@ -110,6 +115,8 @@ export default function Header() {
                     <ul className="flex flex-col px-4 py-2 space-y-2">
                         <li className="p-2 hover:bg-purple-100 cursor-pointer">Favorites</li>
                         <li className="p-2 hover:bg-purple-100 cursor-pointer">Cart</li>
+                        <li>
+                            <button onClick={() => navigate("/profile")} className="p-2 hover:bg-purple-100 cursor-pointer w-full text-left">Profile</button></li>
                         <li className="p-2 hover:bg-purple-100 cursor-pointer" onClick={handleLogout}>Logout</li>
                     </ul>
                 </div>
@@ -137,7 +144,7 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
     };
 
     const goToProfile = () => {
-        navigate("/PublicProfile");
+        navigate("/profile");
         setOpen(false);
     };
 
@@ -152,7 +159,7 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
                 <Avatar name={name} avatarUrl={avatarUrl} />
             </div>
             {open && (
-                <div className="absolute right-0 mt-2 w-56 rounded-lg bg-white border border-gray-200 shadow-lg z-50">
+                <div className="absolute right-0 mt-2 w-65 rounded-lg bg-white border border-gray-200 shadow-lg z-50">
                     <div className="px-3 py-3 border-b border-gray-200 flex items-center gap-3">
                         <Avatar name={name} avatarUrl={avatarUrl} size="2rem"/>
                         <div>
@@ -162,14 +169,14 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
                     </div>
                     <ul className="text-sm text-gray-700">
                         <li>
-                            <button onClick={goToProfile} className="flex items-center gap-2 w-full px-3 py-2 hover:bg-purple-100">
+                            <button onClick={goToProfile} className="flex items-center gap-2 w-full px-3 py-2 hover:bg-purple-100 cursor-pointer hover:transition-colors">
                                 <User size={16} /> Profile
                             </button>
                         </li>
                         <li>
                             <button
                                 onClick={onLogout}
-                                className="flex items-center gap-2 w-full px-3 py-2 hover:bg-purple-100 text-red-600"
+                                className="flex items-center gap-2 w-full px-3 py-2 hover:bg-purple-100 cursor-pointer hover:transition-colors text-red-600"
                             >
                                 <LogOut size={16} /> Logout
                             </button>

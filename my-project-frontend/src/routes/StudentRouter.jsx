@@ -23,7 +23,7 @@ export default function StudentRouter() {
                 <Route path="/feedback" element={<Feedback />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/saved-videos" element={<MyLearning />} />
-                <Route path="/PublicProfile" element={<PublicProfile />} />
+                <Route path="/profile" element={<PublicProfile />} />
                 <Route path="/profile/photo" element={<AvatarUploader/>} />
                 <Route path="/lecture/:lectureId" element={<LecturePage />} />
             </Route>

@@ -1,16 +1,16 @@
-import { useEffect, useState, useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import ReactDOM from "react-dom";
+import { useEffect, useState, useRef } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import ReactDOM from "react-dom"
 
 export default function Courses() {
-    const [courses, setCourses] = useState([]);
-    const [hoveredCourse, setHoveredCourse] = useState(null);
-    const [popupPos, setPopupPos] = useState({ top: 0, left: 0 });
-    const cardRefs = useRef({});
-    const scrollRef = useRef(null);
-    const navigate = useNavigate();
-
+    const [courses, setCourses] = useState([])
+    const [hoveredCourse, setHoveredCourse] = useState(null)
+    const [popupPos, setPopupPos] = useState({ top: 0, left: 0 })
+    const cardRefs = useRef({})
+    const scrollRef = useRef(null)
+    const hideTimeoutRef = useRef(null)
+    const navigate = useNavigate()
 
     useEffect(() => {
         setCourses([
@@ -22,13 +22,8 @@ export default function Courses() {
                 reviews: 15230,
                 price: 199000,
                 image: "https://img-c.udemycdn.com/course/240x135/2195280_49b2_2.jpg",
-                description:
-                    "Learn React from scratch. Build modern UI with components and hooks.",
-                highlights: [
-                    "Understand JSX and Components",
-                    "Use Hooks effectively",
-                    "Build dynamic React apps",
-                ],
+                description: "Learn React from scratch. Build modern UI with components and hooks.",
+                highlights: ["Understand JSX and Components", "Use Hooks effectively", "Build dynamic React apps"],
                 updated: "October 2023",
                 level: "Beginner",
                 duration: "7.5 hours",
@@ -41,13 +36,8 @@ export default function Courses() {
                 reviews: 9830,
                 price: 149000,
                 image: "https://img-c.udemycdn.com/course/240x135/922484_52a1_8.jpg",
-                description:
-                    "Master backend development with Node.js and build scalable apps.",
-                highlights: [
-                    "Event-driven architecture",
-                    "Build REST APIs",
-                    "Integrate with databases",
-                ],
+                description: "Master backend development with Node.js and build scalable apps.",
+                highlights: ["Event-driven architecture", "Build REST APIs", "Integrate with databases"],
                 updated: "June 2023",
                 level: "Intermediate",
                 duration: "10 hours",
@@ -60,13 +50,8 @@ export default function Courses() {
                 reviews: 20540,
                 price: 219000,
                 image: "https://img-c.udemycdn.com/course/240x135/364426_2991_6.jpg",
-                description:
-                    "Build fullstack applications combining Django REST and React.",
-                highlights: [
-                    "Django REST Framework",
-                    "React frontend integration",
-                    "Authentication and deployment",
-                ],
+                description: "Build fullstack applications combining Django REST and React.",
+                highlights: ["Django REST Framework", "React frontend integration", "Authentication and deployment"],
                 updated: "May 2023",
                 level: "Advanced",
                 duration: "15 hours",
@@ -78,9 +63,8 @@ export default function Courses() {
                 rating: 4.9,
                 reviews: 7520,
                 price: 249000,
-                image: "https://img-c.udemycdn.com/course/240x135/2195288_f8f1_3.jpg",
-                description:
-                    "Learn advanced React patterns and state management techniques.",
+                image: "https://img-c.udemycdn.com/course/240x135/1565838_e54e_16.jpg",
+                description: "Learn advanced React patterns and state management techniques.",
                 highlights: [
                     "Render props & Higher-order components",
                     "Context API & Redux Toolkit",
@@ -98,13 +82,8 @@ export default function Courses() {
                 reviews: 18300,
                 price: 99000,
                 image: "https://img-c.udemycdn.com/course/240x135/851712_fc61_6.jpg",
-                description:
-                    "Master the fundamentals of JavaScript for web development.",
-                highlights: [
-                    "Variables, functions, and loops",
-                    "ES6+ features",
-                    "DOM manipulation",
-                ],
+                description: "Master the fundamentals of JavaScript for web development.",
+                highlights: ["Variables, functions, and loops", "ES6+ features", "DOM manipulation"],
                 updated: "March 2023",
                 level: "Beginner",
                 duration: "6 hours",
@@ -117,13 +96,8 @@ export default function Courses() {
                 reviews: 22000,
                 price: 189000,
                 image: "https://img-c.udemycdn.com/course/240x135/903744_8eb2.jpg",
-                description:
-                    "Analyze data with Python, NumPy, Pandas, and Matplotlib.",
-                highlights: [
-                    "Data wrangling with Pandas",
-                    "Visualization with Matplotlib",
-                    "Intro to Machine Learning",
-                ],
+                description: "Analyze data with Python, NumPy, Pandas, and Matplotlib.",
+                highlights: ["Data wrangling with Pandas", "Visualization with Matplotlib", "Intro to Machine Learning"],
                 updated: "April 2023",
                 level: "Intermediate",
                 duration: "14 hours",
@@ -136,13 +110,8 @@ export default function Courses() {
                 reviews: 30120,
                 price: 299000,
                 image: "https://img-c.udemycdn.com/course/240x135/950390_270f_3.jpg",
-                description:
-                    "Hands-on machine learning with Scikit-Learn, TensorFlow, and Keras.",
-                highlights: [
-                    "Supervised & Unsupervised learning",
-                    "Neural networks",
-                    "Real projects",
-                ],
+                description: "Hands-on machine learning with Scikit-Learn, TensorFlow, and Keras.",
+                highlights: ["Supervised & Unsupervised learning", "Neural networks", "Real projects"],
                 updated: "Feb 2023",
                 level: "Advanced",
                 duration: "40 hours",
@@ -155,8 +124,7 @@ export default function Courses() {
                 reviews: 12800,
                 price: 129000,
                 image: "https://img-c.udemycdn.com/course/240x135/762616_7693_3.jpg",
-                description:
-                    "Learn SQL for data analysis and database management.",
+                description: "Learn SQL for data analysis and database management.",
                 highlights: ["Queries & Joins", "Database design", "Practical exercises"],
                 updated: "Jan 2023",
                 level: "Beginner",
@@ -170,13 +138,8 @@ export default function Courses() {
                 reviews: 9100,
                 price: 259000,
                 image: "https://img-c.udemycdn.com/course/240x135/1793828_7999.jpg",
-                description:
-                    "Learn containerization and orchestration with Docker & Kubernetes.",
-                highlights: [
-                    "Docker essentials",
-                    "Kubernetes deployment",
-                    "CI/CD pipelines",
-                ],
+                description: "Learn containerization and orchestration with Docker & Kubernetes.",
+                highlights: ["Docker essentials", "Kubernetes deployment", "CI/CD pipelines"],
                 updated: "Dec 2023",
                 level: "Intermediate",
                 duration: "20 hours",
@@ -189,119 +152,144 @@ export default function Courses() {
                 reviews: 7800,
                 price: 199000,
                 image: "https://img-c.udemycdn.com/course/240x135/1565838_e54e_16.jpg",
-                description:
-                    "Learn UI/UX principles, wireframing, and prototyping.",
+                description: "Learn UI/UX principles, wireframing, and prototyping.",
                 highlights: ["Figma design", "User research", "Design systems"],
                 updated: "Nov 2023",
                 level: "Beginner",
                 duration: "18 hours",
             },
-        ]);
-    }, []);
+        ])
+    }, [])
 
     const handleClick = (id) => {
-        navigate(`/courses/${id}`);
-    };
+        navigate(`/courses/${id}`)
+    }
 
     const renderStars = (rating) => {
         return Array.from({ length: 5 }, (_, i) => (
-            <span
-                key={i}
-                className={`${
-                    i < Math.floor(rating) ? "text-yellow-500" : "text-gray-300"
-                }`}
-            >
+            <span key={i} className={`${i < Math.floor(rating) ? "text-yellow-500" : "text-gray-300"}`}>
         ★
       </span>
-        ));
-    };
+        ))
+    }
 
     const scroll = (direction) => {
         if (scrollRef.current) {
-            const { scrollLeft } = scrollRef.current;
-            const cardWidth = 216; // 200px card + 16px gap
-            const visibleCards = 5;
+            const { scrollLeft } = scrollRef.current
+            const cardWidth = window.innerWidth < 640 ? 180 : 216 // Responsive card width
+            const visibleCards = window.innerWidth < 640 ? 2 : window.innerWidth < 1024 ? 3 : 5
             scrollRef.current.scrollTo({
-                left:
-                    direction === "left"
-                        ? scrollLeft - cardWidth * visibleCards
-                        : scrollLeft + cardWidth * visibleCards,
+                left: direction === "left" ? scrollLeft - cardWidth * visibleCards : scrollLeft + cardWidth * visibleCards,
                 behavior: "smooth",
-            });
+            })
         }
-    };
+    }
 
     const handleMouseEnter = (courseId) => {
-        const card = cardRefs.current[courseId];
+        if (window.innerWidth < 768) return
+
+        // Clear any pending hide timeout
+        if (hideTimeoutRef.current) {
+            clearTimeout(hideTimeoutRef.current)
+            hideTimeoutRef.current = null
+        }
+
+        const card = cardRefs.current[courseId]
         if (card) {
-            const rect = card.getBoundingClientRect();
+            const rect = card.getBoundingClientRect()
+            const popupWidth = 288 // w-72 = 288px
+            const viewportWidth = window.innerWidth
+            const spaceOnRight = viewportWidth - rect.right
+            const spaceOnLeft = rect.left
+
+            // If there's not enough space on the right, show on the left
+            const showOnLeft = spaceOnRight < popupWidth + 12 && spaceOnLeft > popupWidth + 12
+
             setPopupPos({
                 top: rect.top - 12,
-                left: rect.right + 12,
-            });
+                left: showOnLeft ? rect.left - popupWidth - 12 : rect.right + 12,
+            })
         }
-        setHoveredCourse(courseId);
-    };
+        setHoveredCourse(courseId)
+    }
 
     const handleMouseLeave = () => {
-        setHoveredCourse(null);
-    };
+        // Add a small delay before hiding to allow mouse to move to popup
+        hideTimeoutRef.current = setTimeout(() => {
+            setHoveredCourse(null)
+        }, 100)
+    }
+
+    const handlePopupMouseEnter = () => {
+        // Clear hide timeout when mouse enters popup
+        if (hideTimeoutRef.current) {
+            clearTimeout(hideTimeoutRef.current)
+            hideTimeoutRef.current = null
+        }
+    }
+
+    const handlePopupMouseLeave = () => {
+        // Hide popup immediately when mouse leaves popup area
+        setHoveredCourse(null)
+    }
+
+    useEffect(() => {
+        return () => {
+            if (hideTimeoutRef.current) {
+                clearTimeout(hideTimeoutRef.current)
+            }
+        }
+    }, [])
 
     return (
-        <div className="px-6 py-8 relative">
-            <h1 className="text-2xl font-bold mb-6">Top Courses</h1>
+        <div className="px-4 sm:px-6 py-8 relative">
+            <h1 className="text-xl sm:text-2xl font-bold mb-6">Top Courses</h1>
 
             <div className="relative">
-                {/* Nút trái */}
                 <button
                     onClick={() => scroll("left")}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white shadow-md rounded-full p-2 hover:bg-gray-100"
+                    className="cursor-pointer hidden sm:block absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white shadow-md rounded-full p-2 hover:bg-gray-100"
                 >
-                    <ChevronLeft className="w-6 h-6" />
+                    <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
                 </button>
 
-                {/* Thanh cuộn ngang */}
-                <div ref={scrollRef} className="overflow-hidden w-[1080px] mx-auto">
-                    <div className="flex gap-4">
+                <div ref={scrollRef} className="overflow-x-auto scrollbar-hide">
+                    <div className="flex gap-3 sm:gap-4 pb-4">
                         {courses.map((course) => (
                             <div
                                 key={course.id}
                                 ref={(el) => (cardRefs.current[course.id] = el)}
-                                className="min-w-[200px] max-w-[200px] bg-white hover:shadow-md transition cursor-pointer"
+                                className="min-w-[160px] max-w-[160px] sm:min-w-[200px] sm:max-w-[200px] bg-white hover:shadow-md transition cursor-pointer rounded-lg overflow-hidden"
                                 onMouseEnter={() => handleMouseEnter(course.id)}
                                 onMouseLeave={handleMouseLeave}
                                 onClick={() => handleClick(course.id)}
                             >
                                 <img
-                                    src={course.image}
+                                    src={course.image || "/placeholder.svg"}
                                     alt={course.title}
-                                    className="w-full h-[120px] object-cover"
+                                    className="w-full h-[90px] sm:h-[120px] object-cover"
                                 />
 
-                                <div className="mt-2 mb-2">
-                                    <h2 className="font-semibold text-[13px] leading-snug line-clamp-2">
+                                <div className="p-2 sm:p-3">
+                                    <h2 className="font-semibold text-xs sm:text-[13px] leading-snug line-clamp-2 text-balance">
                                         {course.title}
                                     </h2>
-                                    <p className="text-gray-600 text-[12px] mt-1">
-                                        {course.instructor}
-                                    </p>
+                                    <p className="text-gray-600 text-[10px] sm:text-[12px] mt-1">{course.instructor}</p>
 
-                                    <div className="flex items-center text-[12px] mt-1">
+                                    <div className="flex items-center text-[10px] sm:text-[12px] mt-1">
                                         <span className="font-semibold mr-1">{course.rating}</span>
-                                        <div className="flex">{renderStars(course.rating)}</div>
-                                        <span className="text-gray-500 ml-2 text-[11px]">
+                                        <div className="flex text-xs sm:text-sm">{renderStars(course.rating)}</div>
+                                        <span className="text-gray-500 ml-1 sm:ml-2 text-[9px] sm:text-[11px] hidden sm:inline">
                       ({course.reviews.toLocaleString()})
                     </span>
                                     </div>
 
-                                    <p className="text-gray-500 text-[11px] mt-1">
+                                    <p className="text-gray-500 text-[9px] sm:text-[11px] mt-1 hidden sm:block">
                                         {course.duration} • {course.level}
                                     </p>
 
                                     <div className="mt-2">
-                    <span className="font-bold text-[14px] mr-2">
-                      ₫{course.price.toLocaleString()}
-                    </span>
+                                        <span className="font-bold text-xs sm:text-[14px]">₫{course.price.toLocaleString()}</span>
                                     </div>
                                 </div>
                             </div>
@@ -309,25 +297,24 @@ export default function Courses() {
                     </div>
                 </div>
 
-                {/* Nút phải */}
                 <button
                     onClick={() => scroll("right")}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white shadow-md rounded-full p-2 hover:bg-gray-100"
+                    className="cursor-pointer hidden sm:block absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white shadow-md rounded-full p-2 hover:bg-gray-100"
                 >
-                    <ChevronRight className="w-6 h-6" />
+                    <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
                 </button>
             </div>
 
-            {/* Popup Portal */}
             {hoveredCourse &&
+                window.innerWidth >= 768 &&
                 ReactDOM.createPortal(
                     <div
                         className="fixed w-72 bg-white border rounded-lg shadow-lg p-4 z-[9999]"
                         style={{ top: popupPos.top, left: popupPos.left }}
+                        onMouseEnter={handlePopupMouseEnter}
+                        onMouseLeave={handlePopupMouseLeave}
                     >
-                        <h3 className="font-bold text-base">
-                            {courses.find((c) => c.id === hoveredCourse).title}
-                        </h3>
+                        <h3 className="font-bold text-base">{courses.find((c) => c.id === hoveredCourse).title}</h3>
                         <p className="text-xs text-gray-500 mt-1">
                             Updated {courses.find((c) => c.id === hoveredCourse).updated} •{" "}
                             {courses.find((c) => c.id === hoveredCourse).level} •{" "}
@@ -345,12 +332,12 @@ export default function Courses() {
                                     </li>
                                 ))}
                         </ul>
-                        <button className="w-full mt-4 bg-purple-600 text-white py-2 rounded-md font-semibold hover:bg-purple-700">
+                        <button className="cursor-pointer w-full mt-4 bg-purple-600 text-white py-2 rounded-md font-semibold hover:bg-purple-700">
                             Add to cart
                         </button>
                     </div>,
-                    document.body
+                    document.body,
                 )}
         </div>
-    );
+    )
 }

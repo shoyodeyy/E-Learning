@@ -5,11 +5,9 @@ export default function ProfileSidebar({ user }) {
     const location = useLocation();
 
     const menuItems = [
-        { name: "Public profile", path: "/profile/public" },
-        { name: "Account security", path: "/profile/security" },
+        { name: "Public profile", path: "/profile" },
         { name: "Payment methods", path: "/profile/payment" },
         { name: "Notifications", path: "/profile/notifications" },
-        { name: "Photo", path: "/profile/photo" },
     ];
 
     return (
