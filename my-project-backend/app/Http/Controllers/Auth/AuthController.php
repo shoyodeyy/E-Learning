@@ -95,6 +95,7 @@ class AuthController extends Controller
             'token' => $token,
             'email_verified' => $user->hasVerifiedEmail(),
         ], 200);
+
     }
 
     public function logout(Request $request): JsonResponse

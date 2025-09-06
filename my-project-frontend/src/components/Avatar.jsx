@@ -1,6 +1,6 @@
 // Avatar.jsx
 export default function Avatar({ name, avatarUrl, size = 40 }) {
-    // ✅ Nếu có avatarUrl thì ưu tiên hiển thị ảnh
+    // ✅ Nếu có avatarUrl thì ưu tiên hiển thị ảnh từ backend
     if (avatarUrl) {
         return (
             <img
@@ -12,7 +12,7 @@ export default function Avatar({ name, avatarUrl, size = 40 }) {
         );
     }
 
-    // ✅ Nếu không có avatar thì tự tính initials từ name
+    // ❌ Nếu không có avatar thì hiển thị code cũ (initials)
     const initials = name
         ? name
             .trim()
@@ -24,7 +24,7 @@ export default function Avatar({ name, avatarUrl, size = 40 }) {
 
     return (
         <div
-            className="flex items-center justify-center rounded-full  bg-black text-white font-semibold"
+            className="flex items-center justify-center rounded-full bg-black text-white font-semibold"
             style={{ width: size, height: size }}
         >
             {initials}

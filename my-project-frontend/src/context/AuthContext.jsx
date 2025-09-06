@@ -24,6 +24,7 @@ export const AuthProvider = ({ children }) => {
         if (storedToken && storedUser) {
             setToken(storedToken);
             setUser(JSON.parse(storedUser));
+            refreshUser();
         }
         setLoading(false);
     }, []);

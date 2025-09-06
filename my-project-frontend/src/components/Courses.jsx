@@ -1,12 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import ReactDOM from "react-dom";
 
 export default function Courses() {
     const [courses, setCourses] = useState([]);
     const [hoveredCourse, setHoveredCourse] = useState(null);
-    const [setHoverPosition] = useState("top-0");
+    const [popupPos, setPopupPos] = useState({ top: 0, left: 0 });
     const cardRefs = useRef({});
     const scrollRef = useRef(null);
     const navigate = useNavigate();
@@ -20,9 +20,8 @@ export default function Courses() {
                 instructor: "John Doe",
                 rating: 4.7,
                 reviews: 15230,
-                price: 19.99,
-                image:
-                    "https://img-c.udemycdn.com/course/240x135/2195280_49b2_2.jpg",
+                price: 199000,
+                image: "https://img-c.udemycdn.com/course/240x135/2195280_49b2_2.jpg",
                 description:
                     "Learn React from scratch. Build modern UI with components and hooks.",
                 highlights: [
@@ -40,9 +39,8 @@ export default function Courses() {
                 instructor: "Jane Smith",
                 rating: 4.5,
                 reviews: 9830,
-                price: 14.99,
-                image:
-                    "https://img-c.udemycdn.com/course/240x135/922484_52a1_8.jpg",
+                price: 149000,
+                image: "https://img-c.udemycdn.com/course/240x135/922484_52a1_8.jpg",
                 description:
                     "Master backend development with Node.js and build scalable apps.",
                 highlights: [
@@ -60,9 +58,8 @@ export default function Courses() {
                 instructor: "Alex Johnson",
                 rating: 4.8,
                 reviews: 20540,
-                price: 21.99,
-                image:
-                    "https://img-c.udemycdn.com/course/240x135/364426_2991_6.jpg",
+                price: 219000,
+                image: "https://img-c.udemycdn.com/course/240x135/364426_2991_6.jpg",
                 description:
                     "Build fullstack applications combining Django REST and React.",
                 highlights: [
@@ -73,115 +70,181 @@ export default function Courses() {
                 updated: "May 2023",
                 level: "Advanced",
                 duration: "15 hours",
-            },{
-                id: 4,
-                title: "React for Beginners",
-                instructor: "John Doe",
-                rating: 4.7,
-                reviews: 15230,
-                price: 19.99,
-                image:
-                    "https://img-c.udemycdn.com/course/240x135/2195280_49b2_2.jpg",
-                description:
-                    "Learn React from scratch. Build modern UI with components and hooks.",
-                highlights: [
-                    "Understand JSX and Components",
-                    "Use Hooks effectively",
-                    "Build dynamic React apps",
-                ],
-                updated: "October 2023",
-                level: "Beginner",
-                duration: "7.5 hours",
             },
             {
-                id: 2,
-                title: "Mastering Node.js",
-                instructor: "Jane Smith",
-                rating: 4.5,
-                reviews: 9830,
-                price: 14.99,
-                image:
-                    "https://img-c.udemycdn.com/course/240x135/922484_52a1_8.jpg",
+                id: 4,
+                title: "Advanced React Patterns",
+                instructor: "Sarah Lee",
+                rating: 4.9,
+                reviews: 7520,
+                price: 249000,
+                image: "https://img-c.udemycdn.com/course/240x135/2195288_f8f1_3.jpg",
                 description:
-                    "Master backend development with Node.js and build scalable apps.",
+                    "Learn advanced React patterns and state management techniques.",
                 highlights: [
-                    "Event-driven architecture",
-                    "Build REST APIs",
-                    "Integrate with databases",
+                    "Render props & Higher-order components",
+                    "Context API & Redux Toolkit",
+                    "Performance optimization",
                 ],
-                updated: "June 2023",
-                level: "Intermediate",
-                duration: "10 hours",
+                updated: "July 2023",
+                level: "Advanced",
+                duration: "12 hours",
+            },
+            {
+                id: 5,
+                title: "JavaScript Essentials",
+                instructor: "Emily Davis",
+                rating: 4.6,
+                reviews: 18300,
+                price: 99000,
+                image: "https://img-c.udemycdn.com/course/240x135/851712_fc61_6.jpg",
+                description:
+                    "Master the fundamentals of JavaScript for web development.",
+                highlights: [
+                    "Variables, functions, and loops",
+                    "ES6+ features",
+                    "DOM manipulation",
+                ],
+                updated: "March 2023",
+                level: "Beginner",
+                duration: "6 hours",
             },
             {
                 id: 6,
-                title: "Fullstack with Django & React",
-                instructor: "Alex Johnson",
-                rating: 4.8,
-                reviews: 20540,
-                price: 21.99,
-                image:
-                    "https://img-c.udemycdn.com/course/240x135/364426_2991_6.jpg",
+                title: "Python for Data Science",
+                instructor: "Michael Brown",
+                rating: 4.7,
+                reviews: 22000,
+                price: 189000,
+                image: "https://img-c.udemycdn.com/course/240x135/903744_8eb2.jpg",
                 description:
-                    "Build fullstack applications combining Django REST and React.",
+                    "Analyze data with Python, NumPy, Pandas, and Matplotlib.",
                 highlights: [
-                    "Django REST Framework",
-                    "React frontend integration",
-                    "Authentication and deployment",
+                    "Data wrangling with Pandas",
+                    "Visualization with Matplotlib",
+                    "Intro to Machine Learning",
                 ],
-                updated: "May 2023",
-                level: "Advanced",
-                duration: "15 hours",
+                updated: "April 2023",
+                level: "Intermediate",
+                duration: "14 hours",
             },
-            // 👉 thêm các course khác như bạn đã có
+            {
+                id: 7,
+                title: "Machine Learning A-Z",
+                instructor: "Andrew Ng",
+                rating: 4.8,
+                reviews: 30120,
+                price: 299000,
+                image: "https://img-c.udemycdn.com/course/240x135/950390_270f_3.jpg",
+                description:
+                    "Hands-on machine learning with Scikit-Learn, TensorFlow, and Keras.",
+                highlights: [
+                    "Supervised & Unsupervised learning",
+                    "Neural networks",
+                    "Real projects",
+                ],
+                updated: "Feb 2023",
+                level: "Advanced",
+                duration: "40 hours",
+            },
+            {
+                id: 8,
+                title: "SQL Bootcamp",
+                instructor: "Mark Wilson",
+                rating: 4.6,
+                reviews: 12800,
+                price: 129000,
+                image: "https://img-c.udemycdn.com/course/240x135/762616_7693_3.jpg",
+                description:
+                    "Learn SQL for data analysis and database management.",
+                highlights: ["Queries & Joins", "Database design", "Practical exercises"],
+                updated: "Jan 2023",
+                level: "Beginner",
+                duration: "9 hours",
+            },
+            {
+                id: 9,
+                title: "DevOps with Docker & Kubernetes",
+                instructor: "Laura Green",
+                rating: 4.7,
+                reviews: 9100,
+                price: 259000,
+                image: "https://img-c.udemycdn.com/course/240x135/1793828_7999.jpg",
+                description:
+                    "Learn containerization and orchestration with Docker & Kubernetes.",
+                highlights: [
+                    "Docker essentials",
+                    "Kubernetes deployment",
+                    "CI/CD pipelines",
+                ],
+                updated: "Dec 2023",
+                level: "Intermediate",
+                duration: "20 hours",
+            },
+            {
+                id: 10,
+                title: "UI/UX Design Masterclass",
+                instructor: "Sophia White",
+                rating: 4.5,
+                reviews: 7800,
+                price: 199000,
+                image: "https://img-c.udemycdn.com/course/240x135/1565838_e54e_16.jpg",
+                description:
+                    "Learn UI/UX principles, wireframing, and prototyping.",
+                highlights: ["Figma design", "User research", "Design systems"],
+                updated: "Nov 2023",
+                level: "Beginner",
+                duration: "18 hours",
+            },
         ]);
     }, []);
+
     const handleClick = (id) => {
         navigate(`/courses/${id}`);
     };
 
-    const handleMouseEnter = (id) => {
-        setHoveredCourse(id);
-        const card = cardRefs.current[id];
-        if (card) {
-            const rect = card.getBoundingClientRect();
-            const viewportHeight = window.innerHeight;
-            const spaceBelow = viewportHeight - rect.bottom;
-            if (spaceBelow < 250) {
-                setHoverPosition("bottom-0");
-            } else {
-                setHoverPosition("top-0");
-            }
-        }
-    };
-
     const renderStars = (rating) => {
-        const stars = [];
-        for (let i = 0; i < 5; i++) {
-            stars.push(
-                <span
-                    key={i}
-                    className={`${
-                        i < Math.floor(rating) ? "text-yellow-500" : "text-gray-300"
-                    }`}
-                >
-          ★
-        </span>
-            );
-        }
-        return stars;
+        return Array.from({ length: 5 }, (_, i) => (
+            <span
+                key={i}
+                className={`${
+                    i < Math.floor(rating) ? "text-yellow-500" : "text-gray-300"
+                }`}
+            >
+        ★
+      </span>
+        ));
     };
 
     const scroll = (direction) => {
         if (scrollRef.current) {
             const { scrollLeft } = scrollRef.current;
-            const cardWidth = 216; // card 200px + gap 16px
+            const cardWidth = 216; // 200px card + 16px gap
+            const visibleCards = 5;
             scrollRef.current.scrollTo({
                 left:
-                    direction === "left" ? scrollLeft - cardWidth : scrollLeft + cardWidth,
+                    direction === "left"
+                        ? scrollLeft - cardWidth * visibleCards
+                        : scrollLeft + cardWidth * visibleCards,
                 behavior: "smooth",
             });
         }
+    };
+
+    const handleMouseEnter = (courseId) => {
+        const card = cardRefs.current[courseId];
+        if (card) {
+            const rect = card.getBoundingClientRect();
+            setPopupPos({
+                top: rect.top - 12,
+                left: rect.right + 12,
+            });
+        }
+        setHoveredCourse(courseId);
+    };
+
+    const handleMouseLeave = () => {
+        setHoveredCourse(null);
     };
 
     return (
@@ -198,38 +261,33 @@ export default function Courses() {
                 </button>
 
                 {/* Thanh cuộn ngang */}
-                <div ref={scrollRef} className="overflow-x-auto scrollbar-hide">
+                <div ref={scrollRef} className="overflow-hidden w-[1080px] mx-auto">
                     <div className="flex gap-4">
                         {courses.map((course) => (
                             <div
                                 key={course.id}
                                 ref={(el) => (cardRefs.current[course.id] = el)}
-                                className="relative min-w-[200px] max-w-[200px] bg-white hover:shadow-md transition cursor-pointer"
+                                className="min-w-[200px] max-w-[200px] bg-white hover:shadow-md transition cursor-pointer"
                                 onMouseEnter={() => handleMouseEnter(course.id)}
-                                onMouseLeave={() => setHoveredCourse(null)}
+                                onMouseLeave={handleMouseLeave}
                                 onClick={() => handleClick(course.id)}
                             >
-                                {/* Ảnh khóa học */}
                                 <img
                                     src={course.image}
                                     alt={course.title}
                                     className="w-full h-[120px] object-cover"
                                 />
 
-                                {/* Thông tin cơ bản */}
                                 <div className="mt-2 mb-2">
                                     <h2 className="font-semibold text-[13px] leading-snug line-clamp-2">
                                         {course.title}
                                     </h2>
-
                                     <p className="text-gray-600 text-[12px] mt-1">
                                         {course.instructor}
                                     </p>
 
                                     <div className="flex items-center text-[12px] mt-1">
-                    <span className="font-semibold mr-1">
-                      {course.rating}
-                    </span>
+                                        <span className="font-semibold mr-1">{course.rating}</span>
                                         <div className="flex">{renderStars(course.rating)}</div>
                                         <span className="text-gray-500 ml-2 text-[11px]">
                       ({course.reviews.toLocaleString()})
@@ -237,61 +295,15 @@ export default function Courses() {
                                     </div>
 
                                     <p className="text-gray-500 text-[11px] mt-1">
-                                        {course.duration} • {course.lectures} lectures •{" "}
-                                        {course.level}
+                                        {course.duration} • {course.level}
                                     </p>
 
                                     <div className="mt-2">
                     <span className="font-bold text-[14px] mr-2">
                       ₫{course.price.toLocaleString()}
                     </span>
-                                        {course.originalPrice && (
-                                            <span className="text-gray-500 line-through text-[12px]">
-                        ₫{course.originalPrice.toLocaleString()}
-                      </span>
-                                        )}
                                     </div>
-                                    <div>
-                                            <span className="inline-block bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded mt-3">
-                                             Bestseller
-                                            </span>
-                                    </div>
-
                                 </div>
-
-                                {/* Popup chi tiết khi hover */}
-                                {hoveredCourse === course.id && (
-                                    <div
-                                        className="fixed w-72 bg-white border rounded-lg shadow-lg p-4 z-50"
-                                        style={{
-                                            top:
-                                                cardRefs.current[course.id]?.getBoundingClientRect().top +
-                                                window.scrollY -
-                                                20, // 🔥 đẩy lên 20px
-                                            left:
-                                                cardRefs.current[course.id]?.getBoundingClientRect().right + 12,
-                                        }}
-                                    >
-                                        <h3 className="font-bold text-base">{course.title}</h3>
-
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            Updated {course.updated} • {course.level} • {course.duration}
-                                        </p>
-                                        <p className="text-sm text-gray-700 mt-2 line-clamp-3">{course.description}</p>
-
-                                        <ul className="text-sm text-gray-600 mt-2 space-y-1">
-                                            {course.highlights.map((h, i) => (
-                                                <li key={i} className="flex items-start gap-1">
-                                                    ✅ {h}
-                                                </li>
-                                            ))}
-                                        </ul>
-
-                                        <button className="w-full mt-4 bg-purple-600 text-white py-2 rounded-md font-semibold hover:bg-purple-700">
-                                            Add to cart
-                                        </button>
-                                    </div>
-                                )}
                             </div>
                         ))}
                     </div>
@@ -305,6 +317,40 @@ export default function Courses() {
                     <ChevronRight className="w-6 h-6" />
                 </button>
             </div>
+
+            {/* Popup Portal */}
+            {hoveredCourse &&
+                ReactDOM.createPortal(
+                    <div
+                        className="fixed w-72 bg-white border rounded-lg shadow-lg p-4 z-[9999]"
+                        style={{ top: popupPos.top, left: popupPos.left }}
+                    >
+                        <h3 className="font-bold text-base">
+                            {courses.find((c) => c.id === hoveredCourse).title}
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Updated {courses.find((c) => c.id === hoveredCourse).updated} •{" "}
+                            {courses.find((c) => c.id === hoveredCourse).level} •{" "}
+                            {courses.find((c) => c.id === hoveredCourse).duration}
+                        </p>
+                        <p className="text-sm text-gray-700 mt-2 line-clamp-3">
+                            {courses.find((c) => c.id === hoveredCourse).description}
+                        </p>
+                        <ul className="text-sm text-gray-600 mt-2 space-y-1">
+                            {courses
+                                .find((c) => c.id === hoveredCourse)
+                                .highlights.map((h, i) => (
+                                    <li key={i} className="flex items-start gap-1">
+                                        ✅ {h}
+                                    </li>
+                                ))}
+                        </ul>
+                        <button className="w-full mt-4 bg-purple-600 text-white py-2 rounded-md font-semibold hover:bg-purple-700">
+                            Add to cart
+                        </button>
+                    </div>,
+                    document.body
+                )}
         </div>
     );
 }

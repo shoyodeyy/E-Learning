@@ -27,6 +27,14 @@ class User extends Authenticatable
         'role',
         'google_id',
         'email_verified_at',
+
+
+        // thêm mới
+        'phone',
+        'address',
+        'gender',
+        'status',
+        'avatar',
     ];
 
     /**
@@ -86,5 +94,14 @@ class User extends Authenticatable
     public function hasVerifiedEmail(): bool
     {
         return !is_null($this->email_verified_at);
+    }
+    /**
+     * ✅ Trả về URL đầy đủ cho avatar
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->avatar
+            ? Storage::url($this->avatar)
+            : null;
     }
 }
