@@ -48,19 +48,24 @@ class ChatController extends Controller
             'provider'   => null,
         ]);
 
-        // 🟣 Chuẩn bị messages cho AI
-        $messages = [
-            ['role' => 'user', 'content' => $message]
-        ];
-
-        // Check prompt active
+        // 🟣 Chuẩn bị messages cho AI từ lịch sử hội thoại của session (ghi nhớ ngữ cảnh)
         $prompt = Prompt::with('versions')->first();
         $activeVersion = $prompt?->activeVersion();
-        if ($prompt && $activeVersion) {
-            $messages = [
-                ['role' => 'system', 'content' => $activeVersion->content],
-                ['role' => 'user', 'content' => $message],
-            ];
+
+        // Lấy lịch sử gần nhất (giới hạn để tránh quá token)
+        $limit = (int) env('CHATBOT_HISTORY_LIMIT', 24);
+        $history = \App\Models\Chatbot\ChatMessage::where('session_id', $session->id)
+            ->orderBy('id', 'desc')
+            ->limit($limit)
+            ->get(['role', 'content'])
+            ->reverse(); // về thứ tự tăng dần
+
+        $messages = [];
+        if ($activeVersion) {
+            $messages[] = ['role' => 'system', 'content' => $activeVersion->content];
+        }
+        foreach ($history as $m) {
+            $messages[] = ['role' => $m->role, 'content' => $m->content];
         }
 
         // 🟣 Trả về StreamedResponse
