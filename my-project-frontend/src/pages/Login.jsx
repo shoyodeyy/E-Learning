@@ -2,9 +2,9 @@ import {useState} from "react";
 import {toast} from "react-toastify";
 import {Link, useNavigate} from "react-router-dom"
 import {EyeIcon, EyeSlashIcon} from "@heroicons/react/24/outline";
+import {GoogleLogin} from "@react-oauth/google";
 
 import {apiUrl} from "../services/http";
-import {GoogleLogin} from "@react-oauth/google";
 import {useAuth} from "../context/AuthContext";
 
 export default function Login() {
@@ -17,7 +17,7 @@ export default function Login() {
     });
 
     const navigate = useNavigate();
-    const {login} = useAuth();
+    const {login, loginWithUser, getCsrfCookie, getCsrfToken} = useAuth();
 
     const handleEmailSubmit = (e) => {
         e.preventDefault();
@@ -46,52 +46,15 @@ export default function Login() {
         setProcessing(true);
 
         try {
-            const response = await fetch(`${apiUrl}/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: data.email,
-                    password: data.password,
-                }),
-            });
+            const result = await login(data.email, data.password);
+            toast.success("Login successful!");
 
-            const result = await response.json();
-
-            if (response.ok) {
-                // Use AuthContext login method
-                login(result.user, result.token);
-
-                toast.success('Login successful!');
-
-                // Check email verification status - only for non-Google users
-                const needsVerification = result.user.needs_email_verification || false;
-
-                if (needsVerification) {
-                    navigate("/verify-email");
-                    return;
-                }
-
-                // Navigate based on role
-                const userRole = result.user?.role || 'student';
-                navigateByRole(userRole);
-            } else {
-                // Handle validation errors
-                if (result.errors) {
-                    Object.keys(result.errors).forEach(key => {
-                        result.errors[key].forEach(error => {
-                            toast.error(error);
-                        });
-                    });
-                } else {
-                    toast.error('Login failed. Please try again.');
-                }
-            }
+            // SỬA ĐỔI: Sử dụng user từ result thay vì từ context
+            const role = result.user?.role || "student";
+            navigateByRole(role);
         } catch (error) {
-            console.error('Login error:', error);
-            toast.error('Network error. Please check your connection.');
+            console.error("Login error:", error);
+            toast.error(error.message || "Login failed");
         } finally {
             setProcessing(false);
         }
@@ -109,31 +72,45 @@ export default function Login() {
         }));
     };
 
+    // SỬA ĐỔI: Cải thiện xử lý Google login
     const handleGoogleSuccess = async (credentialResponse) => {
         try {
+            // Lấy CSRF cookie trước khi gọi API Google login
+            await getCsrfCookie();
+
+            // Lấy CSRF token từ cookie
+            const csrfToken = getCsrfToken();
+
+            const headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            };
+
+            // Thêm CSRF token vào headers nếu có
+            if (csrfToken) {
+                headers['X-XSRF-TOKEN'] = csrfToken;
+            }
+
             const response = await fetch(`${apiUrl}/auth/google/login`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    credential: credentialResponse.credential,
-                }),
+                headers,
+                credentials: 'include', // Important for Sanctum
+                body: JSON.stringify({ credential: credentialResponse.credential }),
             });
 
             const result = await response.json();
 
-            if (result.status === 200) {
-                // Use AuthContext login method
-                login(result.user, result.token);
-
+            if (response.ok && result.status === 200) {
+                // Use loginWithUser for Google login since user is already authenticated on backend
+                loginWithUser(result.user);
                 toast.success('Login successful!');
 
                 // Navigate based on role immediately
                 const userRole = result.user?.role || 'student';
                 navigateByRole(userRole);
             } else {
-                toast.error('Google login failed');
+                console.error('Google login error response:', result);
+                toast.error(result.message || 'Google login failed');
             }
         } catch (error) {
             console.error('Error during Google login:', error);

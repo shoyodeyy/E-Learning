@@ -5,11 +5,13 @@ import { toast } from "react-toastify";
 import Header from "../../components/Header.jsx";
 import ProfileSidebar from "../../components/ProfileSidebar.jsx";
 import { apiUrl } from "../../services/http.jsx";
+import {useAuth} from "../../context/AuthContext.jsx";
 
 export default function PublicProfile() {
     const [user, setUser] = useState(null);
     const [formData, setFormData] = useState({});
     const [processing, setProcessing] = useState(false);
+    const {getCsrfToken} = useAuth();
 
     // Load user profile
     useEffect(() => {
@@ -21,6 +23,7 @@ export default function PublicProfile() {
                         Accept: "application/json",
                         Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
                     },
+                    credentials: "include",
                 });
 
 
@@ -74,19 +77,27 @@ export default function PublicProfile() {
 
         try {
             const data = new FormData();
+            console.log(data)
             Object.keys(formData).forEach((key) => {
                 if (formData[key] !== null && formData[key] !== "") {
                     data.append(key, formData[key]);
                 }
             });
+            const csrfToken = getCsrfToken();
+            const headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            };
+
+            if (csrfToken) {
+                headers['X-XSRF-TOKEN'] = csrfToken;
+            }
 
             const response = await fetch(`${apiUrl}/profile/update`, {
                 method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-                },
+                headers,
                 body: data,
+                credentials: "include",
             });
 
 
