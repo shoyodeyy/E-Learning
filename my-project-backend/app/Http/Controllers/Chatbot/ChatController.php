@@ -138,7 +138,9 @@ class ChatController extends Controller
     public function history(Request $request, $sessionId)
     {
         $user = $request->user();
-        $session = ChatSession::with('messages')
+        $session = ChatSession::with(['messages' => function ($q) {
+                $q->orderBy('id');
+            }])
             ->where('id', $sessionId)
             ->where('user_id', $user->id)
             ->firstOrFail();

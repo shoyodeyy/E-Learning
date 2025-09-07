@@ -3,27 +3,73 @@ import { AnimatePresence } from "framer-motion";
 import { apiUrl } from "../services/http.jsx";
 import ChatButton from "./ChatbotButton.jsx";
 import ChatDrawer from "./ChatbotDrawer.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Chatbox() {
+    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [isTyping, setIsTyping] = useState(false);
-    const [sessionId, setSessionId] = useState(
-        localStorage.getItem("chat_session_id") || null
-    );
+    // Persist session per-user to avoid cross-account leakage
+    const storageKey = user?.id ? `chat_session_id:${user.id}` : "chat_session_id";
+    const [sessionId, setSessionId] = useState(null);
     const messagesEndRef = useRef(null);
     const assistantIndexRef = useRef(null);
     const [isHistoryLoading, setIsHistoryLoading] = useState(false);
 
-    // Auto scroll xuống cuối (không cuộn trong lúc loading history)
+    // Load session id for current user when mounted or user changes
+    useEffect(() => {
+        try {
+            const id = localStorage.getItem(storageKey);
+            setSessionId(id || null);
+        } catch (_) {
+            setSessionId(null);
+        }
+        // Reset chat UI when switching accounts
+        setMessages([]);
+        setIsTyping(false);
+    }, [storageKey]);
+
+    // If no session in storage, try to load the latest session from server when opening chat
+    useEffect(() => {
+        if (!isOpen) return;
+        if (sessionId) return; // already have
+        const token = localStorage.getItem("auth_token");
+        if (!token) return;
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch(`${apiUrl}/chat/sessions`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        Accept: "application/json",
+                    },
+                });
+                if (!res.ok) return;
+                const sessions = await res.json();
+                if (cancelled) return;
+                if (Array.isArray(sessions) && sessions.length > 0) {
+                    const latestId = sessions[0]?.id;
+                    if (latestId) {
+                        setSessionId(String(latestId));
+                        try { localStorage.setItem(storageKey, String(latestId)); } catch (_) {}
+                    }
+                }
+            } catch (e) {
+                // ignore
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [isOpen, sessionId, storageKey]);
+
     useEffect(() => {
         if (isHistoryLoading) return;
         const behavior = isTyping ? "smooth" : "auto";
         messagesEndRef.current?.scrollIntoView({ behavior });
     }, [messages, isTyping, isHistoryLoading]);
 
-    // Khi vừa load xong history, cuộn tới cuối một lần, không animation
+
     useEffect(() => {
         if (!isHistoryLoading) {
             messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
@@ -32,23 +78,30 @@ export default function Chatbox() {
 
     // Load lịch sử khi mở chat (hiển thị loading, tránh cuộn gây rối mắt)
     useEffect(() => {
-        if (isOpen && sessionId) {
-            const token = localStorage.getItem("auth_token");
-            setIsHistoryLoading(true);
-            setMessages([]);
-            fetch(`${apiUrl}/chat/${sessionId}/history`, {
-                headers: {
-                    Authorization: token ? `Bearer ${token}` : undefined,
-                    Accept: "application/json",
-                },
+        if (!isOpen || !sessionId || isTyping || messages.length > 0) return;
+
+        const token = localStorage.getItem("auth_token");
+        setIsHistoryLoading(true);
+        fetch(`${apiUrl}/chat/${sessionId}/history`, {
+            headers: {
+                Authorization: token ? `Bearer ${token}` : undefined,
+                Accept: "application/json",
+            },
+        })
+            .then(async (res) => {
+                if (!res.ok) {
+                    // Invalid or unauthorized session for this user → clear it
+                    setSessionId(null);
+                    try { localStorage.removeItem(storageKey); } catch (_) {}
+                    return { messages: [] };
+                }
+                return res.json();
             })
-                .then((res) => res.json())
-                .then((data) => {
-                    setMessages(data.messages || []);
-                })
-                .finally(() => setIsHistoryLoading(false));
-        }
-    }, [isOpen, sessionId]);
+            .then((data) => {
+                setMessages(data.messages || []);
+            })
+            .finally(() => setIsHistoryLoading(false));
+    }, [isOpen, sessionId, isTyping, messages.length, storageKey]);
 
     const sendMessage = async (rawText) => {
         if (isTyping) return; // prevent double send while streaming
@@ -65,9 +118,15 @@ export default function Chatbox() {
         const token = localStorage.getItem("auth_token");
 
         let assistantMsg = { role: "assistant", content: "" };
-        let lastIndex = 0; // track how much of responseText we've processed
+        let lastIndex = 0; // reserved for future chunk tracking
         let sseBuffer = ""; // carry over partial chunks between progress events
+        // Pre-create assistant bubble to avoid race with history effect and ensure first reply slot exists
         assistantIndexRef.current = null;
+        setMessages((prev) => {
+            const idx = prev.length;
+            assistantIndexRef.current = idx;
+            return [...prev, { ...assistantMsg }];
+        });
 
         try {
             const controller = new AbortController();
@@ -132,19 +191,19 @@ export default function Chatbox() {
                         const id = payload.split(":")[1];
                         if (id) {
                             setSessionId(id);
-                            localStorage.setItem("chat_session_id", id);
+                            try { localStorage.setItem(storageKey, id); } catch (_) {}
                         }
                         continue;
                     }
                     assistantMsg.content += payload;
                     setMessages((prev) => {
-                        if (assistantIndexRef.current === null) {
-                            assistantIndexRef.current = prev.length;
-                            return [...prev, { ...assistantMsg }];
-                        }
                         const copy = [...prev];
-                        const idx = assistantIndexRef.current;
-                        if (copy[idx]) {
+                        const idx = assistantIndexRef.current ?? prev.length - 1;
+                        if (!copy[idx]) {
+                            // Fallback: create slot if missing
+                            copy.push({ role: "assistant", content: assistantMsg.content });
+                            assistantIndexRef.current = copy.length - 1;
+                        } else {
                             copy[idx] = { ...copy[idx], content: assistantMsg.content };
                         }
                         return copy;

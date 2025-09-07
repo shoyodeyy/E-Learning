@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import Chatbotbox from "../components/Chatbotbox";
+import ChatbotBox from "../components/ChatbotBox.jsx";
 
 export default function Dashboard() {
     const [showMessage, setShowMessage] = useState(false);
@@ -174,7 +174,7 @@ export default function Dashboard() {
                         </div>
                     </div>
                 </main>
-                <Chatbotbox></Chatbotbox>
+                <ChatbotBox />
             </div>
         </div>
     )

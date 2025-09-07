@@ -42,6 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Chatbot routes
     Route::get('/chat/{sessionId}/history', [ChatController::class, 'history']);
+    Route::get('/chat/sessions', [ChatController::class, 'sessions']);
     Route::post('/chat/stream', [ChatController::class, 'stream']);
 });
 
