@@ -6,7 +6,7 @@ export default function ProfileSidebar({ user }) {
 
     const menuItems = [
 
-        { name: "Public profile", path: "/PublicProfile" },
+        { name: "Public profile", path: "/profile" },
         { name: "Account security", path: "/profile/security" },
         { name: "Payment methods", path: "/profile/payment" },
         { name: "Notifications", path: "/profile/notifications" },
@@ -27,11 +27,8 @@ export default function ProfileSidebar({ user }) {
                         <Link
                             key={item.path}
                             to={item.path}
-                            className={`block px-3 py-2 rounded hover:bg-purple-50 ${
-                                location.pathname === item.path
-                                    ? "bg-purple-100 font-semibold text-purple-700"
-                                    : "text-gray-700"
-                            }`}
+                            className={`block px-3 py-2 rounded hover:bg-purple-50 
+                            `}
                         >
                             {item.name}
                         </Link>

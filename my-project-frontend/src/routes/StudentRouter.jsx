@@ -11,7 +11,7 @@ import Reports from "../components/Reports.jsx";
 import MyLearning from "../components/MyLearning.jsx";
 import PublicProfile from "../pages/Student/PublicProfile.jsx";
 import LecturePage from "../pages/Student/LecturePage.jsx";
-import AvatarUploader from "../pages/Student/AvatarUploader.jsx";
+
 
 export default function StudentRouter() {
     return (
@@ -24,7 +24,7 @@ export default function StudentRouter() {
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/saved-videos" element={<MyLearning />} />
                 <Route path="/profile" element={<PublicProfile />} />
-                <Route path="/profile/photo" element={<AvatarUploader/>} />
+
                 <Route path="/lecture/:lectureId" element={<LecturePage />} />
             </Route>
         </>

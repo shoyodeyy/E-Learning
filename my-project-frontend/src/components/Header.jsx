@@ -1,18 +1,32 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import {FaRegBell, FaRegHeart, FaSearch, FaShoppingCart, FaBars, FaTimes} from "react-icons/fa";
+import {
+    FaRegBell,
+    FaRegHeart,
+    FaSearch,
+    FaShoppingCart,
+    FaBars,
+    FaTimes,
+} from "react-icons/fa";
 import { LogOut, User } from "lucide-react";
 
-import { useAuth } from "../context/AuthContext.jsx";
 import Avatar from "./Avatar.jsx";
+import { getProfile } from "../api/profileApi.js";
 
 export default function Header() {
-    const { user, logout } = useAuth();
+    const [user, setUser] = useState(null);
     const navigate = useNavigate();
 
     const [openMenu, setOpenMenu] = useState(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     let timeoutId;
+
+    // ✅ gọi API khi mount
+    useEffect(() => {
+        getProfile()
+            .then((u) => setUser(u))
+            .catch(() => setUser(null));
+    }, []);
 
     const handleMouseEnter = (menu) => {
         clearTimeout(timeoutId);
@@ -24,8 +38,9 @@ export default function Header() {
     };
 
     const handleLogout = () => {
-        if (!confirm("Are you sure you want to logout?")) return
-        logout();
+        if (!confirm("Are you sure you want to logout?")) return;
+        localStorage.removeItem("auth_token"); // xoá token
+        setUser(null);
         navigate("/login");
     };
 
@@ -36,7 +51,7 @@ export default function Header() {
                     {/* Logo */}
                     <img
                         src="/images/logo.webp"
-                        alt="Udemy Logo"
+                        alt="Logo"
                         className="h-8 cursor-pointer"
                         onClick={() => navigate("/dashboard")}
                     />
@@ -49,7 +64,7 @@ export default function Header() {
                             onMouseEnter={() => handleMouseEnter("explore")}
                             onMouseLeave={handleMouseLeave}
                         >
-                            <button className="px-3 py-2 text-sm font-medium hover:text-purple-600 cursor-pointer hover:transition-colors">
+                            <button className="px-3 py-2 text-sm text-gray-700  hover:text-purple-600 cursor-pointer hover:transition-colors">
                                 Explore
                             </button>
                             {openMenu === "explore" && (
@@ -77,24 +92,32 @@ export default function Header() {
 
                     {/* Actions + Avatar */}
                     <div className="hidden md:flex items-center space-x-4 ml-4">
-                        <button className="p-2 rounded-md hover:bg-purple-100 cursor-pointer hover:transition-colors">
+                        <button className="p-2 rounded-md hover:bg-purple-100 cursor-pointer">
                             <FaRegHeart size={18} className="text-gray-600" />
                         </button>
-                        <button className="p-2 rounded-md hover:bg-purple-100 cursor-pointer hover:transition-colors">
+                        <button className="p-2 rounded-md hover:bg-purple-100 cursor-pointer">
                             <FaShoppingCart size={18} className="text-gray-600" />
                         </button>
-                        <button className="p-2 rounded-md hover:bg-purple-100 cursor-pointer hover:transition-colors">
+                        <button className="p-2 rounded-md hover:bg-purple-100 cursor-pointer">
                             <FaRegBell size={18} className="text-gray-600" />
                         </button>
 
-                        <DropdownAvatar
-                            name={user?.name || "User"}
-                            avatarUrl={user?.avatarUrl || null}
-                            fullName={user?.name || "User"}
-                            email={user?.email || ""}
-                            isVerified={!!user?.email_verified_at}
-                            onLogout={handleLogout}
-                        />
+                        {user ? (
+                            <DropdownAvatar
+                                name={user.name}
+                                avatarUrl={user.avatar_url}
+                                fullName={user.name}
+                                email={user.email}
+                                onLogout={handleLogout}
+                            />
+                        ) : (
+                            <button
+                                onClick={() => navigate("/login")}
+                                className="px-4 py-2 rounded-md bg-purple-600 text-white"
+                            >
+                                Login
+                            </button>
+                        )}
                     </div>
 
                     {/* Mobile Hamburger */}
@@ -115,9 +138,33 @@ export default function Header() {
                     <ul className="flex flex-col px-4 py-2 space-y-2">
                         <li className="p-2 hover:bg-purple-100 cursor-pointer">Favorites</li>
                         <li className="p-2 hover:bg-purple-100 cursor-pointer">Cart</li>
-                        <li>
-                            <button onClick={() => navigate("/profile")} className="p-2 hover:bg-purple-100 cursor-pointer w-full text-left">Profile</button></li>
-                        <li className="p-2 hover:bg-purple-100 cursor-pointer" onClick={handleLogout}>Logout</li>
+                        {user ? (
+                            <>
+                                <li>
+                                    <button
+                                        onClick={() => navigate("/profile")}
+                                        className="p-2 hover:bg-purple-100 cursor-pointer w-full text-left"
+                                    >
+                                        Profile
+                                    </button>
+                                </li>
+                                <li
+                                    className="p-2 hover:bg-purple-100 cursor-pointer"
+                                    onClick={handleLogout}
+                                >
+                                    Logout
+                                </li>
+                            </>
+                        ) : (
+                            <li>
+                                <button
+                                    onClick={() => navigate("/login")}
+                                    className="p-2 hover:bg-purple-100 cursor-pointer w-full text-left"
+                                >
+                                    Login
+                                </button>
+                            </li>
+                        )}
                     </ul>
                 </div>
             )}
@@ -143,6 +190,10 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
         }, 200);
     };
 
+    const toggleClick = () => {
+        setOpen((prev) => !prev);
+    };
+
     const goToProfile = () => {
         navigate("/profile");
         setOpen(false);
@@ -155,13 +206,19 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
-            <div className="flex items-center gap-2 cursor-pointer">
+            {/* Avatar */}
+            <div
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={toggleClick}
+            >
                 <Avatar name={name} avatarUrl={avatarUrl} />
             </div>
+
+            {/* Dropdown */}
             {open && (
                 <div className="absolute right-0 mt-2 w-65 rounded-lg bg-white border border-gray-200 shadow-lg z-50">
                     <div className="px-3 py-3 border-b border-gray-200 flex items-center gap-3">
-                        <Avatar name={name} avatarUrl={avatarUrl} size="2rem"/>
+                        <Avatar name={name} avatarUrl={avatarUrl} size="2rem" />
                         <div>
                             <p className="font-semibold text-gray-800">{fullName}</p>
                             <p className="text-sm text-gray-500">{email}</p>
@@ -169,14 +226,17 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
                     </div>
                     <ul className="text-sm text-gray-700">
                         <li>
-                            <button onClick={goToProfile} className="flex items-center gap-2 w-full px-3 py-2 hover:bg-purple-100 cursor-pointer hover:transition-colors">
+                            <button
+                                onClick={goToProfile}
+                                className="flex items-center gap-2 w-full px-3 py-2 hover:bg-purple-100 cursor-pointer"
+                            >
                                 <User size={16} /> Profile
                             </button>
                         </li>
                         <li>
                             <button
                                 onClick={onLogout}
-                                className="flex items-center gap-2 w-full px-3 py-2 hover:bg-purple-100 cursor-pointer hover:transition-colors text-red-600"
+                                className="flex items-center gap-2 w-full px-3 py-2 hover:bg-purple-100 cursor-pointer text-red-600"
                             >
                                 <LogOut size={16} /> Logout
                             </button>

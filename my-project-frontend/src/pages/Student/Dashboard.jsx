@@ -1,18 +1,33 @@
 import { useState, useEffect } from "react"
-import { useAuth } from "../../context/AuthContext.jsx"
 import Header from "../../components/Header.jsx"
 import Courses from "../../components/Courses.jsx"
 import Feedback from "../../components/Feedback.jsx"
 import MyLearning from "../../components/MyLearning.jsx"
 import Slideshow from "../../components/HeroCarousel.jsx"
+import Avatar from "../../components/Avatar.jsx"
+
+import { getProfile } from "../../api/profileApi.js" // <-- import API
 
 export default function Dashboard() {
     const [showMessage, setShowMessage] = useState(false)
     const [messageContent, setMessageContent] = useState("")
     const [messageType, setMessageType] = useState("success")
+    const [user, setUser] = useState(null)
 
-    const { user, refreshUser } = useAuth()
+    // Lấy user từ API
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const profile = await getProfile()
+                setUser(profile)
+            } catch (error) {
+                console.error("Error loading profile:", error)
+            }
+        }
+        fetchUser()
+    }, [])
 
+    // Xử lý message từ URL (email_verified, already_verified,…)
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search)
         const message = urlParams.get("message")
@@ -22,11 +37,6 @@ export default function Dashboard() {
             window.history.replaceState({}, document.title, window.location.pathname)
         }
     }, [])
-
-    useEffect(() => {
-        if (!user) return
-        if (!user.email_verified_at) refreshUser()
-    }, [user, refreshUser])
 
     const handleUrlMessage = (message) => {
         switch (message) {
@@ -43,7 +53,6 @@ export default function Dashboard() {
             default:
                 break
         }
-
         setTimeout(() => setShowMessage(false), 5000)
     }
 
@@ -76,19 +85,8 @@ export default function Dashboard() {
                 {/* Main */}
                 <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4 p-4 sm:p-6 bg-white rounded-lg shadow-sm">
-                        {/* Avatar chữ cái đầu */}
-                        <div
-                            className="flex items-center justify-center rounded-full bg-black text-white text-xl sm:text-2xl font-bold mx-auto sm:mx-0"
-                            style={{ width: "4rem", height: "4rem", minWidth: "4rem", minHeight: "4rem" }}
-                        >
-                            {user.name
-                                ? user.name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")
-                                    .toUpperCase()
-                                : "U"}
-                        </div>
+                        {/* Avatar component */}
+                        <Avatar size={64} />
 
                         {/* Nội dung welcome */}
                         <div className="text-center sm:text-left">
@@ -96,12 +94,12 @@ export default function Dashboard() {
                             <div className="mt-2">
                                 {user.email_verified_at ? (
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    ✓ Verified
-                  </span>
+                                        ✓ Verified
+                                    </span>
                                 ) : (
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                    ⚠ Unverified
-                  </span>
+                                        ⚠ Unverified
+                                    </span>
                                 )}
                             </div>
                         </div>

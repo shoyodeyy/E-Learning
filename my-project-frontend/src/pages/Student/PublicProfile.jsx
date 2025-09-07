@@ -1,53 +1,31 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-
 import Header from "../../components/Header.jsx";
 import ProfileSidebar from "../../components/ProfileSidebar.jsx";
-import { apiUrl } from "../../services/http.jsx";
+import { getProfile, updateProfile } from "../../api/profileApi.js";
 
 export default function PublicProfile() {
     const [user, setUser] = useState(null);
     const [formData, setFormData] = useState({});
+    const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
     // Load user profile
     useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await fetch(`${apiUrl}/profile`, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                        Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-                    },
+        getProfile()
+            .then((u) => {
+                setUser(u);
+                setFormData({
+                    name: u?.name || "",
+                    email: u?.email || "",
+                    gender: u?.gender || "",
+                    profile: u?.profile || "",
+                    address: u?.address || "",
+                    phone: u?.phone || "",
+                    avatar: null,
                 });
-
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    setUser(result.user);
-                    setFormData({
-                        name: result.user?.name || "",
-                        email: result.user?.email || "",
-                        gender: result.user?.gender || "",
-                        profile: result.user?.profile || "",
-                        address: result.user?.address || "",
-                        phone: result.user?.phone || "",
-                        avatar: null,
-                    });
-                } else {
-                    toast.error(result.message || "Failed to load profile.");
-                }
-            } catch (error) {
-                console.error("Profile load error:", error);
-                toast.error("Network error. Please check your connection.");
-
-            }
-        };
-
-        fetchUser();
+            })
+            .catch(() => toast.error("Failed to load profile ❌"));
     }, []);
 
     if (!user) {
@@ -62,16 +40,54 @@ export default function PublicProfile() {
         const { name, value, files } = e.target;
         const fieldValue = files ? files[0] : value;
 
-        setFormData((prev) => ({
-            ...prev,
-            [name]: fieldValue,
-        }));
+        // Cập nhật formData
+        setFormData((prev) => ({ ...prev, [name]: fieldValue }));
+
+        // Nếu có lỗi của field này, xóa nó
+        if (errors[name]) {
+            setErrors((prev) => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
+    };
+
+
+    // Validate form
+    const validate = () => {
+        const newErrors = {};
+
+        if (!formData.name || formData.name.trim() === "") {
+            newErrors.name = "Full Name is required";
+        }
+
+        if (!formData.address || formData.address.trim() === "") {
+            newErrors.address = "Address is required";
+        }
+
+        if (!formData.phone || formData.phone.trim() === "") {
+            newErrors.phone = "Phone is required";
+        } else if (!/^\d{10,15}$/.test(formData.phone)) {
+            newErrors.phone = "Phone must be 10-15 digits";
+        }
+
+        setErrors(newErrors);
+
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setProcessing(true);
 
+        // Validate trước
+        if (!validate()) return;
+
+        // Hiển thị confirm dialog
+        const confirmUpdate = window.confirm("Do you want to update your profile?");
+        if (!confirmUpdate) return; // nếu người dùng chọn "No" thì dừng
+
+        setProcessing(true);
         try {
             const data = new FormData();
             Object.keys(formData).forEach((key) => {
@@ -79,33 +95,18 @@ export default function PublicProfile() {
                     data.append(key, formData[key]);
                 }
             });
-
-            const response = await fetch(`${apiUrl}/profile/update`, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-                },
-                body: data,
-            });
-
-
-            const result = await response.json();
-
-            if (response.ok) {
-                setUser(result.user);
-                toast.success(result.message || "Profile updated successfully ✅");
-            } else {
-                toast.error(result.message || "Update failed ❌");
-
-            }
+            const result = await updateProfile(data);
+            setUser(result.user);
+            toast.success(result.message || "Profile updated successfully ✅");
+            setErrors({});
         } catch (error) {
             console.error("Profile update error:", error);
-            toast.error("Network error. Please try again.");
+            toast.error("Update failed ❌");
         } finally {
             setProcessing(false);
         }
     };
+
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -120,15 +121,14 @@ export default function PublicProfile() {
 
                     {/* Form */}
                     <section className="col-span-1 md:col-span-9 order-2 md:order-2 bg-white shadow rounded p-6">
-                        <h1 className="text-2xl font-semibold mb-4">
-                            Public Profile
-                        </h1>
+                        <h1 className="text-2xl font-semibold mb-4">Public Profile</h1>
 
                         <form
                             onSubmit={handleSubmit}
                             className="space-y-6"
                             encType="multipart/form-data"
                         >
+                            {/* Name */}
                             <div>
                                 <label className="block font-medium mb-2">Full Name</label>
                                 <input
@@ -136,23 +136,26 @@ export default function PublicProfile() {
                                     name="name"
                                     value={formData.name}
                                     onChange={handleInputChange}
-                                    className="w-full border rounded px-3 py-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 border-gray-300 focus:ring-purple-500 ${
+                                        errors.name ? "border-red-500" : ""
+                                    }`}
                                 />
+                                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                             </div>
 
+                            {/* Email */}
                             <div>
                                 <label className="block font-medium mb-2">Email</label>
                                 <input
                                     type="email"
                                     name="email"
                                     value={formData.email}
-
                                     readOnly
                                     className="w-full border rounded px-3 py-2 bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed"
-
                                 />
                             </div>
 
+                            {/* Gender */}
                             <div>
                                 <label className="block font-medium mb-2">Gender</label>
                                 <select
@@ -168,6 +171,7 @@ export default function PublicProfile() {
                                 </select>
                             </div>
 
+                            {/* Avatar */}
                             <div>
                                 <label className="block font-medium mb-2">Avatar</label>
                                 <input
@@ -179,6 +183,7 @@ export default function PublicProfile() {
                                 />
                             </div>
 
+                            {/* Biography */}
                             <div>
                                 <label className="block font-medium mb-2">Biography</label>
                                 <textarea
@@ -190,6 +195,7 @@ export default function PublicProfile() {
                                 ></textarea>
                             </div>
 
+                            {/* Address */}
                             <div>
                                 <label className="block font-medium mb-2">Address</label>
                                 <input
@@ -197,10 +203,14 @@ export default function PublicProfile() {
                                     name="address"
                                     value={formData.address}
                                     onChange={handleInputChange}
-                                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 border-gray-300 focus:ring-purple-500"
+                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 border-gray-300 focus:ring-purple-500 ${
+                                        errors.address ? "border-red-500" : ""
+                                    }`}
                                 />
+                                {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
                             </div>
 
+                            {/* Phone */}
                             <div>
                                 <label className="block font-medium mb-2">Phone</label>
                                 <input
@@ -208,16 +218,18 @@ export default function PublicProfile() {
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleInputChange}
-                                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 border-gray-300 focus:ring-purple-500"
+                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 border-gray-300 focus:ring-purple-500 ${
+                                        errors.phone ? "border-red-500" : ""
+                                    }`}
                                 />
+                                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                             </div>
 
+                            {/* Submit */}
                             <button
                                 type="submit"
-
                                 disabled={processing}
                                 className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 disabled:opacity-50"
-
                             >
                                 {processing ? "Saving..." : "Save"}
                             </button>
