@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
@@ -46,7 +47,7 @@ class GoogleController extends Controller
                 [
                     'google_id' => $payload['sub'],
                     'name' => $payload['name'] ?? 'Google User',
-                    'email_verified_at' => Carbon::now(), // Auto verify Google accounts
+                    'email_verified_at' => Carbon::now(),
                 ]
             );
 
@@ -58,11 +59,12 @@ class GoogleController extends Controller
                 ]);
             }
 
-            $token = $user->createToken('google_token')->plainTextToken;
+            Auth::guard('web')->login($user, true);
+            $request->session()->regenerate();
 
             return response()->json([
                 'status' => 200,
-                'token' => $token,
+                'message' => 'Login successful',
                 'user' => [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -74,7 +76,8 @@ class GoogleController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Google login error: ' . $e->getMessage(), [
-                'trace' => $e->getTrace()
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all()
             ]);
             return response()->json([
                 'status' => 401,

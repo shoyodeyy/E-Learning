@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -64,46 +65,32 @@ class AuthController extends Controller
 
         RateLimiter::hit($key, 600);
 
-        $request->validate([
+        $credentials = $request->validate([
             'email' => 'required|string|email',
-            'password' => 'required'
+            'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (!Auth::attempt($credentials, true)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $request->session()->regenerate();
+        RateLimiter::clear($key); // Clear rate limit on successful login
 
         return response()->json([
             'message' => 'Login successful',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-                'email_verified_at' => $user->email_verified_at,
-                'profile' => $user->profile,
-                'google_id' => $user->google_id,
-                'is_google_user' => $user->isGoogleUser(),
-                'needs_email_verification' => $user->needsEmailVerification(),
-            ],
-            'token' => $token,
-            'email_verified' => $user->hasVerifiedEmail(),
-        ], 200);
-
+            'user' => Auth::user()->only(['id', 'name', 'email', 'role', 'email_verified_at']),
+        ]);
     }
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return response()->json([
-            'message' => 'Logged out successfully'
-        ]);
+        return response()->json(['message' => 'Logged out successfully']);
     }
 }

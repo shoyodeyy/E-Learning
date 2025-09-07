@@ -11,18 +11,15 @@ use App\Http\Controllers\Auth\VerificationController;
 
 use App\Http\Controllers\Student\ProfileController;
 
-
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 
-// courses (để tạm thời)
-Route::apiResource('/courses', CourseController::class);
+Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle'])
+    ->middleware('web');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', static function (Request $request) {
         return $request->user();
-
     });
     Route::post('/logout', [AuthController::class, 'logout']);
 
@@ -33,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/email/resend', [VerificationController::class, 'resend'])
         ->middleware(['throttle:6,1']);
     Route::get('/email/verify-status', [VerificationController::class, 'status']);
+
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/profile/update', [ProfileController::class, 'update']);
     Route::put('/profile', [ProfileController::class, 'update']);
@@ -50,8 +48,3 @@ Route::middleware('auth:sanctum')->prefix('profile')->group(function () {
     Route::get('/', [ProfileController::class, 'show']);   // show profile
     Route::post('/update', [ProfileController::class, 'update']); // update profile
 });
-
-
-
-
-
