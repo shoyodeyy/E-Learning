@@ -14,7 +14,7 @@ class OpenAIClient
     public function __construct()
     {
         $this->token = env('OPENAI_API_KEY');
-        $this->model = env('OPENAI_MODEL', 'gpt-4o-mini');
+        $this->model = env('OPENAI_MODEL', 'gpt-4o');
         $this->url   = env('OPENAI_API_URL', 'https://api.openai.com/v1/chat/completions');
     }
 

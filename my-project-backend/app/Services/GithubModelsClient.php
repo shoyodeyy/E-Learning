@@ -16,7 +16,7 @@ class GithubModelsClient
     public function __construct()
     {
         $this->token = env('GITHUB_PAT');
-        $this->model = env('GITHUB_MODEL', 'gpt-4o-mini');
+        $this->model = env('GITHUB_MODEL', 'gpt-4o');
         $this->url   = env('GITHUB_API_URL', 'https://models.inference.ai.azure.com/chat/completions');
     }
 
