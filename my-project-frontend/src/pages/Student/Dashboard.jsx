@@ -5,6 +5,7 @@ import Feedback from "../../components/Feedback.jsx"
 import MyLearning from "../../components/MyLearning.jsx"
 import Slideshow from "../../components/HeroCarousel.jsx"
 import Avatar from "../../components/Avatar.jsx"
+import Chatbox from "../../components/ChatbotBox.jsx"
 
 import { getProfile } from "../../api/profileApi.js" // <-- import API
 
@@ -113,6 +114,7 @@ export default function Dashboard() {
                     </div>
                 </main>
             </div>
+            <Chatbox />
         </div>
     )
 }
