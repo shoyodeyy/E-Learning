@@ -41,6 +41,10 @@ export default function Login() {
         }
     };
 
+    const handleBannedUser = (banDetails) => {
+        toast.error(`Your account has been banned. Reason: ${banDetails.reason}. Banned until: ${banDetails.banned_until}`);
+    };
+
     const handlePasswordSubmit = async (e) => {
         e.preventDefault();
         setProcessing(true);
@@ -78,6 +82,12 @@ export default function Login() {
                 const userRole = result.user?.role || 'student';
                 navigateByRole(userRole);
             } else {
+                // Handle account banned
+                if (result.error === 'account_banned') {
+                    handleBannedUser(result.ban_details);
+                    return;
+                }
+
                 // Handle validation errors
                 if (result.errors) {
                     Object.keys(result.errors).forEach(key => {
@@ -130,10 +140,12 @@ export default function Login() {
                 login(result.user, result.token);
 
                 toast.success('Login successful!');
-
-                // Navigate based on role immediately
+                // Navigate based on role immediately (Google users are auto-verified)
                 const userRole = result.user?.role || 'student';
                 navigateByRole(userRole);
+            } else if (result.status === 403 && result.error === 'account_banned') {
+                // Handle banned account for Google login
+                handleBannedUser(result.ban_details);
             } else {
                 toast.error(result.message || 'Google login failed');
             }
