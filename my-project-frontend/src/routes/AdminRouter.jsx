@@ -10,7 +10,6 @@ import ChangePassword from "../pages/ChangePassword.jsx";
 import Overview from "../pages/Admin/Overview.jsx";
 // import CourseList from "../pages/Admin/components/CourseList.jsx";
 
-
 export default function AdminRouter() {
     return (
         <>

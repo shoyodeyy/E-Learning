@@ -77,6 +77,7 @@ class AuthController extends Controller
             ]);
         }
 
+
         // Check if user is banned
         if ($user->isBanned()) {
             $bannedUntil = $user->banned_until->format('d/m/Y H:i');
@@ -89,6 +90,7 @@ class AuthController extends Controller
                 ]
             ], 403);
         }
+
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -162,5 +164,4 @@ class AuthController extends Controller
                 : 'Password not changed.',
         ]);
     }
-
 }

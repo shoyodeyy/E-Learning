@@ -84,9 +84,11 @@ class GoogleController extends Controller
                     'role' => $user->role,
                     'google_id' => $user->google_id,
                     'email_verified_at' => $user->email_verified_at,
+
                     'is_google_user' => $user->isGoogleUser(),
                     'needs_email_verification' => $user->needsEmailVerification(),
                     'has_password' => $user->has_password,
+
                 ],
             ]);
         } catch (\Exception $e) {
