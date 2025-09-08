@@ -16,6 +16,7 @@ import VerifyEmail from "./pages/VerifyEmail.jsx";
 import Footer from "./components/Footer.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
 
+
 function App() {
     return (
         <BrowserRouter>

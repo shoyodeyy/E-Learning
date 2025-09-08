@@ -41,6 +41,8 @@ export const AuthProvider = ({ children }) => {
         setToken(null);
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user');
+        localStorage.removeItem('chat_session_id');
+        // Optionally clear other user-specific data from localStorage
     };
 
     const updateUser = (userData) => {

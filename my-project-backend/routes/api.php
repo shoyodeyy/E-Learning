@@ -1,10 +1,18 @@
 <?php
 
+
+use App\Http\Controllers\Admin\UserAnalyticsController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VoucherController;
+
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CourseController;
+
+use App\Http\Controllers\Chatbot\ChatController;
+use App\Services\AIClientWithFallback;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\VerificationController;
@@ -12,12 +20,24 @@ use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Student\ProfileController;
 
 
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 
+
 // courses (để tạm thời)
 Route::apiResource('/courses', CourseController::class);
+
+if (app()->environment('local')) {
+    Route::get('/test-ai-stream', function (Request $request, AIClientWithFallback $ai) {
+        $messages = [
+            ['role' => 'user', 'content' => $request->query('q', 'Giới thiệu bản thân')]
+        ];
+        return $ai->stream($messages);
+    });
+}
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', static function (Request $request) {
@@ -26,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::post('/logout', [AuthController::class, 'logout']);
 
+//    Route::apiResource('users', UserController::class);
     // Email verification routes for authenticated users
     Route::post('/email/verification-notification', [VerificationController::class, 'send'])
         ->middleware(['throttle:6,1'])
@@ -36,6 +57,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/profile/update', [ProfileController::class, 'update']);
     Route::put('/profile', [ProfileController::class, 'update']);
+
+    //Chatbot routes
+    Route::get('/chat/{sessionId}/history', [ChatController::class, 'history']);
+    Route::get('/chat/sessions', [ChatController::class, 'sessions']);
+    Route::post('/chat/stream', [ChatController::class, 'stream']);
+    // Change password
+    Route::post('/user/change-password', [AuthController::class, 'changePassword']);
+
 });
 
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
@@ -50,8 +79,4 @@ Route::middleware('auth:sanctum')->prefix('profile')->group(function () {
     Route::get('/', [ProfileController::class, 'show']);   // show profile
     Route::post('/update', [ProfileController::class, 'update']); // update profile
 });
-
-
-
-
 
