@@ -20,9 +20,9 @@ export default function Avatar({ size = 40 }) {
         )
     }
 
-    return user.avatar_url ? (
+    return user.avatar ? (
         <img
-            src={user.avatar_url}
+            src={`http://localhost:8000/storage/${user.avatar}`}
             alt={user.name}
             className="rounded-full object-cover"
             style={{ width: size, height: size }}

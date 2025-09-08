@@ -105,7 +105,7 @@ export default function Header() {
                         {user ? (
                             <DropdownAvatar
                                 name={user.name}
-                                avatarUrl={user.avatar_url}
+                                avatarUrl={user.avatar}
                                 fullName={user.name}
                                 email={user.email}
                                 onLogout={handleLogout}
@@ -173,7 +173,7 @@ export default function Header() {
 }
 
 // DropdownAvatar component
-function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
+function DropdownAvatar({ name,     avatarUrl, fullName, email, onLogout }) {
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
     const timeoutRef = useRef(null);
