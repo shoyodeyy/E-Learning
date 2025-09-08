@@ -1,6 +1,12 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext.jsx";
+
+
+import { useEffect, useState } from "react"
+import { Outlet, useNavigate } from "react-router-dom"
+import { Menu, X } from "lucide-react"
+
+import { useAuth } from "../../context/AuthContext.jsx"
+import AdminSidebar from "./components/AdminSidebar.jsx"
+
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -34,22 +40,31 @@ export default function Dashboard() {
                         ) : (
                             <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">⚠ Unverified</span>
                         )}
-                        <button
-                            onClick={handleLogout}
-                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                        >
+
+
+                        <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+
                             Logout
                         </button>
                     </div>
                 </div>
             </header>
+            <di className="flex">
+                <div
+                    className={`
+                        ${
+                        windowWidth < 768
+                            ? `fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out ${
+                                isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+                            } top-[5rem]`
+                            : "relative"
+                    }
+                    `}
+                >
+                    <AdminSidebar isCollapsed={isSidebarCollapsed} setIsMobileSidebarOpen={setIsMobileSidebarOpen} />
 
-            <main className="max-w-7xl mx-auto p-6">
-                <div className="bg-white rounded-lg shadow p-6">
-                    <h2 className="text-lg font-bold">Admin Controls</h2>
-                    <p className="mt-2 text-gray-600">Manage users, courses, and settings here.</p>
                 </div>
-            </main>
+            </di>
         </div>
     );
 }

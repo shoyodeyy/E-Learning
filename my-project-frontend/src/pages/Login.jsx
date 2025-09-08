@@ -129,7 +129,7 @@ export default function Login() {
 
                 toast.success('Login successful!');
 
-                // Navigate based on role immediately
+                // Navigate based on role immediately (Google users are auto-verified)
                 const userRole = result.user?.role || 'student';
                 navigateByRole(userRole);
             } else {
