@@ -67,7 +67,7 @@ export default function VoucherFilter({ onFilter }) {
                     onChange={e => handleChange("min_order", e.target.value)}
                     className="w-full"
                 />
-                <span className="text-white">{filters.min_order}</span>
+                <span className="text-white">{Number(filters.min_order).toLocaleString()}</span>
             </div>
 
             {/* Usage Limit */}
@@ -81,7 +81,7 @@ export default function VoucherFilter({ onFilter }) {
                     onChange={e => handleChange("usage_limit", e.target.value)}
                     className="w-full"
                 />
-                <span className="text-white">{filters.usage_limit}</span>
+                <span className="text-white">{Number(filters.usage_limit).toLocaleString()}</span>
             </div>
 
             {/* Discount Type */}
@@ -112,7 +112,7 @@ export default function VoucherFilter({ onFilter }) {
                             onChange={e => handleChange("discount_value", e.target.value)}
                             className="w-full"
                         />
-                        <span className="text-white">{filters.discount_value}%</span>
+                        <span className="text-white">{Number(filters.discount_value).toLocaleString()}%</span>
                     </>
                 ) : (
                     <>
@@ -124,7 +124,7 @@ export default function VoucherFilter({ onFilter }) {
                             onChange={e => handleChange("discount_value", e.target.value)}
                             className="w-full"
                         />
-                        <span className="text-white">{filters.discount_value}</span>
+                        <span className="text-white">{Number(filters.discount_value).toLocaleString()}</span>
                     </>
                 )}
             </div>

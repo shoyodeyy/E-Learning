@@ -3,31 +3,36 @@ import {Pencil, Trash2, Plus, Loader2, Search} from "lucide-react"
 import {Link, useOutletContext} from "react-router-dom"
 import { toast } from "react-toastify"
 import api from "../../../api/axios.js"
+import VoucherFilterMobile from "./VoucherFilterMobile.jsx";
 
 
 export default function VoucherList() {
-    const [vouchers, setVouchers] = useState([])
-    const [loading, setLoading] = useState(true)
+    const [vouchers, setVouchers] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [showSearchMb, setShowSearchMb] = useState(false);
-    const {filters} = useOutletContext();
+    const {filters,setFilters} = useOutletContext();
+    const [meta, setMeta] = useState({});
+    const [page, setPage] = useState(1);
 
     useEffect(() => {
-        console.log("Filter: ", filters, "search: ", search);
-
         const delayDebounce = setTimeout(() => {
             setLoading(true);
-            api.get("/vouchers", {params: {search, ...filters} })
+            api.get("/vouchers", {params: {search, page, ...filters} })
                 .then((res) => {
-                    console.log("API response:", res.data);
-                    setVouchers(res.data);
+                    setVouchers(res.data.data);
+                    setMeta({
+                        current_page: res.data.current_page,
+                        last_page: res.data.last_page,
+                        total: res.data.total,
+                    });
                 })
                 .catch((err) => console.log(err))
                 .finally(() => setLoading(false))
         }, 300);
 
         return () => clearTimeout(delayDebounce);
-    }, [search,filters]);
+    }, [search,filters, page]);
 
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this voucher?")) return
@@ -43,6 +48,9 @@ export default function VoucherList() {
 
     return (
         <div className="p-4 md:p-6 bg-white rounded-2xl shadow-md">
+            <div className="block md:hidden mb-4">
+                <VoucherFilterMobile filters={filters} setFilters={setFilters} />
+            </div>
             <div className="flex justify-between items-center mb-6">
                 <h2 className="hidden md:block text-2xl font-bold text-gray-800">🎟️ Vouchers</h2>
 
@@ -226,6 +234,27 @@ export default function VoucherList() {
                     </div>
                 </>
             )}
+            <div className="flex justify-center items-center gap-2 mt-6">
+                <button
+                    disabled={meta.current_page === 1}
+                    onClick={() => setPage((prev) => prev -1)}
+                    className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                >
+                    Prev
+                </button>
+
+                <span>
+                    Page {meta.current_page} / {meta.last_page}
+                </span>
+
+                <button
+                    disabled={meta.current_page === meta.last_page}
+                    onClick={() => setPage((prev) => prev + 1)}
+                    className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                >
+                    Next
+                </button>
+            </div>
         </div>
     )
 }
