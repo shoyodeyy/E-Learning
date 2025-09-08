@@ -77,6 +77,19 @@ class AuthController extends Controller
             ]);
         }
 
+        // Check if user is banned
+        if ($user->isBanned()) {
+            $bannedUntil = $user->banned_until->format('d/m/Y H:i');
+            return response()->json([
+                'message' => 'Your account has been banned.',
+                'error' => 'account_banned',
+                'ban_details' => [
+                    'reason' => $user->ban_reason,
+                    'banned_until' => $bannedUntil,
+                ]
+            ], 403);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -91,6 +104,7 @@ class AuthController extends Controller
                 'google_id' => $user->google_id,
                 'is_google_user' => $user->isGoogleUser(),
                 'needs_email_verification' => $user->needsEmailVerification(),
+                'has_password' => $user->has_password,
             ],
             'token' => $token,
             'email_verified' => $user->hasVerifiedEmail(),
@@ -105,4 +119,48 @@ class AuthController extends Controller
             'message' => 'Logged out successfully'
         ]);
     }
+
+    public function changePassword(Request $request)
+    {
+        $user = $request->user();
+        $key = Str::lower("change-password:".$user->id);
+
+        // Giới hạn 3 lần trong 1 giờ
+        if (RateLimiter::tooManyAttempts($key, 3)) {
+            $seconds = RateLimiter::availableIn($key);
+            return response()->json([
+                'message' => 'You have changed password too many times. Please try again later.',
+            ], 429);
+        }
+
+        RateLimiter::hit($key, 3600); // reset sau 1 giờ
+
+        $rules = [
+            'new_password' => 'required|string|min:8|confirmed',
+        ];
+
+        if ($user->password) {
+            $rules['current_password'] = 'required|string';
+        }
+
+        $validated = $request->validate($rules);
+
+        if ($user->password && !Hash::check($validated['current_password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => ['The current password is incorrect.'],
+            ]);
+        }
+
+        $user->update([
+            'password' => Hash::make($validated['new_password']),
+            'has_password' => true,
+        ]);
+
+        return response()->json([
+            'message' => $user->wasChanged('password')
+                ? 'Password changed successfully!'
+                : 'Password not changed.',
+        ]);
+    }
+
 }

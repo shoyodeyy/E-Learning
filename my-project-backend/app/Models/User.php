@@ -27,7 +27,16 @@ class User extends Authenticatable
         'role',
         'google_id',
         'email_verified_at',
+        'ban_reason',
+        'banned_until',
     ];
+
+    protected $appends = ['has_password'];
+
+    public function getHasPasswordAttribute()
+    {
+        return !is_null($this->password);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -48,6 +57,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'banned_until' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -86,5 +96,13 @@ class User extends Authenticatable
     public function hasVerifiedEmail(): bool
     {
         return !is_null($this->email_verified_at);
+    }
+
+    /**
+     * Check if user is currently banned
+     */
+    public function isBanned(): bool
+    {
+        return !is_null($this->banned_until) && $this->banned_until->isFuture();
     }
 }

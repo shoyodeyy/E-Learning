@@ -58,6 +58,20 @@ class GoogleController extends Controller
                 ]);
             }
 
+            // Check if user is banned
+            if ($user->isBanned()) {
+                $bannedUntil = $user->banned_until->format('d/m/Y H:i');
+                return response()->json([
+                    'status' => 403,
+                    'message' => 'Your account has been banned.',
+                    'error' => 'account_banned',
+                    'ban_details' => [
+                        'reason' => $user->ban_reason,
+                        'banned_until' => $bannedUntil,
+                    ]
+                ], 403);
+            }
+
             $token = $user->createToken('google_token')->plainTextToken;
 
             return response()->json([
@@ -70,6 +84,9 @@ class GoogleController extends Controller
                     'role' => $user->role,
                     'google_id' => $user->google_id,
                     'email_verified_at' => $user->email_verified_at,
+                    'is_google_user' => $user->isGoogleUser(),
+                    'needs_email_verification' => $user->needsEmailVerification(),
+                    'has_password' => $user->has_password,
                 ],
             ]);
         } catch (\Exception $e) {
