@@ -99,6 +99,9 @@ export default function PublicProfile() {
             setUser(result.user);
             toast.success(result.message || "Profile updated successfully ✅");
             setErrors({});
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         } catch (error) {
             console.error("Profile update error:", error);
             toast.error("Update failed ❌");
