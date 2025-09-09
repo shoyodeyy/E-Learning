@@ -5,6 +5,10 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\LectureController;
+use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\QuizController;
+use App\Http\Controllers\SectionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\VerificationController;
@@ -17,6 +21,10 @@ Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 
 // courses (để tạm thời)
 Route::apiResource('/courses', CourseController::class);
+Route::apiResource('courses.sections', SectionController::class);
+Route::apiResource('sections.lectures', LectureController::class);
+Route::apiResource('/sections.quizzes', QuizController::class);
+Route::apiResource('/sections.quizzes.questions', QuestionController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', static function (Request $request) {

@@ -12,6 +12,8 @@ export default function Courses() {
     const {user, logout, refreshUser} = useAuth();
 
     const [course, setCourse] = useState([]);
+    const [searchText, setSearchText] = useState("");
+    const [statusFilter, setStatusFilter] = useState("All");
 
     useEffect(() => {
         async function fetchCourses() {
@@ -23,7 +25,6 @@ export default function Courses() {
 
         fetchCourses();
     }, []);
-
 
     useEffect(() => {
         if (!user) return;
@@ -46,6 +47,14 @@ export default function Courses() {
         navigate("/instructor/course/create/1");
     }
 
+    const filteredCourses = course.filter(c => {
+        const matchSearch = c.courseTitle.toLowerCase().includes(searchText.toLowerCase());
+        const matchStatus =
+            statusFilter === "All" ||
+            c.status.statusName.toLowerCase() === statusFilter.toLowerCase();
+        return matchSearch && matchStatus;
+    });
+
     return (
         <div className="min-h-screen bg-gray-100">
             <header className="bg-white shadow-sm">
@@ -54,7 +63,12 @@ export default function Courses() {
                         <div className="flex items-center">
                             <img src="/images/logo.webp" alt="Udemy Logo" className="h-8"/>
                         </div>
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-8">
+                            <div
+                                onClick={() => navigate("/instructor/dashboard")}
+                                className="font-semibold text-lg cursor-pointer rounded-md hover:bg-gray-100 p-2">
+                                Dashboard Instructor
+                            </div>
                             <span className="text-gray-700">Welcome, {user.name}</span>
                             <div className="flex items-center space-x-2">
                                 {user.email_verified_at ? (
@@ -86,35 +100,30 @@ export default function Courses() {
                     <h2 className="text-3xl font-extrabold">Courses</h2>
 
                     <div className="space-y-7">
-                        {/* Search + Filter + New Course + Courses */}
                         <div className="flex flex-wrap items-center justify-between gap-4">
                             <div className="flex items-center space-x-2 gap-4 flex-1">
                                 {/* Search */}
                                 <input
                                     type="text"
                                     placeholder="Search your courses"
+                                    value={searchText}
+                                    onChange={e => setSearchText(e.target.value)}
                                     className="px-4 py-3 w-80 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-800 focus:border-purple-800"
                                 />
-
-                                {/* Search button with icon */}
-                                <button
-                                    className="px-3 py-3 bg-purple-800 text-white rounded-md hover:bg-purple-800 flex items-center justify-center cursor-pointer">
-                                    🔍
-                                </button>
 
                                 {/* Sort dropdown */}
                                 <div className="relative">
                                     <select
+                                        value={statusFilter}
+                                        onChange={e => setStatusFilter(e.target.value)}
                                         className="appearance-none w-50 px-4 pr-10 py-3 border border-gray-300 rounded-md text-purple-800 font-semibold focus:outline-none focus:ring-2 focus:ring-purple-800 cursor-pointer">
-                                        <option>Newest</option>
-                                        <option>Oldest</option>
-                                        <option>A–Z</option>
-                                        <option>Z–A</option>
-                                        <option>Published first</option>
-                                        <option>Unpublished first</option>
+                                        <option value="All">All Status</option>
+                                        <option value="Draft">Draft</option>
+                                        <option value="Publish">Publish</option>
+                                        <option value="Unpublished">Unpublished</option>
+                                        <option value="Rejected">Rejected</option>
                                     </select>
 
-                                    {/* Custom arrow */}
                                     <span
                                         className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-purple-800">
                                         <MoveDown className="w-5"/>
@@ -130,12 +139,16 @@ export default function Courses() {
                         </div>
 
                         {/* Course List */}
-                        {course.slice().reverse().map(course => (
-                            <CourseItem
-                                key={course.courseID}
-                                course={course}
-                            />
-                        ))}
+                        {filteredCourses.length > 0 ? (
+                            filteredCourses.slice().reverse().map(course => (
+                                <CourseItem
+                                    key={course.courseID}
+                                    course={course}
+                                />
+                            ))
+                        ) : (
+                            <p className="text-gray-500 italic">No courses found.</p>
+                        )}
                     </div>
                 </div>
             </main>

@@ -1,7 +1,8 @@
-import {useParams, useNavigate} from "react-router-dom";
-import {useState, useEffect} from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import axios from 'axios';
-import {X, File, Pencil, Trash, Plus} from "lucide-react";
+import { X, File, Pencil, Trash, Plus } from "lucide-react";
+import {toast} from "react-toastify";
 
 import SidebarCourseManage from "./SidebarCourseManage.jsx";
 import HeaderCourseManage from "./HeaderCourseManage.jsx";
@@ -12,35 +13,6 @@ import { apiUrl } from "../../../services/http.jsx";
 export default function Curriculum() {
     const {courseID} = useParams();
     const navigate = useNavigate();
-
-    // fetch data by axios
-    useEffect(() => {
-        async function fetchCourse() {
-            try {
-                const res = await fetch(`${apiUrl}/courses/${courseID}`);
-                const data = await res.json();
-
-                setCourse(prev => ({
-                    ...prev,
-                    id: courseID,
-                    title: data.data.courseTitle,
-                    category: data.data.category?.categoryName || "",
-                    status: data.data.status?.statusName || ""
-                }));
-            } catch (error) {
-                console.error("Error load course: ", error);
-            }
-        }
-
-        fetchCourse();
-    }, [courseID]);
-
-    // auto scroll to top
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [courseID]);
-
-    const [isAddingCurrItem, setIsAddingCurrItem] = useState(false);
 
     const [course, setCourse] = useState({
         id: crypto.randomUUID(),
@@ -56,28 +28,62 @@ export default function Curriculum() {
         avgRating: "",
         totalStudents: 0,
         totalDuration: 0,
-        sections: [
-            {
-                id: crypto.randomUUID(),
-                title: "Introduction",
-                index: 1,
-                totalDuration: 0,
-                items: [
-                    {
-                        id: crypto.randomUUID(),
-                        type: "Lecture",
-                        index: 1,
-                        title: "Introduction",
-                        videoFile: null,
-                        videoUrl: null,
-                        thumbnail: null,
-                        duration: null,
-                        isAddingVideo: false,
-                    }
-                ]
-            }
-        ]
+        sections: []
     });
+
+    // fetch data by axios
+    useEffect(() => {
+        async function fetchCourse() {
+            try {
+                const res = await fetch(`${apiUrl}/courses/${courseID}`);
+                const data = await res.json();
+
+                const sections = (data.data.sections || []).map(sec => ({
+                    id: sec.sectionId,
+                    title: sec.sectionTitle,
+                    index: sec.sectionIndex,
+                    totalDuration: sec.totalDuration,
+                    items: (sec.items || []).map(it => ({
+                        id: it.itemId,
+                        type: it.type,
+                        index: it.itemIndex,
+                        title: it.itemTitle,
+                        videoUrl: it.videoUrl,
+                        videoFile: it.videoFile,
+                        videoName: it.videoName,
+                        thumbnail: it.thumbnail,
+                        duration: it.duration,
+                        isAddingVideo: false,
+
+                        questions: it.questions || [],
+                        hasMultipleQuestion: it.questions && it.questions.length > 0,
+                        isAddingQuestion: false,
+                    }))
+                }));
+
+                setCourse(prev => ({
+                    ...prev,
+                    id: courseID,
+                    title: data.data.courseTitle,
+                    category: data.data.category?.categoryName || "",
+                    status: data.data.status?.statusName || "",
+                    totalDuration: data.data.totalDuration || 0,
+                    sections
+                }));
+            } catch (error) {
+                console.error("Error load course: ", error);
+            }
+        }
+
+        fetchCourse();
+    }, [courseID]);
+
+    // auto scroll to top
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [courseID]);
+
+    const [addingToSectionId, setAddingToSectionId] = useState(null);
 
     // state Section
     const [editedSectionName, setEditedSectionName] = useState("");
@@ -91,275 +97,230 @@ export default function Curriculum() {
     const [newQuizTitle, setNewQuizTitle] = useState("");
     const [isNewQuiz, setIsNewQuiz] = useState(false);
 
-    function handleSaveRenamedSection(sectionId, newTitle) {
-        setCourse(prev => ({
-            ...prev,
-            sections: prev.sections.map((sec) =>
-                sec.id === sectionId
-                    ? {...sec, title: newTitle}
-                    : sec
-            ),
-        }));
+    async function handleRenameSection(sectionId, newTitle) {
+        if (!newTitle.trim()) return;
 
-        setIsEditingSectionId(null);
-        setEditedSectionName("");
+        try {
+            const res = await axios.put(`${apiUrl}/courses/${courseID}/sections/${sectionId}`, {
+                sectionTitle: newTitle
+            });
+
+            const updatedSection = res.data.section;
+
+            // Cập nhật lại state với dữ liệu mới từ backend
+            setCourse(prev => ({
+                ...prev,
+                sections: prev.sections.map(sec =>
+                    sec.id === sectionId
+                        ? {
+                            ...sec,
+                            title: updatedSection.sectionTitle,
+                            index: updatedSection.sectionIndex
+                        }
+                        : sec
+                ),
+            }));
+
+            // Reset state edit
+            setIsEditingSectionId(null);
+            setEditedSectionName("");
+
+        } catch (error) {
+            console.error("Error updating section:", error);
+        }
     }
 
-    function handleAddSection() {
-        setCourse(prev => {
-            // lấy số index tiếp theo
-            const nextIndex = prev.sections.length + 1;
+    async function handleAddSection() {
+        try {
+            const res = await axios.post(`${apiUrl}/courses/${courseID}/sections`, {
+                sectionTitle: `New Section ${course.sections.length + 1}`
+            });
 
-            const newSection = {
-                id: crypto.randomUUID(),
-                title: `New Section ${nextIndex}`,
-                index: nextIndex,
+            const savedSection = {
+                id: res.data.section.sectionId,
+                title: res.data.section.sectionTitle,
+                index: res.data.section.sectionIndex,
                 totalDuration: 0,
                 items: []
             };
 
-            const updatedSections = [
-                ...prev.sections,
-                newSection
-            ].map((sec, idx) => ({
-                ...sec,
-                index: idx + 1
+            setCourse(prev => ({
+                ...prev,
+                sections: [...prev.sections, savedSection]
             }));
 
-            return {
-                ...prev,
-                sections: updatedSections
-            }
-        })
+        } catch (error) {
+            console.error("Error adding section:", error);
+        }
     }
 
-    async function handleAddLecture(sectionId, itemId) {
+    async function handleAddLecture(sectionId) {
         if (!newLectureTitle.trim()) return;
 
-        // 1. Gửi request lên backend
-        const res = await axios.post(`${apiUrl}/courses/${courseID}`,
-            {
-                'title': newLectureTitle,
-                'type': "Lecture"
-            }
-        );
+        try {
+            const res = await axios.post(`${apiUrl}/sections/${sectionId}/lectures`, {
+                lectureTitle: newLectureTitle
+            });
 
-        const savedLecture = res.data.data;
-        // backend trả về { id, title, type, ... }
+            const savedLecture = {
+                id: res.data.lecture.lectureId,
+                type: "Lecture",
+                index: res.data.lecture.lectureIndex,
+                title: res.data.lecture.lectureTitle,
+                videoUrl: res.data.lecture.videoUrl,
+                videoFile: res.data.lecture.videoFile,
+                thumbnail: res.data.lecture.thumbnail,
+                duration: res.data.lecture.lectureDuration,
+                isAddingVideo: false,
+            };
 
-        // 2. Update state cục bộ
-        setCourse(prev => ({
-            ...prev,
-            sections: prev.sections.map(sec => {
-                if (sec.id !== sectionId) return sec;
+            setCourse(prev => ({
+                ...prev,
+                sections: prev.sections.map(sec =>
+                    sec.id === sectionId
+                        ? { ...sec, items: [...sec.items, savedLecture] }
+                        : sec
+                )
+            }));
 
-                const oldItems = sec.items || [];
+            setNewLectureTitle("");
+            setAddingToSectionId(null);
 
-                let newItems;
-                if (itemId) {
-                    // insert following the item has id = itemId
-                    const insertIndex = oldItems.findIndex(it => it.id === itemId);
-                    if (insertIndex === -1) {
-                        // if not found itemId, push to the end
-                        newItems = [
-                            ...oldItems,
-                            savedLecture
-                        ];
-                    } else {
-                        newItems = [
-                            ...oldItems.slice(0, insertIndex + 1),
-                            savedLecture,
-                            ...oldItems.slice(insertIndex + 1)
-                        ];
-                    }
-                } else {
-                    // no itemId passed, also push to the end
-                    newItems = [
-                        ...oldItems,
-                        savedLecture
-                    ];
-                }
-
-                // Cật nhật lại index cho toàn bộ items có type là Lecture
-                let lectureCounter = 0;
-                newItems = newItems.map(it => {
-                    if (it.type === "Lecture") {
-                        lectureCounter++;
-                        return {
-                            ...it,
-                            index: lectureCounter
-                        };
-                    }
-                    return it;
-                });
-
-                return {
-                    ...sec,
-                    items: newItems
-                };
-            })
-        }));
-
-        // reset input
-        setNewLectureTitle("");
-        setIsNewLecture(false);
-        setIsAddingCurrItem(false);
+        } catch (error) {
+            console.error("Error adding lecture: ", error);
+        }
     }
 
-    function handleAddQuiz(sectionId, itemId) {
+    async function handleAddQuiz(sectionId, itemId) {
         if (!newQuizTitle.trim()) return;
 
-        setCourse(prev => ({
-            ...prev,
-            sections: prev.sections.map(sec => {
-                if (sec.id !== sectionId) return sec;
+        try {
+            // 1. Gửi request tạo quiz lên backend
+            const res = await axios.post(`${apiUrl}/sections/${sectionId}/quizzes`, {
+                quizTitle: newQuizTitle
+            });
 
-                const oldItems = sec.items || [];
+            const backendQuiz = res.data.quiz; // quiz trả về từ backend, có quizId và quizIndex
 
-                // create new item
-                const newQuiz = {
-                    id: crypto.randomUUID(),
-                    type: "Quiz",
-                    title: newQuizTitle,
-                    description: "",
-                    isAddingQuestion: false,
-                    hasMultipleQuestion: false,
-                    questions: []
-                };
+            setCourse(prev => ({
+                ...prev,
+                sections: prev.sections.map(sec => {
+                    if (sec.id !== sectionId) return sec;
 
-                let newItems;
-                if (itemId) {
-                    // insert following the item has id = itemId
-                    const insertIndex = oldItems.findIndex(it => it.id === itemId);
-                    if (insertIndex === -1) {
-                        // if not found itemId, push to the end
-                        newItems = [
-                            ...oldItems,
-                            newQuiz
-                        ];
+                    const oldItems = sec.items || [];
+
+                    // Tạo quiz mới dựa trên backend trả về
+                    const newQuiz = {
+                        id: backendQuiz.quizId, // lấy quizId thật
+                        type: "Quiz",
+                        title: backendQuiz.quizTitle,
+                        description: backendQuiz.description || "",
+                        index: backendQuiz.quizIndex,
+                        questions: [],
+                        isAddingQuestion: false,
+                        hasMultipleQuestion: false
+                    };
+
+                    let newItems;
+                    if (itemId) {
+                        // Chèn quiz theo sau item có id = itemId
+                        const insertIndex = oldItems.findIndex(it => it.id === itemId);
+                        if (insertIndex === -1) {
+                            newItems = [...oldItems, newQuiz];
+                        } else {
+                            newItems = [
+                                ...oldItems.slice(0, insertIndex + 1),
+                                newQuiz,
+                                ...oldItems.slice(insertIndex + 1)
+                            ];
+                        }
                     } else {
-                        newItems = [
-                            ...oldItems.slice(0, insertIndex + 1),
-                            newQuiz,
-                            ...oldItems.slice(insertIndex + 1)
-                        ];
+                        // Nếu không có itemId thì push vào cuối
+                        newItems = [...oldItems, newQuiz];
                     }
-                } else {
-                    // no itemId passed, also push to the end
-                    newItems = [
-                        ...oldItems,
-                        newQuiz
-                    ];
-                }
 
-                // Cật nhật lại index cho toàn bộ items có type là Quiz
-                let quizCounter = 0;
-                newItems = newItems.map(it => {
-                    if (it.type === "Quiz") {
-                        quizCounter++;
-                        return {
-                            ...it,
-                            index: quizCounter
-                        };
-                    }
-                    return it;
-                });
+                    // Cập nhật lại index cho tất cả quiz trong section
+                    let quizCounter = 0;
+                    newItems = newItems.map(it => {
+                        if (it.type === "Quiz") {
+                            quizCounter++;
+                            return { ...it, index: quizCounter };
+                        }
+                        return it;
+                    });
 
-                return {
-                    ...sec,
-                    items: newItems
-                };
-            })
-        }));
+                    return {
+                        ...sec,
+                        items: newItems
+                    };
+                })
+            }));
 
-        setNewQuizTitle("");
-        setIsNewQuiz(false);
-        setIsAddingCurrItem(false);
+            setNewQuizTitle("");
+            setIsNewQuiz(false);
+            setAddingToSectionId(null);
+
+        } catch (error) {
+            console.error("Error adding quiz:", error);
+            toast.error("Failed to add quiz");
+        }
     }
 
-    // function handleChangeOption(optionId, changes) {
-    //     setOptions((prev) =>
-    //         prev.map((opt) => {
-    //             if (opt.id === optionId) {
-    //                 return {
-    //                     ...opt,
-    //                     ...changes,
-    //                     isCorrect: changes.isCorrect ? true : opt.isCorrect,
-    //                 };
-    //             }
-    //             // Nếu có chọn correct, các option khác phải false
-    //             if (changes.isCorrect && opt.isCorrect) {
-    //                 return { ...opt, isCorrect: false }; // chỉ tạo object mới khi đang là correct
-    //             }
-    //             return opt; // ⚡ giữ nguyên object cũ
-    //         })
-    //     );
-    // }
-
-    // function handleChangeOption(optionId, changes) {
-    //     setOptions(prevOptions => {
-    //         // Nếu thay đổi là chọn đáp án đúng (isCorrect)
-    //         if (changes.isCorrect) {
-    //             return prevOptions.map(opt => ({
-    //                 ...opt,
-    //                 isCorrect: opt.id === optionId // Chỉ đặt `isCorrect` là true cho option được chọn
-    //             }));
-    //         }
-    //         // Nếu thay đổi là nội dung text của option
-    //         else {
-    //             return prevOptions.map(opt =>
-    //                 opt.id === optionId
-    //                     ? { ...opt, ...changes } // Cập nhật text cho option cụ thể
-    //                     : { ...opt } // Trả về một bản sao mới của các option khác
-    //             );
-    //         }
-    //     });
-    // }
-    //
-    // function handleDeleteOption(optionId) {
-    //     setOptions(prev => prev.filter(opt => opt.id !== optionId));
-    // }
-    //
-    // function handleAddOption() {
-    //     setOptions(prev => [
-    //         ...prev,
-    //         {
-    //             id: crypto.randomUUID(),
-    //             optionText: "",
-    //             explainText: "",
-    //             isCorrect: false
-    //         }
-    //     ]);
-    // }
-
-    function handleRemoveSection(sectionId) {
+    async function handleRemoveSection(sectionId) {
         // confirm
         const confirmed = window.confirm("Are you sure you want to remove this section?");
         if (!confirmed) return;
 
-        setCourse(prev => {
-            // filter out section has id == sectionId
-            const updatedSections = prev.sections
-                .filter(sec => sec.id !== sectionId)
-                // re-index
-                .map((sec, idx) => ({
-                    ...sec,
-                    index: idx + 1
-                }));
+        try {
+            // gọi API xoá ở backend
+            await axios.delete(`${apiUrl}/courses/${courseID}/sections/${sectionId}`);
 
-            return {
-                ...prev,
-                sections: updatedSections
-            };
-        })
+            // xoá ở frontend state
+            setCourse(prev => {
+                const updatedSections = prev.sections
+                    .filter(sec => sec.id !== sectionId)
+                    // re-index
+                    .map((sec, idx) => ({
+                        ...sec,
+                        index: idx + 1
+                    }));
+
+                return {
+                    ...prev,
+                    sections: updatedSections
+                };
+            });
+
+        } catch (error) {
+            console.error("Error deleting section:", error);
+            toast.error("Failed to delete section. Please try again.");
+        }
     }
 
-    function handleRemoveItem(sectionId, itemId) {
+    async function handleRemoveItem(sectionId, itemId, itemType) {
         const confirmed = window.confirm(
             "You are about to remove a curriculum item. Are you sure you want to continue?"
         );
         if (!confirmed) return;
 
+        try {
+            // remove Lecture
+            if (itemType === "Lecture") {
+                await axios.delete(`${apiUrl}/sections/${sectionId}/lectures/${itemId}`);
+            }
+
+            // remove Quiz
+            if (itemType === "Quiz") {
+                await axios.delete(`${apiUrl}/sections/${sectionId}/quizzes/${itemId}`);
+            }
+
+        } catch (err) {
+            console.error("Delete failed:", err);
+            toast.error("Failed to delete item on server");
+            return;
+        }
+
+        // Nếu xoá backend thành công thì update state
         setCourse(prev => ({
             ...prev,
             sections: prev.sections.map(sec => {
@@ -432,6 +393,7 @@ export default function Curriculum() {
         <div className="min-h-screen bg-gray-100 flex flex-col">
             {/* Header */}
             <HeaderCourseManage
+                course={course}
                 title={course.title}
                 status={course.status}
             />
@@ -472,8 +434,7 @@ export default function Curriculum() {
                                         <div className="flex flex-col gap-y-10 w-full px-2 py-5 bg-gray-100 border">
                                             {/* Title Section */}
                                             <div>
-                                                {/* nhớ sửa đk chỗ này lại */}
-                                                {!isEditingSectionId && (
+                                                {isEditingSectionId !== section.id && (
                                                     <div
                                                         className="flex items-center justify-start space-x-3 cursor-move w-full group">
                                                         {/* Section Index*/}
@@ -483,7 +444,7 @@ export default function Curriculum() {
 
                                                         <div className="flex items-center space-x-2">
                                                             {/* Section Title */}
-                                                            {!isEditingSectionId && (
+                                                            {isEditingSectionId !== section.id && (
                                                                 <div className="flex items-center space-x-2">
                                                                     <File className="w-3 cursor-pointer"/>
                                                                     <p>{section.title}</p>
@@ -513,8 +474,7 @@ export default function Curriculum() {
                                                 )}
 
                                                 {/* Edit Section */}
-                                                {/* nhớ sửa đk chỗ này lại */}
-                                                {isEditingSectionId && (
+                                                {isEditingSectionId === section.id && (
                                                     <div
                                                         className="flex flex-col items-center justify-start w-full space-y-5 px-2 py-5 bg-white border">
                                                         <div
@@ -525,7 +485,7 @@ export default function Curriculum() {
                                                             </p>
 
                                                             {/* Input Rename Section */}
-                                                            {isEditingSectionId && (
+                                                            {isEditingSectionId === section.id && (
                                                                 <div className="flex items-center space-x-2 w-full">
                                                                     <input
                                                                         type="text"
@@ -547,7 +507,7 @@ export default function Curriculum() {
                                                                 Cancel
                                                             </button>
                                                             <button
-                                                                onClick={() => handleSaveRenamedSection(section.id, editedSectionName)}
+                                                                onClick={() => handleRenameSection(section.id, editedSectionName)}
                                                                 className="px-5 py-1.5 cursor-pointer bg-purple-800 text-white font-bold rounded-md shadow hover:bg-purple-800 disabled:opacity-30 disabled:cursor-not-allowed"
                                                                 disabled={!editedSectionName.trim()}
                                                             >
@@ -570,16 +530,16 @@ export default function Curriculum() {
                                                 <div
                                                     className="w-full flex flex-col items-start justify-start flex-1 space-x-2 h-14">
                                                     {/* Curriculum item button */}
-                                                    {!isAddingCurrItem && (
+                                                    {addingToSectionId !== section.id && (
                                                         <button
-                                                            onClick={() => setIsAddingCurrItem(true)}
+                                                            onClick={() => setAddingToSectionId(section.id)}
                                                             className="flex items-center justify-center gap-x-2 px-5 py-2 cursor-pointer border bg-white text-purple-800 text-sm font-bold rounded-md hover:bg-gray-200">
                                                             <Plus className="w-3"/>
                                                             Curriculum item
                                                         </button>
                                                     )}
 
-                                                    {isAddingCurrItem && (
+                                                    {addingToSectionId === section.id && (
                                                         <div className="w-full">
                                                             {/* Select item */}
                                                             <div className="flex w-full bg-white">
@@ -611,9 +571,9 @@ export default function Curriculum() {
                                                                         onClick={() => {
                                                                             setIsNewLecture(false);
                                                                             setIsNewQuiz(false);
-                                                                            setIsAddingCurrItem(false);
+                                                                            setAddingToSectionId(null);
                                                                         }}
-                                                                        className="flex items-center min-w-5 w-5 absolute right-208 -top-5 rounded-sm hover:bg-gray-200"
+                                                                        className="flex items-center min-w-5 w-5 absolute right-198 -top-5 rounded-sm hover:bg-gray-200"
                                                                     />
                                                                 </div>
                                                             </div>
@@ -724,9 +684,9 @@ export default function Curriculum() {
                                                                         onClick={() => {
                                                                             setIsNewLecture(false);
                                                                             setIsNewQuiz(false);
-                                                                            setIsAddingCurrItem(false);
+                                                                            setAddingToSectionId(null);
                                                                         }}
-                                                                        className="flex items-center min-w-5 w-5 absolute right-208 -top-34.5 rounded-sm hover:bg-gray-200"
+                                                                        className="flex items-center min-w-5 w-5 absolute right-198 -top-34.5 rounded-sm hover:bg-gray-200"
                                                                     />
                                                                 </div>
                                                             )}

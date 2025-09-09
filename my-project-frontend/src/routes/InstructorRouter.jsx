@@ -1,4 +1,4 @@
-import {Route} from "react-router-dom";
+import { Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import Dashboard from "../pages/Instructor/Dashboard.jsx";
 import Courses from '../pages/Instructor/Course/Courses.jsx';

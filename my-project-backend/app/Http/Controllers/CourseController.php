@@ -16,7 +16,11 @@ class CourseController
             'approvedByAdmin',
             'category',
             'status',
-            'section'
+            'sections',
+            'sections.lectures',
+            'sections.quizzes',
+            'sections.quizzes.questions',
+            'sections.quizzes.questions.options'
         ])->get();
         return CourseResource::collection($courses);
     }
@@ -28,7 +32,11 @@ class CourseController
             'approvedByAdmin',
             'category',
             'status',
-            'section'
+            'sections',
+            'sections.lectures',
+            'sections.quizzes',
+            'sections.quizzes.questions',
+            'sections.quizzes.questions.options'
         ])->where('courseID', $id)->firstOrFail();
 
         return new CourseResource($course);
@@ -69,6 +77,23 @@ class CourseController
             return response()->json([
                 "message" => "Internal Server Error",
                 "error" => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function destroy($id): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $course = Course::where('courseID', $id)->firstOrFail();
+            $course->delete();
+
+            return response()->json([
+                'message' => 'Course deleted successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to delete course',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

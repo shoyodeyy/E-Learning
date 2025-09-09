@@ -2,10 +2,11 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import {ArrowDown} from "lucide-react";
 import axios from 'axios';
+import {toast} from "react-toastify";
 
 import {apiUrl} from "../../../services/http.jsx";
 
-export default function CreateStepTwo({ title, setTitle, category, setCategory }) {
+export default function CreateStepTwo({ title, category, setCategory }) {
     const navigate = useNavigate();
 
     const [ response, setResponse ] = useState(null);
@@ -22,11 +23,13 @@ export default function CreateStepTwo({ title, setTitle, category, setCategory }
         try {
             const res = await axios.post(`${apiUrl}/courses`, {
                 courseTitle: title,
-                categoryID: category
+                categoryID: category,
             });
 
             console.log("Course created: ", res.data);
             setResponse(res.data);
+
+            toast.success("Created course successfully");
 
             navigate(`/instructor/course/${res.data.data.courseID}/manage/curriculum`);
         } catch (err) {

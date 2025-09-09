@@ -19,7 +19,17 @@ class SectionResource extends JsonResource
             'sectionTitle'  => $this->sectionTitle,
             'sectionIndex'  => $this->sectionIndex,
             'totalDuration' => $this->totalDuration,
-//            'items'         => ItemResource::collection($this->whenLoaded('items')),
+            'items' => collect()
+                ->merge($this->resource->relationLoaded('lectures')
+                    ? LectureResource::collection($this->lectures)
+                    : collect()
+                )
+                ->merge($this->resource->relationLoaded('quizzes')
+                    ? QuizResource::collection($this->quizzes)
+                    : collect()
+                )
+                ->sortBy('itemIndex')
+                ->values(),
         ];
     }
 }

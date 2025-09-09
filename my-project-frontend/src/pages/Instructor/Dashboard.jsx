@@ -30,6 +30,11 @@ export default function Dashboard() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center py-6">
                     <h1 className="text-xl font-bold">Instructor Dashboard</h1>
                     <div className="flex items-center space-x-3">
+                        <div
+                            onClick={() => navigate("/instructor/courses")}
+                            className="font-semibold text-lg cursor-pointer rounded-md hover:bg-gray-100 p-2">
+                            Courses
+                        </div>
                         {user.email_verified_at ? (
                             <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">✓ Verified</span>
                         ) : (

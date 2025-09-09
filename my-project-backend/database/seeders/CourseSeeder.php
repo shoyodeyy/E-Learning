@@ -114,8 +114,8 @@ class CourseSeeder extends Seeder
         // ------------------- courses -------------------
         $courses = [
             [
-                'courseTitle' => 'Laravel Basics',
-                'courseDescription' => 'Learn the basics of Laravel framework.',
+                'courseTitle' => 'Development Fundamentals',
+                'courseDescription' => 'Learn the fundamentals of software development.',
                 'price' => 49.99,
                 'level' => 'Beginner',
                 'badge' => 'bestseller',
@@ -125,7 +125,39 @@ class CourseSeeder extends Seeder
                 'approvedBy' => 1,
                 'avgRating' => 4.5,
                 'totalStudents' => 120,
-                'totalDuration' => 1200,
+                'totalDuration' => 3273,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'courseTitle' => 'Everything for Business',
+                'courseDescription' => 'Learn the essentials of business and management.',
+                'price' => 59.99,
+                'level' => 'Beginner',
+                'badge' => 'hot',
+                'categoryID' => 'CA02',
+                'statusID' => 'ST01',
+                'instructorID' => 2,
+                'approvedBy' => 1,
+                'avgRating' => 4.5,
+                'totalStudents' => 120,
+                'totalDuration' => 39607,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'courseTitle' => 'The Complete Guide to IT & Software Fundamentals',
+                'courseDescription' => 'Learn the basics of IT and software systems.',
+                'price' => 69.99,
+                'level' => 'Beginner',
+                'badge' => 'bestseller',
+                'categoryID' => 'CA04',
+                'statusID' => 'ST01',
+                'instructorID' => 2,
+                'approvedBy' => 1,
+                'avgRating' => 4.5,
+                'totalStudents' => 120,
+                'totalDuration' => 6390,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]
@@ -139,36 +171,6 @@ class CourseSeeder extends Seeder
             Course::updateOrCreate(
                 ['courseID' => $course['courseID']],
                 $course
-            );
-        }
-
-
-        // ------------------- sections -------------------
-        $sections = [
-            [
-                'sectionId'     => 'S001',
-                'courseID'      => 'C001',
-                'sectionTitle'  => 'Getting Started',
-                'sectionIndex'  => 1,
-                'totalDuration' => 600,
-                'created_at'    => now(),
-                'updated_at'    => now(),
-            ],
-            [
-                'sectionId'     => 'S002',
-                'courseID'      => 'C001',
-                'sectionTitle'  => 'Laravel Basics',
-                'sectionIndex'  => 2,
-                'totalDuration' => 1200,
-                'created_at'    => now(),
-                'updated_at'    => now(),
-            ],
-        ];
-
-        foreach ($sections as $section) {
-            Section::updateOrCreate(
-                ['sectionId' => $section['sectionId']],
-                $section
             );
         }
     }

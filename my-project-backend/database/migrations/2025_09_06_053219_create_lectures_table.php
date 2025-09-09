@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('lectureIndex');
             $table->string('videoUrl')->nullable();
             $table->string('videoFile')->nullable();
+            $table->string('videoName')->nullable();
             $table->string('thumbnail')->nullable();
             $table->integer('lectureDuration')->nullable();
 

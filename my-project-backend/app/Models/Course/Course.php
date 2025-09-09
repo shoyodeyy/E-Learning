@@ -32,7 +32,7 @@ class Course extends Model
         'updated_at'
     ];
 
-    // Relationship
+    // relationship
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'categoryID', 'categoryID');
@@ -53,7 +53,7 @@ class Course extends Model
         return $this->belongsTo(Status::class, 'statusID', 'statusID');
     }
 
-    public function section(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function sections(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Section::class, 'courseID', 'courseID');
     }

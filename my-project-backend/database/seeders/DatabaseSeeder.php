@@ -35,6 +35,13 @@ class DatabaseSeeder extends Seeder
             ]
         ]);
 
-        $this->call(CourseSeeder::class);
+        $this->call([
+            CourseSeeder::class,
+            SectionSeeder::class,
+            LectureSeeder::class,
+            QuizSeeder::class,
+            QuizQuestionSeeder::class,
+            QuizOptionSeeder::class,
+        ]);
     }
 }

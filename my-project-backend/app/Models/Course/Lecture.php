@@ -19,6 +19,7 @@ class Lecture extends Model
         'lectureIndex',
         'videoFile',
         'videoUrl',
+        'videoName',
         'thumbnail',
         'lectureDuration',
     ];

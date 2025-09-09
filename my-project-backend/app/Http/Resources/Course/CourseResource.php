@@ -28,7 +28,7 @@ class CourseResource extends JsonResource
             'status' => new StatusResource($this->whenLoaded('status')),
             'instructor' => new InstructorResource($this->whenLoaded('instructor')),
             'approvedBy' => new AdminResource($this->whenLoaded('approvedByAdmin')),
-            'sections' => SectionResource::collection($this->whenLoaded('section')),
+            'sections' => SectionResource::collection($this->whenLoaded('sections')),
 
             'avgRating' => $this->avgRating,
             'totalStudents' => $this->totalStudents,

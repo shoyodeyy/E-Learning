@@ -20,6 +20,7 @@ class QuizResource extends JsonResource
             'itemTitle' => $this->quizTitle,
             'itemIndex' => $this->quizIndex,
             'description' => $this->quizDescription,
+            'questions' => QuizQuestionResource::collection($this->whenLoaded('questions')),
         ];
     }
 }
