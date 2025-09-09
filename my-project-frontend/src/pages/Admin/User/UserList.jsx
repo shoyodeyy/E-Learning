@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Loader2, Ban, Undo } from "lucide-react"
 import { toast } from "react-toastify"
 import api from "../../../api/axios.js"
@@ -6,23 +6,84 @@ import api from "../../../api/axios.js"
 export default function UserList() {
     const [users, setUsers] = useState([])
     const [loading, setLoading] = useState(true)
+    const [loadingMore, setLoadingMore] = useState(false)
+    const [page, setPage] = useState(1)
+    const [hasMore, setHasMore] = useState(true)
+
     const [banUser, setBanUser] = useState(null)
     const [reason, setReason] = useState("")
     const [isProcessingBan, setIsProcessingBan] = useState(false)
 
+    const loadMoreRef = useRef(null)
+
+    const fetchUsers = async (pageNum = 1, isLoadMore = false) => {
+        if (isLoadMore) {
+            setLoadingMore(true)
+        } else {
+            setLoading(true)
+        }
+
+        try {
+            console.log("[v0] Fetching users for page:", pageNum)
+            const res = await api.get(`/users?page=${pageNum}&per_page=100`)
+            const usersArray = Array.isArray(res.data.data) ? res.data.data : []
+
+            if (pageNum === 1) {
+                setUsers(usersArray)
+            } else {
+                setUsers((prev) => [...prev, ...usersArray])
+            }
+
+            if (res.data.current_page && res.data.last_page) {
+                setHasMore(res.data.current_page < res.data.last_page)
+            } else {
+                setHasMore(usersArray.length >= 100)
+            }
+
+            console.log("[v0] Loaded users:", usersArray.length, "hasMore:", hasMore)
+        } catch (err) {
+            console.error("Error fetching users:", err)
+            toast.error("Failed to load users")
+        } finally {
+            setLoading(false)
+            setLoadingMore(false)
+        }
+    }
+
     useEffect(() => {
-        api
-            .get("/users")
-            .then((res) => {
-                const usersArray = Array.isArray(res.data) ? res.data : res.data.data
-                setUsers(usersArray || [])
-            })
-            .catch((err) => {
-                console.error("Error fetching users:", err)
-                toast.error("Failed to load users")
-            })
-            .finally(() => setLoading(false))
+        fetchUsers(1)
     }, [])
+
+    useEffect(() => {
+        if (!hasMore || loadingMore) return
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && !loading && !loadingMore) {
+                    setPage((prev) => {
+                        const nextPage = prev + 1
+                        console.log("[v0] Loading more users, page:", nextPage)
+                        fetchUsers(nextPage, true)
+                        return nextPage
+                    })
+                }
+            },
+            {
+                root: document.querySelector(".user-scroll-container"),
+                threshold: 0.1,
+            }
+        )
+
+        if (loadMoreRef.current) {
+            observer.observe(loadMoreRef.current)
+        }
+
+        return () => {
+            if (loadMoreRef.current) {
+                observer.unobserve(loadMoreRef.current)
+            }
+        }
+    }, [hasMore, loading, loadingMore])
 
     const handleBan = async () => {
         if (!banUser) return
@@ -31,12 +92,9 @@ export default function UserList() {
             const response = await api.post(`/users/${banUser.id}/ban`, { reason })
 
             if (response.status >= 200 && response.status < 300) {
-                setUsers(users.map((u) =>
-                    u.id === banUser.id ? { ...u, banned_until: "9999-12-31", ban_reason: reason } : u
-                ))
+                setUsers(users.map((u) => (u.id === banUser.id ? { ...u, banned_until: "9999-12-31", ban_reason: reason } : u)))
                 toast.success(`Banned ${banUser.name} successfully!`)
             } else {
-                console.error("Unexpected response status:", response.status)
                 toast.error("Failed to ban user")
             }
         } catch {
@@ -52,9 +110,7 @@ export default function UserList() {
         if (!window.confirm("Are you sure you want to unban this user?")) return
         try {
             await api.post(`/users/${id}/unban`)
-            setUsers(users.map((u) =>
-                u.id === id ? { ...u, banned_until: null, ban_reason: null } : u
-            ))
+            setUsers(users.map((u) => (u.id === id ? { ...u, banned_until: null, ban_reason: null } : u)))
             toast.success("User unbanned successfully!")
         } catch {
             toast.error("Failed to unban user")
@@ -72,10 +128,11 @@ export default function UserList() {
                 </div>
             ) : (
                 <>
-                    <div className="hidden md:block overflow-x-auto">
+                    {/* Desktop */}
+                    <div className="user-scroll-container hidden md:block overflow-x-auto overflow-y-auto max-h-[80vh]">
                         <table className="w-full border-collapse">
-                            <thead>
-                            <tr className="bg-gray-100 text-gray-700 text-sm uppercase text-center">
+                            <thead className="sticky top-0 bg-gray-100 z-10">
+                            <tr className="text-gray-700 text-sm uppercase text-center">
                                 <th className="px-4 py-3">ID</th>
                                 <th className="px-4 py-3">Name</th>
                                 <th className="px-4 py-3">Email</th>
@@ -123,28 +180,39 @@ export default function UserList() {
                             ))}
                             </tbody>
                         </table>
+                        {hasMore && (
+                            <div ref={loadMoreRef} className="h-10 flex justify-center items-center text-gray-500">
+                                {loadingMore ? (
+                                    <>
+                                        <Loader2 className="animate-spin mr-2" size={16} />
+                                        Loading more users...
+                                    </>
+                                ) : (
+                                    "Scroll to load more..."
+                                )}
+                            </div>
+                        )}
                     </div>
 
+                    {/* Mobile */}
                     <div className="md:hidden space-y-4">
                         {users.map((u) => (
                             <div key={u.id} className="flex justify-between items-end bg-gray-50 rounded-lg p-4 border">
-                                <div className="flex justify-between items-start mb-3">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-sm text-gray-500">#{u.id}</span>
-                                            {u.banned_until ? (
-                                                <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs">Banned</span>
-                                            ) : (
-                                                <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Active</span>
-                                            )}
-                                        </div>
-                                        <h3 className="font-semibold text-gray-900">{u.name}</h3>
-                                        <p className="text-sm text-gray-600 truncate">{u.email}</p>
-                                        <p className="text-sm text-gray-500 capitalize mt-1">Role: {u.role}</p>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            Created: {new Date(u.created_at).toLocaleDateString("vi-VN")}
-                                        </p>
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-sm text-gray-500">#{u.id}</span>
+                                        {u.banned_until ? (
+                                            <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs">Banned</span>
+                                        ) : (
+                                            <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Active</span>
+                                        )}
                                     </div>
+                                    <h3 className="font-semibold text-gray-900">{u.name}</h3>
+                                    <p className="text-sm text-gray-600 truncate">{u.email}</p>
+                                    <p className="text-sm text-gray-500 capitalize mt-1">Role: {u.role}</p>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Created: {new Date(u.created_at).toLocaleDateString("vi-VN")}
+                                    </p>
                                 </div>
 
                                 <div className="flex justify-end">
@@ -166,10 +234,23 @@ export default function UserList() {
                                 </div>
                             </div>
                         ))}
+                        {hasMore && (
+                            <div ref={loadMoreRef} className="flex justify-center items-center py-4 text-gray-500">
+                                {loadingMore ? (
+                                    <>
+                                        <Loader2 className="animate-spin mr-2" size={16} />
+                                        Loading more users...
+                                    </>
+                                ) : (
+                                    "Scroll to load more..."
+                                )}
+                            </div>
+                        )}
                     </div>
                 </>
             )}
 
+            {/* Modal ban */}
             {banUser && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg w-full max-w-md mx-4">

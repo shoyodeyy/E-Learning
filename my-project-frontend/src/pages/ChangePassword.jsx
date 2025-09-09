@@ -5,7 +5,7 @@ import {useAuth} from "../context/AuthContext.jsx"
 import api from "../api/axios.js"
 
 export default function ChangePassword() {
-    const {user, token} = useAuth()
+    const {user, token, refreshUser} = useAuth()
 
     const [form, setForm] = useState({
         current_password: "",
@@ -48,6 +48,8 @@ export default function ChangePassword() {
             })
 
             toast.success(res.data.message || "Password updated successfully")
+
+            await refreshUser()
 
             setForm({
                 current_password: "",

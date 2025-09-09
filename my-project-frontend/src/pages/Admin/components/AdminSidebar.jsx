@@ -25,9 +25,10 @@ const AdminSidebar = ({isCollapsed = false, setIsMobileSidebarOpen, onFilter, fi
     return (
         <aside
             className={`
-                ${isCollapsed ? "w-38 lg:w-20" : "w-38 lg:w-64"} 
-                min-h-screen bg-purple-700 text-white flex flex-col shadow-lg transition-all duration-300 ease-in-out
-            `}
+            ${isCollapsed ? "w-38 lg:w-20" : "w-64 lg:w-64"} 
+            h-full bg-purple-700 text-white flex flex-col shadow-lg transition-all duration-300 ease-in-out
+        `}
+            style={{ minHeight: "100vh" }}
         >
             <div className="flex-row px-2 lg:px-4 py-4">
                 <ul className="space-y-2">
