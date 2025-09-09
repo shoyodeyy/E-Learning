@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react"
-import Header from "../components/Header.jsx"
-import Courses from "../components/Courses.jsx"
-import Feedback from "../components/Feedback.jsx"
-import MyLearning from "../components/MyLearning.jsx"
-import Slideshow from "../components/HeroCarousel.jsx"
-import Avatar from "../components/Avatar.jsx"
+import Header from "../../components/Header.jsx"
+import Courses from "../../components/Courses.jsx"
+import Feedback from "../../components/Feedback.jsx"
+import MyLearning from "../../components/MyLearning.jsx"
+import Slideshow from "../../components/HeroCarousel.jsx"
+import Avatar from "../../components/Avatar.jsx"
 
-import { getProfile } from "../api/profileApi.js" // <-- import API
+import { getProfile } from "../../api/profileApi.js" // <-- import API
 
 export default function Dashboard() {
     const [showMessage, setShowMessage] = useState(false)
