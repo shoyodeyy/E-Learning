@@ -95,6 +95,7 @@ class User extends Authenticatable
         return !is_null($this->email_verified_at);
     }
 
+
     /**
      * Check nếu user bị ban
      */
@@ -166,12 +167,14 @@ class User extends Authenticatable
      */
 
     // Các khóa học mà user này là giảng viên
+
     public function coursesAsInstructors(): HasMany
     {
         return $this->hasMany(Course::class, 'instructorID', 'id');
     }
 
     // Các khóa học mà user này phê duyệt
+
     public function coursesApproved(): HasMany
     {
         return $this->hasMany(Course::class, 'approvedID', 'id');
