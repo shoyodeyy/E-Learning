@@ -10,9 +10,19 @@ use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return User::whereIn('role', ['student', 'instructor'])->get();
+        $query = User::whereIn('role', ['student', 'instructor']);
+
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%");
+            });
+        }
+
+        return $query->orderBy('id', 'desc')->paginate(20);
     }
 
     public function ban(Request $request, $id)
