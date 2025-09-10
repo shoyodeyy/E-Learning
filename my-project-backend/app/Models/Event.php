@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Events extends Model
+class Event extends Model
 {
     public $incrementing = false;
     public $timestamps = true;
@@ -33,10 +33,10 @@ class Events extends Model
     // relationship
     public function organizer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'organizerId', 'id');
+        return $this->belongsTo(User::class, 'organizerId', 'user_id');
     }
 
     public function approvedByAdmin(): BelongsTo {
-        return $this->belongsTo(User::class, 'approvedBy', 'id');
+        return $this->belongsTo(User::class, 'approvedBy', 'user_id');
     }
 }

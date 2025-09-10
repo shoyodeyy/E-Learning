@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('event_id')->primary();
             $table->string('title');
             $table->text('description');
-            $table->enum('category', ['Cultural Events', 'Technical Fests', 'Sports Meets', 'Annual Day Functions', 'Workshops and Seminars', 'Intercollegiate Competitions']);
+            $table->enum('category', ['Cultural Event', 'Technical Fests', 'Sports Meets', 'Annual Day Functions', 'Workshops and Seminars', 'Intercollegiate Competitions']);
             $table->date('eventDate');
             $table->time('eventTime');
             $table->string('venue');

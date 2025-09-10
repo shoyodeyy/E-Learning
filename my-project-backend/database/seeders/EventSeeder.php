@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Events;
+use App\Models\Event;
 use Illuminate\Database\Seeder;
 
 class EventSeeder extends Seeder
@@ -16,7 +16,7 @@ class EventSeeder extends Seeder
             [
                 'title'                => 'Cultural Festival',
                 'description'          => 'A celebration of cultural diversity with music, dance, and art performances.',
-                'category'             => 'Cultural Events',
+                'category'             => 'Cultural Event',
                 'eventDate'            => '2025-10-01',
                 'eventTime'            => '18:00:00',
                 'venue'                => 'Main Auditorium',
@@ -47,7 +47,7 @@ class EventSeeder extends Seeder
             $eventId = 'E' . str_pad($index + 1, 3, '0', STR_PAD_LEFT);
             $event['event_id'] = $eventId;
 
-            Events::updateOrCreate(
+            Event::updateOrCreate(
                 ['event_id' => $event['event_id']],
                 $event
             );
