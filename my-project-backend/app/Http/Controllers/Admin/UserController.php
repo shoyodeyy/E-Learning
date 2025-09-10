@@ -12,17 +12,10 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::whereIn('role', ['student', 'instructor']);
-
-        if ($request->has('search') && $request->search) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%")
-                    ->orWhere('email', 'LIKE', "%{$search}%");
-            });
-        }
-
-        return $query->orderBy('id', 'desc')->paginate(20);
+        $perPage = $request->get('per_page', 100);
+        return User::whereIn('role', ['student', 'instructor'])
+            ->orderBy('id')
+            ->paginate($perPage, ['*'], 'page', $request->get('page', 1));
     }
 
     public function ban(Request $request, $id)
