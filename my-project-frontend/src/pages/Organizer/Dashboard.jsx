@@ -27,7 +27,7 @@ export default function Dashboard() {
         <div className="min-h-screen bg-gray-100">
             <header className="bg-white shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center py-6">
-                    <h1 className="text-xl font-bold">Instructor Dashboard</h1>
+                    <h1 className="text-xl font-bold">Organizer Dashboard</h1>
                     <div className="flex items-center space-x-3">
                         {user.email_verified_at ? (
                             <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">✓ Verified</span>

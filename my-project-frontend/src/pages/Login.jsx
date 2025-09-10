@@ -147,7 +147,7 @@ export default function Login() {
                 // Handle banned account for Google login
                 handleBannedUser(result.ban_details);
             } else {
-                toast.error(result.message || 'Google login failed');
+                toast.error('Google login failed');
             }
         } catch (error) {
             console.error('Error during Google login:', error);
@@ -180,7 +180,7 @@ export default function Login() {
                         className="mx-auto h-10 mb-4"
                     />
                     <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                        Welcome to Udemy Business
+                        Welcome to FPT Aptech
                     </h1>
                     <p className="text-gray-600 text-sm">(fpl.udemy.com)</p>
                 </div>

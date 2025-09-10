@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { LogOut, User, Menu, X } from "lucide-react";
+import { LogOut, User, Menu, X, LayoutDashboard } from "lucide-react";
 
 import Avatar from "./Avatar.jsx";
 import { getProfile } from "../api/profileApi.js";
@@ -255,7 +255,7 @@ export default function Header() {
                                         }}
                                         className=" cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors duration-200"
                                     >
-                                        <User size={20} className="mr-3" />
+                                        <LayoutDashboard size={20} className="mr-3" />
                                         Dashboard
                                     </button>
                                     <button
@@ -374,7 +374,7 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
                             onClick={goToDashboard}
                             className="cursor-pointer flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-200"
                         >
-                            <User size={16} />
+                            <LayoutDashboard size={16} />
                             Dashboard
                         </button>
                         <button

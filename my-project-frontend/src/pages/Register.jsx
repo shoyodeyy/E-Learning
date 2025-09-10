@@ -159,7 +159,7 @@ export default function Register() {
             <div className="w-full max-w-md relative z-10 bg-white shadow-2xl">
                 <div className="text-center pb-6 pt-6 px-6">
                     <img src="/images/logo.webp" alt="Udemy Logo" className="mx-auto h-10 mb-4" />
-                    <h1 className="text-2xl font-bold text-gray-900 mb-1">Join Udemy Business</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-1">Join FPT Aptech</h1>
                     <p className="text-gray-600 text-sm">(fpl.udemy.com)</p>
                 </div>
 
