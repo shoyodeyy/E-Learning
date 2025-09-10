@@ -1,0 +1,22 @@
+{
+    id: crypto.randomUUID(),
+    type: "Quiz",
+    title: "Quiz 1",
+    description: "",
+    isAddingQuestion: false,
+    hasMultipleQuestion: false,
+    questions: [
+        {
+            id:  crypto.randomUUID(),
+            questionText: "",
+            options: [
+                {
+                    id: crypto.randomUUID(),
+                    optionText: "",
+                    explainText: "",
+                    isCorrect: false,
+                },
+            ]
+        },
+    ]
+},
