@@ -219,12 +219,12 @@ export default function Header() {
                     </nav>
 
                     <div className="flex items-center space-x-4">
-                        <button className="cursor-pointer text-gray-700 hover:text-purple-600 font-semibold transition-colors duration-200">
+                        <Link to="/login" className="cursor-pointer text-gray-700 hover:text-purple-600 font-semibold transition-colors duration-200">
                             Login
-                        </button>
-                        <button className="cursor-pointer bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+                        </Link>
+                        <Link to="/register" className="cursor-pointer bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
                             Sign Up
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>

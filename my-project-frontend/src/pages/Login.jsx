@@ -31,12 +31,12 @@ export default function Login() {
             case "admin":
                 navigate("/admin/dashboard");
                 break;
-            case "instructor":
-                navigate("/instructor/dashboard");
+            case "organizer":
+                navigate("/organizer/dashboard");
                 break;
-            case "student":
+            case "participant":
             default:
-                navigate("/dashboard");
+                navigate("/");
                 break;
         }
     };
@@ -79,7 +79,7 @@ export default function Login() {
                 }
 
                 // Navigate based on role
-                const userRole = result.user?.role || 'student';
+                const userRole = result.user?.role || 'participant';
                 navigateByRole(userRole);
             } else {
                 // Handle account banned
@@ -141,7 +141,7 @@ export default function Login() {
 
                 toast.success('Login successful!');
                 // Navigate based on role immediately (Google users are auto-verified)
-                const userRole = result.user?.role || 'student';
+                const userRole = result.user?.role || 'participant';
                 navigateByRole(userRole);
             } else if (result.status === 403 && result.error === 'account_banned') {
                 // Handle banned account for Google login
@@ -220,7 +220,7 @@ export default function Login() {
                             </div>
                             <button
                                 type="submit"
-                                className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium transition-colors cursor-pointer"
+                                className="w-full btn-gradient"
                             >
                                 Continue
                             </button>
@@ -289,7 +289,7 @@ export default function Login() {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                                    className="w-full btn-gradient"
                                 >
                                     {processing ? "Signing in..." : "Log In"}
                                 </button>
