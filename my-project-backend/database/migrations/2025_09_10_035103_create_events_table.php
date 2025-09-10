@@ -15,9 +15,16 @@ return new class extends Migration
             $table->string('event_id')->primary();
             $table->string('title');
             $table->text('description');
-            $table->enum('category', ['Cultural Event', 'Technical Fests', 'Sports Meets', 'Annual Day Functions', 'Workshops and Seminars', 'Intercollegiate Competitions']);
-            $table->date('eventDate');
-            $table->time('eventTime');
+            $table->enum('category', [
+                'Cultural Event',
+                'Technical Fests',
+                'Sports Meets',
+                'Annual Day Functions',
+                'Workshops and Seminars',
+                'Intercollegiate Competitions'
+            ]);
+            $table->dateTime('start_at');
+            $table->integer('duration_minutes')->comment('Total event time in minutes');
             $table->string('venue');
             $table->unsignedBigInteger('organizerId');
             $table->integer('maxParticipants')->default(100);
