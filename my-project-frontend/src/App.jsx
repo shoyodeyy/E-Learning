@@ -15,9 +15,11 @@ import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 import Footer from "./components/Footer.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
 import EventsPage from "./pages/Events.jsx";
 import EventDetailPage from "./pages/EventDetail.jsx";
+
+// ===========
+import Home from "./pages/Home.jsx"
 
 
 function App() {
@@ -40,7 +42,7 @@ function App() {
                             {InstructorRouter()}
 
                             {/* Common */}
-                            <Route path="/" element={<Dashboard />} />
+                            <Route path="/" element={<Home />} />
                             <Route path="/event" element={<EventsPage />} />
                             <Route path="/event/:id" element={<EventDetailPage />} />
                             <Route path="/login" element={<Login/>}/>

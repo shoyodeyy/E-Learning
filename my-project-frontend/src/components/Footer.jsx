@@ -44,16 +44,6 @@ export default function Footer() {
                         <ul className="space-y-3">
                             <li>
                                 <a href="#" className="hover:text-white transition-colors duration-200">
-                                    Get the app
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" className="hover:text-white transition-colors duration-200">
-                                    Teach on Udemy
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" className="hover:text-white transition-colors duration-200">
                                     Plans and Pricing
                                 </a>
                             </li>

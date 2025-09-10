@@ -203,7 +203,9 @@ const EventCard = ({ event }) => {
                     </div>
                 </div>
 
-                <Link to={`/event/${event.id}`} className="flex justify-center w-full btn-gradient">View Details</Link>
+                <Link to={`/event/${event.id}`} onClick={() => window.screenTop(0, 0)} className="flex justify-center w-full btn-gradient">
+                    View Details
+                </Link>
             </div>
         </div>
     );
@@ -236,7 +238,9 @@ const FeaturedEvents = ({ events }) => {
                 </div>
 
                 <div className="text-center mt-12">
-                    <button className="btn-gradient-l">View All Events</button>
+                    <Link to="/event" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="btn-gradient-l">
+                        View All Events
+                    </Link>
                 </div>
             </div>
         </section>
@@ -244,7 +248,7 @@ const FeaturedEvents = ({ events }) => {
 };
 
 // Main Dashboard Component
-export default function Dashboard() {
+export default function Home() {
     const [showMessage, setShowMessage] = useState(false);
     const [messageContent, setMessageContent] = useState("");
     const [messageType, setMessageType] = useState("success");
