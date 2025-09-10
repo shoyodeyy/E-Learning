@@ -2,14 +2,13 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function UserSidebar({ mobile = false }) {
+export default function OrganizerSidebar({ mobile = false }) {
     const location = useLocation();
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const menuItems = [
-        { id: "dashboard", link: "/user/dashboard", label: "Dashboard", icon: "📊" },
-        { id: "profile", link: "/user/profile", label: "Profile", icon: "👤" },
-        { id: "registrations", link: "/user/registration", label: "My Registrations", icon: "📋" },
+        { id: "dashboard", link: "/organizer/dashboard", label: "Dashboard", icon: "📊" },
+        { id: "manage", link: "/organizer/manage-events", label: "Manage Events", icon: "👤" },
     ];
 
     const toggleSidebar = () => setIsCollapsed(!isCollapsed);

@@ -62,44 +62,44 @@ const MyRegistrations = () => {
                 <table className="w-full">
                     <thead className="bg-gradient-to-r from-purple-50 to-pink-50">
                         <tr>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">Event Name</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">Date</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">Location</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">Registered On</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">Actions</th>
+                            <th className="pl-6 pr-3 py-4 text-center text-xs font-semibold text-purple-700 uppercase tracking-wider">Event Name</th>
+                            <th className="px-3 py-4 text-center text-xs font-semibold text-purple-700 uppercase tracking-wider">Date</th>
+                            <th className="px-3 py-4 text-center text-xs font-semibold text-purple-700 uppercase tracking-wider">Location</th>
+                            <th className="px-3 py-4 text-center text-xs font-semibold text-purple-700 uppercase tracking-wider">Registered On</th>
+                            <th className="px-3 py-4 text-center text-xs font-semibold text-purple-700 uppercase tracking-wider">Status</th>
+                            <th className="px-3 py-4 text-center text-xs font-semibold text-purple-700 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-purple-100">
                         {registrations.map((registration) => (
                             <tr
                                 key={registration.id}
-                                className="hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300"
+                                className="hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300 text-center"
                             >
-                                <td className="px-6 py-4">
+                                <td className="pl-6 pr-3 py-4">
                                     <div className="text-sm font-semibold text-gray-900">{registration.eventName}</div>
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-3 py-4">
                                     <div className="text-sm text-gray-700">{registration.date}</div>
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-3 py-4">
                                     <div className="text-sm text-gray-700">{registration.location}</div>
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-3 py-4">
                                     <div className="text-sm text-gray-700">{registration.registeredOn}</div>
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-3 py-4">
                                     <span
                                         className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full text-white ${registration.statusColor}`}
                                     >
                                         {registration.status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 text-sm font-medium space-x-2">
-                                    <button className="text-purple-600 hover:text-white bg-purple-100 hover:bg-purple-600 px-3 py-2 rounded-lg transition-all duration-300 transform hover:scale-105">
+                                <td className="px-3 py-4 text-sm font-medium flex gap-2 justify-center">
+                                    <button className="cursor-pointer text-purple-600 hover:text-white bg-purple-100 hover:bg-purple-600 px-3 py-2 rounded-lg transition-all duration-300">
                                         View Details
                                     </button>
-                                    <button className="text-red-600 hover:text-white bg-red-100 hover:bg-red-600 px-3 py-2 rounded-lg transition-all duration-300 transform hover:scale-105">
+                                    <button className="cursor-pointer text-red-600 hover:text-white bg-red-100 hover:bg-red-600 px-3 py-2 rounded-lg transition-all duration-300">
                                         Cancel
                                     </button>
                                 </td>
@@ -141,10 +141,10 @@ const MyRegistrations = () => {
                         </div>
 
                         <div className="flex gap-2 mt-4">
-                            <button className="flex-1 text-purple-600 hover:text-white bg-purple-100 hover:bg-purple-600 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300">
+                            <button className="cursor-pointer flex-1 text-purple-600 hover:text-white bg-purple-100 hover:bg-purple-600 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300">
                                 View Details
                             </button>
-                            <button className="flex-1 text-red-600 hover:text-white bg-red-100 hover:bg-red-600 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300">
+                            <button className="cursor-pointer flex-1 text-red-600 hover:text-white bg-red-100 hover:bg-red-600 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300">
                                 Cancel
                             </button>
                         </div>

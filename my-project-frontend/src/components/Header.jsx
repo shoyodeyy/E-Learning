@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { LogOut, User, Menu, X, LayoutDashboard } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import Avatar from "./Avatar.jsx";
 import { getProfile } from "../api/profileApi.js";
-
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import ConfirmDialog from "./ConfirmDialog.jsx";
 
 export default function Header() {
     const location = useLocation();
     const [user, setUser] = useState(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [confirmOpen, setConfirmOpen] = useState(false);
     const navigate = useNavigate();
     const mobileMenuRef = useRef(null);
 
@@ -61,12 +62,7 @@ export default function Header() {
     }, [location.pathname]);
 
     const handleLogout = () => {
-        if (!confirm("Are you sure you want to logout?")) return;
-        localStorage.removeItem("auth_token");
-        localStorage.removeItem("user");
-        setUser(null);
-        navigate("/");
-        setMobileMenuOpen(false);
+        setConfirmOpen(true);
     };
 
     const toggleMobileMenu = () => {
@@ -193,7 +189,10 @@ export default function Header() {
                                     EventSphere
                                 </span>
                             </div>
-                            <button onClick={toggleMobileMenu} className="cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                            <button
+                                onClick={toggleMobileMenu}
+                                className="cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                            >
                                 <X size={20} className="text-gray-700" />
                             </button>
                         </div>
@@ -240,7 +239,7 @@ export default function Header() {
                                 <div className="mt-6 pt-6 border-t border-gray-200 space-y-1">
                                     <button
                                         onClick={() => {
-                                            navigate("/profile");
+                                            navigate("/user/profile");
                                             setMobileMenuOpen(false);
                                         }}
                                         className="cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors duration-200"
@@ -250,7 +249,7 @@ export default function Header() {
                                     </button>
                                     <button
                                         onClick={() => {
-                                            navigate("/dashboard");
+                                            navigate("/user/dashboard");
                                             setMobileMenuOpen(false);
                                         }}
                                         className=" cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors duration-200"
@@ -288,6 +287,18 @@ export default function Header() {
                     </div>
                 </div>
             )}
+            <ConfirmDialog
+                open={confirmOpen}
+                message="Are you sure you want to logout?"
+                onCancel={() => setConfirmOpen(false)}
+                onConfirm={() => {
+                    localStorage.removeItem("auth_token");
+                    localStorage.removeItem("user");
+                    setUser(null);
+                    navigate("/");
+                    setConfirmOpen(false);
+                }}
+            />
         </>
     );
 }
@@ -315,12 +326,12 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
     };
 
     const goToProfile = () => {
-        navigate("/profile");
+        navigate("/user/profile");
         setOpen(false);
     };
 
     const goToDashboard = () => {
-        navigate("/dashboard");
+        navigate("/user/dashboard");
         setOpen(false);
     };
 
