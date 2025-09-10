@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Pencil, Trash2, Plus, Loader2, Search } from "lucide-react";
 import { Link, useOutletContext } from "react-router-dom";
 import { toast } from "react-toastify";
+
 import api from "../../../api/axios.js";
 import VoucherFilterMobile from "./VoucherFilterMobile.jsx";
 
@@ -11,11 +12,7 @@ export default function VoucherList() {
     const [search, setSearch] = useState("");
     const [showSearchMb, setShowSearchMb] = useState(false);
     const { filters, setFilters } = useOutletContext();
-    const [meta, setMeta] = useState({
-        current_page: 1,
-        last_page: 1,
-        total: 0,
-    });
+    const [meta, setMeta] = useState({});
     const [page, setPage] = useState(1);
 
     useEffect(() => {
@@ -23,40 +20,14 @@ export default function VoucherList() {
             setLoading(true);
             api.get("/vouchers", { params: { search, page, ...filters } })
                 .then((res) => {
-                    const response = res.data;
-
-                    // Nếu backend trả chuẩn Laravel paginate
-                    if (response.data && Array.isArray(response.data)) {
-                        setVouchers(response.data);
-                        setMeta({
-                            current_page: response.current_page ?? 1,
-                            last_page: response.last_page ?? 1,
-                            total: response.total ?? response.data.length,
-                        });
-                    }
-                    // Nếu backend custom (data + meta)
-                    else if (response.meta) {
-                        setVouchers(response.data ?? []);
-                        setMeta({
-                            current_page: response.meta.current_page,
-                            last_page: response.meta.last_page,
-                            total: response.meta.total,
-                        });
-                    }
-                    // fallback khi không có pagination
-                    else {
-                        setVouchers(response ?? []);
-                        setMeta({
-                            current_page: 1,
-                            last_page: 1,
-                            total: response.length ?? 0,
-                        });
-                    }
+                    setVouchers(res.data);
+                    setMeta({
+                        current_page: res.data.current_page,
+                        last_page: res.data.last_page,
+                        total: res.data.total,
+                    });
                 })
-                .catch((err) => {
-                    console.error("Error fetching vouchers:", err);
-                    toast.error("Failed to load vouchers");
-                })
+                .catch((err) => console.log(err))
                 .finally(() => setLoading(false));
         }, 300);
 
@@ -101,10 +72,7 @@ export default function VoucherList() {
 
                 <div className="block md:hidden relative">
                     {!showSearchMb ? (
-                        <button
-                            onClick={() => setShowSearchMb(true)}
-                            className="p-2 rounded-full bg-purple-600 text-white"
-                        >
+                        <button onClick={() => setShowSearchMb(true)} className="p-2 rounded-full bg-purple-600 text-white">
                             <Search size={18} />
                         </button>
                     ) : (
@@ -148,46 +116,35 @@ export default function VoucherList() {
                     <div className="hidden md:block overflow-x-auto">
                         <table className="w-full border-collapse">
                             <thead>
-                            <tr className="bg-gray-100 text-gray-700 text-sm uppercase">
-                                <th className="px-4 py-3 text-left">ID</th>
-                                <th className="px-4 py-3 text-left">Code</th>
-                                <th className="px-4 py-3 text-left">Discount</th>
-                                <th className="px-4 py-3 text-left">Min</th>
-                                <th className="px-4 py-3 text-left">Use</th>
-                                <th className="px-4 py-3 text-left">Time</th>
-                                <th className="px-4 py-3 text-left">Status</th>
-                                <th className="px-4 py-3 text-center">Action</th>
-                            </tr>
+                                <tr className="bg-gray-100 text-gray-700 text-sm uppercase">
+                                    <th className="px-4 py-3 text-left">ID</th>
+                                    <th className="px-4 py-3 text-left">Code</th>
+                                    <th className="px-4 py-3 text-left">Discount</th>
+                                    <th className="px-4 py-3 text-left">Min</th>
+                                    <th className="px-4 py-3 text-left">Use</th>
+                                    <th className="px-4 py-3 text-left">Time</th>
+                                    <th className="px-4 py-3 text-left">Status</th>
+                                    <th className="px-4 py-3 text-center">Action</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            {vouchers.map((v, idx) => (
-                                <tr
-                                    key={v.id}
-                                    className={`border-b hover:bg-gray-50 transition ${
-                                        idx % 2 === 0 ? "bg-white" : "bg-gray-50"
-                                    }`}
-                                >
-                                    <td className="px-4 py-3">{v.id}</td>
-                                    <td className="px-4 py-3 font-mono text-purple-600">
-                                        {v.code}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {v.discount_type === "percent"
-                                            ? `${parseInt(v.discount_value)}%`
-                                            : `${parseInt(v.discount_value).toLocaleString()} VND`}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {v.min_order
-                                            ? `${parseInt(v.min_order).toLocaleString()} VND`
-                                            : "—"}
-                                    </td>
-                                    <td className="px-4 py-3">{v.usage_limit ?? "Unlimited"}</td>
-                                    <td className="px-4 py-3">
-                                        {v.start_date && v.end_date
-                                            ? `${v.start_date.substring(0, 10)} → ${v.end_date.substring(0, 10)}`
-                                            : "Untimed"}
-                                    </td>
-                                    <td className="px-4 py-3">
+                                {vouchers.map((v, idx) => (
+                                    <tr key={v.id} className={`border-b hover:bg-gray-50 transition ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                                        <td className="px-4 py-3">{v.id}</td>
+                                        <td className="px-4 py-3 font-mono text-purple-600">{v.code}</td>
+                                        <td className="px-4 py-3">
+                                            {v.discount_type === "percent"
+                                                ? `${parseInt(v.discount_value)}%`
+                                                : `${parseInt(v.discount_value).toLocaleString()} VND`}
+                                        </td>
+                                        <td className="px-4 py-3">{v.min_order ? `${parseInt(v.min_order).toLocaleString()} VND` : "—"}</td>
+                                        <td className="px-4 py-3">{v.usage_limit ?? "Unlimited"}</td>
+                                        <td className="px-4 py-3">
+                                            {v.start_date && v.end_date
+                                                ? `${v.start_date.substring(0, 10)} → ${v.end_date.substring(0, 10)}`
+                                                : "Untimed"}
+                                        </td>
+                                        <td className="px-4 py-3">
                                             <span
                                                 className={`px-2 py-1 rounded-full text-xs font-semibold ${
                                                     v.status
@@ -197,23 +154,23 @@ export default function VoucherList() {
                                             >
                                                 {v.status ? "Active" : "Inactive"}
                                             </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-center space-x-3">
-                                        <Link
-                                            to={`/admin/vouchers/edit/${v.id}`}
-                                            className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 transition"
-                                        >
-                                            <Pencil size={16} /> Edit
-                                        </Link>
-                                        <button
-                                            onClick={() => handleDelete(v.id)}
-                                            className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 transition cursor-pointer"
-                                        >
-                                            <Trash2 size={16} /> Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                        <td className="px-4 py-3 text-center space-x-3">
+                                            <Link
+                                                to={`/admin/vouchers/edit/${v.id}`}
+                                                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 transition"
+                                            >
+                                                <Pencil size={16} /> Edit
+                                            </Link>
+                                            <button
+                                                onClick={() => handleDelete(v.id)}
+                                                className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 transition cursor-pointer"
+                                            >
+                                                <Trash2 size={16} /> Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
@@ -232,9 +189,7 @@ export default function VoucherList() {
                                             off
                                         </p>
                                         {v.min_order && (
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                Min: {parseInt(v.min_order).toLocaleString()} VND
-                                            </p>
+                                            <p className="text-xs text-gray-500 mt-1">Min: {parseInt(v.min_order).toLocaleString()} VND</p>
                                         )}
                                         <p className="text-xs text-gray-500 mt-1">
                                             {v.start_date && v.end_date
@@ -274,13 +229,8 @@ export default function VoucherList() {
             ) : (
                 <div className="text-center py-12 text-gray-500">No vouchers found.</div>
             )}
-
-            {/* Pagination */}
-            <div className="flex flex-col items-center gap-2 mt-6">
-                <div className="text-gray-600 text-sm">
-                    Total: <span className="font-semibold">{meta.total}</span> vouchers
-                </div>
-                <div className="flex justify-center items-center gap-2">
+            {meta.last_page > 1 && (
+                <div className="flex justify-center items-center gap-2 mt-6">
                     <button
                         disabled={meta.current_page === 1}
                         onClick={() => setPage((prev) => prev - 1)}
@@ -301,7 +251,7 @@ export default function VoucherList() {
                         Next
                     </button>
                 </div>
-            </div>
+            )}
         </div>
     );
 }
