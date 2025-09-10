@@ -1,13 +1,9 @@
-import Header from "../../components/Header.jsx";
-import Footer from "../../components/Footer.jsx";
+
+
 
 export default function LecturePage() {
     return (
         <>
-            {/* Header */}
-            <header>
-                <Header />
-            </header>
 
             {/* Main content */}
             <main className="flex h-screen bg-gray-100">
@@ -66,8 +62,7 @@ export default function LecturePage() {
                 </section>
             </main>
 
-            {/* Footer */}
-            <Footer />
+
         </>
     );
 }

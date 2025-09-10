@@ -1,13 +1,12 @@
-import { Link, useLocation } from "react-router-dom";
-import Avatar from "./Avatar.jsx";
+import { Link } from "react-router-dom";
+import Avatar from "../../../components/Avatar.jsx";
 
 export default function ProfileSidebar({ user }) {
-    const location = useLocation();
+
 
     const menuItems = [
 
         { name: "Public profile", path: "/profile" },
-        { name: "Account security", path: "/profile/security" },
         { name: "Payment methods", path: "/profile/payment" },
         { name: "Notifications", path: "/profile/notifications" },
     ];

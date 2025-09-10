@@ -17,12 +17,12 @@ import Footer from "./components/Footer.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
 
 
+
 function App() {
     return (
         <BrowserRouter>
             <AuthProvider>
                 <div className="flex flex-col min-h-screen">
-                    {/* Header */}
 
                     {/* Main */}
                     <main className="flex-grow">

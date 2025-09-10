@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import Header from "../../components/Header.jsx";
-import ProfileSidebar from "../../components/ProfileSidebar.jsx";
+import ProfileSidebar from "./Components-student/ProfileSidebar.jsx";
 import { getProfile, updateProfile } from "../../api/profileApi.js";
 
 export default function PublicProfile() {
@@ -97,7 +96,11 @@ export default function PublicProfile() {
             });
             const result = await updateProfile(data);
             setUser(result.user);
-            toast.success(result.message || "Profile updated successfully ✅");
+            toast.success(result.message || "Profile updated successfully ✅", {
+                onClose: () => window.location.reload(),
+            });
+
+
             setErrors({});
         } catch (error) {
             console.error("Profile update error:", error);
@@ -110,7 +113,7 @@ export default function PublicProfile() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Header />
+
 
             <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -151,7 +154,7 @@ export default function PublicProfile() {
                                     name="email"
                                     value={formData.email}
                                     readOnly
-                                    className="w-full border rounded px-3 py-2 bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed"
+                                    className="w-full border rounded px-3 py-2 bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed focus:outline-none focus:ring-0"
                                 />
                             </div>
 
@@ -229,7 +232,7 @@ export default function PublicProfile() {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 disabled:opacity-50"
+                                className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 disabled:opacity-50 cursor-pointer"
                             >
                                 {processing ? "Saving..." : "Save"}
                             </button>

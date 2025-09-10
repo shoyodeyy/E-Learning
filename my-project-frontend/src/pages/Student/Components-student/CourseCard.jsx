@@ -1,6 +1,7 @@
 // CourseCard.jsx
 import React from "react";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
+import CourseList from "../Components-student/CourseList.jsx";
 
 export default function CourseCard({ course }) {
     // course = {

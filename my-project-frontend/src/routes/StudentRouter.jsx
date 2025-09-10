@@ -4,14 +4,15 @@ import Dashboard from "../pages/Student/Dashboard.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 
 // student feature pages
-import Courses from "../components/Courses.jsx";
+import Courses from "../pages/Student/Components-student/Courses.jsx";
 import CourseDetail from "../pages/Student/CourseDetail.jsx";
-import Feedback from "../components/Feedback.jsx";
-import Reports from "../components/Reports.jsx";
-import MyLearning from "../components/MyLearning.jsx";
+import Feedback from "../pages/Student/Components-student/Feedback.jsx";
+import Reports from "../pages/Student/Components-student/Reports.jsx";
+import MyLearning from "../pages/Student/Components-student/MyLearning.jsx";
 import PublicProfile from "../pages/Student/PublicProfile.jsx";
 import LecturePage from "../pages/Student/LecturePage.jsx";
 import SearchResultsPage from "../pages/Student/Filters.jsx";
+import Header from "../components/Header.jsx";
 
 
 export default function StudentRouter() {

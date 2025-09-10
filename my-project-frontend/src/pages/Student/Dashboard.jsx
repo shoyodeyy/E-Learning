@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react"
-import Header from "../../components/Header.jsx"
-import Courses from "../../components/Courses.jsx"
-import Feedback from "../../components/Feedback.jsx"
-import MyLearning from "../../components/MyLearning.jsx"
-import Slideshow from "../../components/HeroCarousel.jsx"
+
+import Courses from "./Components-student/Courses.jsx"
+import Feedback from "./Components-student/Feedback.jsx"
+import MyLearning from "./Components-student/MyLearning.jsx"
+import Slideshow from "./Components-student/HeroCarousel.jsx"
 import Avatar from "../../components/Avatar.jsx"
 
 import { getProfile } from "../../api/profileApi.js" // <-- import API
@@ -80,7 +80,7 @@ export default function Dashboard() {
 
             {/* Header */}
             <div className={`${showMessage ? "pt-16" : ""}`}>
-                <Header />
+
 
                 {/* Main */}
                 <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">

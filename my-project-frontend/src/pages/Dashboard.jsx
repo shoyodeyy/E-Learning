@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react"
 import Header from "../components/Header.jsx"
-import Courses from "../components/Courses.jsx"
-import Feedback from "../components/Feedback.jsx"
-import MyLearning from "../components/MyLearning.jsx"
-import Slideshow from "../components/HeroCarousel.jsx"
+import Courses from "./Student/Components-student/Courses.jsx"
+import Feedback from "./Student/Components-student/Feedback.jsx"
+import MyLearning from "./Student/Components-student/MyLearning.jsx"
+import Slideshow from "./Student/Components-student/HeroCarousel.jsx"
 import Avatar from "../components/Avatar.jsx"
 
 import { getProfile } from "../api/profileApi.js" // <-- import API
