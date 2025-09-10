@@ -1,10 +1,10 @@
-
+import Header from "../../components/Header.jsx";
 
 
 export default function LecturePage() {
     return (
         <>
-
+                <Header/>
             {/* Main content */}
             <main className="flex h-screen bg-gray-100">
                 {/* Sidebar - Lecture list */}

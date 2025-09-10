@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import CourseCard from "../Student/Components-student/CourseCard.jsx";
 import { searchCourses } from "../../api/courseApi.js";
 import { Filter, ChevronDown, X, Code, Users, Edit3, HelpCircle } from "lucide-react";
+import Header from "../../components/Header.jsx";
 
 function useQuery() {
     return new URLSearchParams(useLocation().search);
@@ -113,7 +114,9 @@ function DrawerFilter({ filters, setFilters, onClose }) {
     };
 
     return (
+
         <div className="fixed inset-0 bg-black/40 z-50 flex justify-start">
+                <Header/>
             <div className="bg-white w-80 h-full p-6 overflow-y-auto relative">
                 <button
                     className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"

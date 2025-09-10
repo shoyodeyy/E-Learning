@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import Reports from "./Components-student/Reports.jsx";
+import Header from "../../components/Header.jsx";
 
 export default function CourseDetail() {
     const { id } = useParams();
@@ -48,7 +49,7 @@ export default function CourseDetail() {
 
     return (
         <div className="flex flex-col bg-white">
-
+            <Header/>
 
             {/* Hero Section */}
             <div className="bg-gray-900 text-white px-6 lg:px-20 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">

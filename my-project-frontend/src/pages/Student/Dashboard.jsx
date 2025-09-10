@@ -6,7 +6,8 @@ import MyLearning from "./Components-student/MyLearning.jsx"
 import Slideshow from "./Components-student/HeroCarousel.jsx"
 import Avatar from "../../components/Avatar.jsx"
 
-import { getProfile } from "../../api/profileApi.js" // <-- import API
+import { getProfile } from "../../api/profileApi.js"
+import Header from "../../components/Header.jsx"; // <-- import API
 
 export default function Dashboard() {
     const [showMessage, setShowMessage] = useState(false)
@@ -80,7 +81,7 @@ export default function Dashboard() {
 
             {/* Header */}
             <div className={`${showMessage ? "pt-16" : ""}`}>
-
+                <Header/>
 
                 {/* Main */}
                 <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
