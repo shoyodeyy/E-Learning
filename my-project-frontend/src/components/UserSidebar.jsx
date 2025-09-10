@@ -1,99 +1,85 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, User, BookOpen, Calendar, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function ExpandableSidebar() {
-    const [isExpanded, setIsExpanded] = useState(true);
+export default function UserSidebar({ mobile = false }) {
     const location = useLocation();
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const menuItems = [
-        { id: "dashboard", link: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-        { id: "profile", link: "/profile", label: "Profile", icon: User },
-        { id: "registrations", link: "/registration", label: "My Registrations", icon: BookOpen },
-
+        { id: "dashboard", link: "/user/dashboard", label: "Dashboard", icon: "📊" },
+        { id: "profile", link: "/user/profile", label: "Profile", icon: "👤" },
+        { id: "registrations", link: "/user/registration", label: "My Registrations", icon: "📋" },
     ];
 
+    const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+
+    // 👉 Mobile Bottom Navigation
+    if (mobile) {
+        return (
+            <nav className="w-full bg-white border-t border-gray-200 shadow-md flex justify-around py-2 rounded-lg">
+                {menuItems.map((item) => {
+                    const isActive = location.pathname === item.link;
+                    return (
+                        <Link
+                            key={item.id}
+                            to={item.link}
+                            className={`
+                                flex flex-col items-center text-xs font-medium flex-1 py-1
+                                ${isActive ? "text-purple-600" : "text-gray-500 hover:text-purple-600"}
+                            `}
+                        >
+                            <span className="text-xl">{item.icon}</span>
+                            <span>{item.label}</span>
+                        </Link>
+                    );
+                })}
+            </nav>
+        );
+    }
+
+    // 👉 Desktop / Tablet Sidebar
     return (
-        <>
-            {/* Desktop Sidebar */}
-            <aside
-                className={`hidden md:flex flex-col bg-white shadow-lg border-r border-gray-200 min-h-screen transition-all duration-300 ${
-                    isExpanded ? "w-64" : "w-16"
-                }`}
-            >
-                {/* Header */}
-                <div className="p-4 border-b border-gray-200">
-                    <div className="flex items-center justify-between">
-                        {isExpanded && (
-                            <div className="flex items-center space-x-2">
-                                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                    <span className="text-white font-bold text-sm">PP</span>
-                                </div>
-                                <span className="font-bold text-blue-600 text-lg">ParticipantPortal</span>
-                            </div>
-                        )}
-                        <button onClick={() => setIsExpanded(!isExpanded)} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                            {isExpanded ? <ChevronLeft size={20} className="text-gray-600" /> : <ChevronRight size={20} className="text-gray-600" />}
-                        </button>
-                    </div>
-                </div>
+        <aside
+            className={`
+                hidden lg:block
+                ${isCollapsed ? "w-16" : "w-64"} 
+                bg-white shadow-sm border-r border-gray-200 min-h-screen transition-all duration-300 ease-in-out
+            `}
+        >
+            {/* Header with toggle button */}
+            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                <button onClick={toggleSidebar} className="cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                    {isCollapsed ? <ChevronRight size={20} className="text-gray-600" /> : <ChevronLeft size={20} className="text-gray-600" />}
+                </button>
+            </div>
 
-                {/* Navigation */}
-                <nav className="flex-1 p-4">
-                    <div className="space-y-2">
-                        {menuItems.map((item) => {
-                            const isActive = location.pathname === item.link;
-                            const IconComponent = item.icon;
-
-                            return (
-                                <div key={item.id} className="relative group">
-                                    <Link
-                                        to={item.link}
-                                        className={`flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 ${
-                                            isActive
-                                                ? "bg-blue-50 text-blue-600 border-r-2 border-blue-600"
-                                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                                        }`}
-                                    >
-                                        <IconComponent size={20} className="flex-shrink-0" />
-                                        {isExpanded && <span className="font-medium truncate">{item.label}</span>}
-                                    </Link>
-
-                                    {/* Tooltip for collapsed state */}
-                                    {!isExpanded && (
-                                        <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                                            {item.label}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </nav>
-            </aside>
-
-            {/* Mobile Bottom Navigation */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-                <nav className="flex justify-around py-2">
+            {/* Navigation */}
+            <div className="p-4">
+                <nav className="space-y-2">
                     {menuItems.map((item) => {
                         const isActive = location.pathname === item.link;
-                        const IconComponent = item.icon;
-
                         return (
                             <Link
                                 key={item.id}
                                 to={item.link}
-                                className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
-                                    isActive ? "text-blue-600" : "text-gray-600"
-                                }`}
+                                className={`
+                                    w-full flex items-center px-4 py-3 rounded-lg text-left transition-colors duration-200
+                                    ${
+                                        isActive
+                                            ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                                            : "text-gray-600 hover:bg-purple-50 hover:text-purple-600"
+                                    }
+                                    ${isCollapsed ? "justify-center" : "space-x-3"}
+                                `}
                             >
-                                <IconComponent size={20} />
-                                <span className="text-xs mt-1 font-medium">{item.label}</span>
+                                <span className="text-lg flex-shrink-0">{item.icon}</span>
+                                {!isCollapsed && <span className="font-medium">{item.label}</span>}
                             </Link>
                         );
                     })}
                 </nav>
             </div>
-        </>
+        </aside>
     );
 }
