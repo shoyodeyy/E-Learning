@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CourseResource;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
-use http\Env\Request;
+use Illuminate\Http\Request;
+
 
 class EventController extends Controller
 {
@@ -37,12 +38,12 @@ class EventController extends Controller
             'title' => 'required|string|max:255',
             'category' => 'required|string|in:Cultural Event,Technical Fests,Sports Meets,Annual Day Functions,Workshops and Seminars,Intercollegiate Competitions',
             'description' => 'nullable|string',
-            'eventDate' => 'required|date',
-            'eventTime' => 'required|time|format:H:i',
+            'eventDate' => 'required|date_format:Y-m-d',
+            'eventTime' => 'required|date_format:H:i',
             'venue' => 'required|string',
             'organizerId' => 'required|integer|exists:users,user_id',
             'maxParticipants' => 'required|integer|min:1',
-            'registrationDeadline' => 'required|dateTime',
+            'registrationDeadline' => 'required|date_format:Y-m-d H:i:s',
         ]);
     }
 }
