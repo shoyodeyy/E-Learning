@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
-import Header from "../components/Header"
+import Header from "../components/Header";
 
 // Mock data for events
 const mockEvents = [
@@ -60,14 +62,37 @@ const mockEvents = [
     },
 ];
 
+function RandomBlob({ className, color }) {
+    const [target, setTarget] = useState({ x: 0, y: 0 });
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setTarget({
+                x: Math.random() * 200 - 100,
+                y: Math.random() * 200 - 100,
+            });
+        }, 4000); // mỗi 4s đổi hướng
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <motion.div
+            animate={{ x: target.x, y: target.y }}
+            transition={{ duration: 1, ease: "linear" }}
+            className={`absolute w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-70 ${className}`}
+            style={{ backgroundColor: color }}
+        />
+    );
+}
+
 // Hero Section Component
 const HeroSection = () => {
     return (
         <section className="bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100 py-20 relative overflow-hidden">
             <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-                <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+                <RandomBlob className="-top-40 -right-40" color="#c084fc" />
+                <RandomBlob className="-bottom-40 -left-40" color="#f9a8d4" />
+                <RandomBlob className="top-40 left-40" color="#a5b4fc" />
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -91,9 +116,7 @@ const HeroSection = () => {
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <button className="btn-gradient-l">
-                                Explore Events
-                            </button>
+                            <button className="btn-gradient-l">Explore Events</button>
                             <button className="cursor-pointer bg-white/80 backdrop-blur-sm hover:bg-white text-purple-600 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border border-purple-200">
                                 Watch Demo
                             </button>
@@ -180,9 +203,7 @@ const EventCard = ({ event }) => {
                     </div>
                 </div>
 
-                <button className="w-full btn-gradient">
-                    View Details
-                </button>
+                <Link to={`/event/${event.id}`} className="flex justify-center w-full btn-gradient">View Details</Link>
             </div>
         </div>
     );
@@ -215,9 +236,7 @@ const FeaturedEvents = ({ events }) => {
                 </div>
 
                 <div className="text-center mt-12">
-                    <button className="btn-gradient-l">
-                        View All Events
-                    </button>
+                    <button className="btn-gradient-l">View All Events</button>
                 </div>
             </div>
         </section>

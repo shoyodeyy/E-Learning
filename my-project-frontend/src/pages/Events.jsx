@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Search } from "lucide-react";
 
 import Header from "../components/Header.jsx";
 
@@ -126,9 +127,9 @@ const SearchAndFilter = ({
                     {/* Search Input */}
                     <div className="flex-1 w-full lg:max-w-md">
                         <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
-                                    <span className="text-purple-600 text-xs">🔍</span>
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                                <div className="size-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <Search className="text-purple-600 size-5" />
                                 </div>
                             </div>
                             <input
@@ -136,7 +137,9 @@ const SearchAndFilter = ({
                                 placeholder="Search by event title or keyword..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-12 pr-4 py-3 bg-white/90 backdrop-blur-sm border border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-lg hover:shadow-xl transition-all duration-200 placeholder-gray-500"
+                                className="w-full pl-12 pr-4 py-3 bg-white/90 backdrop-blur-sm border border-purple-200 rounded-xl 
+                 focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-lg hover:shadow-xl 
+                 transition-all duration-200 placeholder-gray-500"
                             />
                         </div>
                     </div>
