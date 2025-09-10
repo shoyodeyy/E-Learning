@@ -12,6 +12,7 @@ use App\Http\Controllers\Chatbot\ChatController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\Student\ProfileController;
 use App\Services\AIClientWithFallback;
+use App\Http\Controllers\CalendarController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -68,6 +69,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Change password
     Route::post('/user/change-password', [AuthController::class, 'changePassword']);
+    // Calendar routes
+    Route::get('/events/{id}/calendar', [CalendarController::class, 'getCalendarLinks']);
+    Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
 });
 
 // Admin routes
