@@ -4,7 +4,7 @@ import { Link, useOutletContext } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import api from "../../../api/axios.js";
-import VoucherFilterMobile from "./VoucherFilterMobile.jsx";
+
 
 export default function VoucherList() {
     const [vouchers, setVouchers] = useState([]);

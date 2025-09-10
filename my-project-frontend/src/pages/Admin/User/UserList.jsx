@@ -25,7 +25,17 @@ export default function UserList() {
     const fetchUsers = async (pageNum = 1) => {
         setLoading(true);
         try {
-            const res = await api.get(`/users?page=${pageNum}&per_page=50`);
+            const res = await api.get(`/admin/users`, {
+                params: {
+                    page: pageNum,
+                    search: searchTerm,
+                    role: roleFilter,
+                    status: statusFilter,
+                    sortField,
+                    sortDirection,
+                },
+            });
+
             setUsers(res.data.data || []);
             setMeta({
                 current_page: res.data.current_page,
@@ -33,16 +43,17 @@ export default function UserList() {
                 total: res.data.total,
             });
         } catch (err) {
-            console.error("Error fetching users:", err);
+            console.error("Error fetching user: ", err);
             toast.error("Failed to load users");
         } finally {
             setLoading(false);
         }
     };
 
+
     useEffect(() => {
         fetchUsers(page);
-    }, [page]);
+    }, [page, searchTerm, roleFilter, statusFilter, sortField, sortDirection]);
 
     useEffect(() => {
         let filtered = [...users];
