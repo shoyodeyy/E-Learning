@@ -84,5 +84,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/{id}/ban', [UserController::class, 'ban']);
     Route::post('/users/{id}/unban', [UserController::class, 'unban']);
-
 });
+
+//Route::middleware(['auth:sanctum', 'role:participant'])->group(function () {
+//    Route::post('media/save-selected', [MediaController::class, 'saveSelected']);
+//});
