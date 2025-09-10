@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
-import { getProfile } from "../api/profileApi.js";
 
+import { getProfile } from "../api/profileApi.js";
+import { User } from "lucide-react";
 
 export default function Avatar({ size = 40 }) {
     const [user, setUser] = useState(null)
@@ -15,7 +16,7 @@ export default function Avatar({ size = 40 }) {
                 className="flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold"
                 style={{ width: size, height: size }}
             >
-                U
+                <User />
             </div>
         )
     }
