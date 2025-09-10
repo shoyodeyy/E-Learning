@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react"
-import { Outlet, useNavigate } from "react-router-dom"
-import { Menu, X } from "lucide-react"
+import {useEffect, useState} from "react"
+import {Outlet, useNavigate} from "react-router-dom"
+import {Menu, X} from "lucide-react"
 
-import { useAuth } from "../../context/AuthContext.jsx"
+import {useAuth} from "../../context/AuthContext.jsx"
 import AdminSidebar from "./components/AdminSidebar.jsx"
 
 export default function Dashboard() {
     const navigate = useNavigate()
-    const { user, logout, refreshUser } = useAuth()
+    const {user, logout, refreshUser} = useAuth()
 
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -81,25 +81,28 @@ export default function Dashboard() {
                         >
                             {windowWidth < 768 ? (
                                 isMobileSidebarOpen ? (
-                                    <X size={20} />
+                                    <X size={20}/>
                                 ) : (
-                                    <Menu size={20} />
+                                    <Menu size={20}/>
                                 )
                             ) : isSidebarCollapsed ? (
-                                <Menu size={20} />
+                                <Menu size={20}/>
                             ) : (
-                                <X size={20} />
+                                <X size={20}/>
                             )}
                         </button>
                         <h1 className="text-xl font-bold">Admin Dashboard</h1>
                     </div>
                     <div className="flex items-center space-x-3">
                         {user.email_verified_at ? (
-                            <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">✓ Verified</span>
+                            <span
+                                className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">✓ Verified</span>
                         ) : (
-                            <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">⚠ Unverified</span>
+                            <span
+                                className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">⚠ Unverified</span>
                         )}
-                        <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+                        <button onClick={handleLogout}
+                                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
                             Logout
                         </button>
                     </div>
@@ -110,13 +113,14 @@ export default function Dashboard() {
                 <div
                     className={`
                         ${
-                        windowWidth < 768
-                            ? `fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out ${
-                                isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
-                            } top-[5rem]`
-                            : "relative"
-                    }
+                            windowWidth < 768
+                                ? `fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out ${
+                                    isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+                                } top-[5rem] rounded-tl-lg rounded-tr-lg`
+                                : "relative rounded-tl-lg rounded-tr-lg"
+                        }
                     `}
+
                 >
                     <AdminSidebar
                         isCollapsed={isSidebarCollapsed}
@@ -133,7 +137,8 @@ export default function Dashboard() {
                     />
                 )}
 
-                <div className="flex-1 bg-white p-6 shadow transition-all duration-300 ease-in-out overflow-y-auto">
+                <div
+                    className="flex-1 bg-white pr-6 pb-6 pl-6 shadow transition-all duration-300 ease-in-out overflow-y-auto pt-0">
                     <Outlet context={{filters, setFilters}}/>
                 </div>
             </div>

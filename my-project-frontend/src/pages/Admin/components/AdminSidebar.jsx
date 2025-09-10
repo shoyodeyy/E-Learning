@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { User, LayoutDashboard, BookOpen, KeyRound, LogOut, Ticket } from "lucide-react"
+import {User, LayoutDashboard, KeyRound, LogOut, Sparkles} from "lucide-react"
 
 import { useAuth } from "../../../context/AuthContext.jsx"
 
@@ -46,7 +46,7 @@ const AdminSidebar = ({ isCollapsed = false, setIsMobileSidebarOpen }) => {
                     </li>
                     <li>
                         <Link
-                            to="/admin/course"
+                            to="/admin/events"
                             onClick={handleLinkClick}
                             className={`
                                 flex items-center gap-2 lg:gap-3 px-3 py-2 rounded-lg hover:bg-purple-600 transition
@@ -54,8 +54,8 @@ const AdminSidebar = ({ isCollapsed = false, setIsMobileSidebarOpen }) => {
                             `}
                             title={isCollapsed ? "Course" : ""}
                         >
-                            <BookOpen size={18} className="flex-shrink-0" />
-                            <span className={isCollapsed ? "lg:hidden" : ""}>Course</span>
+                            <Sparkles size={18} className="flex-shrink-0" />
+                            <span className={isCollapsed ? "lg:hidden" : ""}>Events</span>
                         </Link>
                     </li>
                     <li>
@@ -70,20 +70,6 @@ const AdminSidebar = ({ isCollapsed = false, setIsMobileSidebarOpen }) => {
                         >
                             <User size={18} className="flex-shrink-0" />
                             <span className={isCollapsed ? "lg:hidden" : ""}>User</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link
-                            to="/admin/vouchers"
-                            onClick={handleLinkClick}
-                            className={`
-                                flex items-center gap-2 lg:gap-3 px-3 py-2 rounded-lg hover:bg-purple-600 transition
-                                ${isCollapsed ? "lg:justify-center" : ""}
-                            `}
-                            title={isCollapsed ? "Voucher" : ""}
-                        >
-                            <Ticket size={18} className="flex-shrink-0" />
-                            <span className={isCollapsed ? "lg:hidden" : ""}>Voucher</span>
                         </Link>
                     </li>
                     <li>
