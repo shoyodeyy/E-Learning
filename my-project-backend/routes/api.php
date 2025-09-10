@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BrowseController;
 
 // Auth
 Route::post('/register', [AuthController::class, 'register']);
@@ -50,15 +51,14 @@ Route::middleware(['auth:sanctum', 'role:admin'])
         Route::get('/analytics/users/recent', [UserAnalyticsController::class, 'getRecentUsers']);
         Route::get('/analytics/users/hourly', [UserAnalyticsController::class, 'getHourlyStats']);
 
-        // Vouchers
-        Route::post('/admin/vouchers', [VoucherController::class, 'store']);
-        Route::put('/vouchers/{id}', [VoucherController::class, 'update']);
-        Route::delete('/vouchers/{id}', [VoucherController::class, 'destroy']);
-        Route::get('/vouchers', [VoucherController::class, 'index']);
-        Route::get('/vouchers/{id}', [VoucherController::class, 'show']);
-
         // Users
         Route::get('/users', [UserController::class, 'index']);
         Route::post('/users/{id}/ban', [UserController::class, 'ban']);
         Route::post('/users/{id}/unban', [UserController::class, 'unban']);
+
+        //Event Approval
+        Route::get('/events', [BrowseController::class, 'index']);
+        Route::get('/events/{id}', [BrowseController::class, 'show']);
+        Route::post('/events/{id}/approve', [BrowseController::class, 'approve']);
+        Route::post('/events/{id}/reject', [BrowseController::class, 'reject']);
     });
