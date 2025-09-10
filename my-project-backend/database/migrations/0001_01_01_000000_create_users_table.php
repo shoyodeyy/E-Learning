@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('phone', 15)->nullable();
             $table->string('address', 255)->nullable();
             $table->enum('gender', ['male', 'female', 'other'])->nullable();
-            $table->string('password', 255)->nullable()->comment('nullable for Google login');
+            $table->string('password', 255)->nullable(); // nullable cho Google login
             $table->string('profile', 255)->nullable();
             $table->enum('role', ['participant', 'organizer', 'admin'])->default('participant');
             $table->string('status', 20)->default('active')->comment('active, expired, lifted');
@@ -29,15 +29,15 @@ return new class extends Migration
             $table->unsignedBigInteger('banned_by')->nullable(); // ref users.user_id
             $table->string('department', 100)->nullable();
             $table->string('enrollment_no', 50)->nullable();
-            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
 
             // Foreign key
             $table->foreign('banned_by')
                 ->references('user_id')->on('users')
                 ->nullOnDelete();
         });
+
 
         Schema::create('password_reset_tokens', static function (Blueprint $table) {
             $table->string('email')->primary();

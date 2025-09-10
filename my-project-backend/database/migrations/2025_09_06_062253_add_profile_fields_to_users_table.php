@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Thông tin cá nhân
+            // Thông tin cá nhân mở rộng (profile fields)
             if (!Schema::hasColumn('users', 'phone')) {
                 $table->string('phone', 15)->nullable()->after('email');
             }
@@ -26,45 +26,7 @@ return new class extends Migration
                 $table->string('profile', 255)->nullable()->after('password');
             }
             if (!Schema::hasColumn('users', 'avatar')) {
-                $table->string('avatar', 255)->nullable()->after('status');
-            }
-
-            // Vai trò & trạng thái
-            if (!Schema::hasColumn('users', 'role')) {
-                $table->enum('role', ['participant', 'organizer', 'admin'])
-                    ->default('participant')
-                    ->after('profile');
-            }
-            if (!Schema::hasColumn('users', 'status')) {
-                $table->string('status', 20)
-                    ->default('active')
-                    ->comment('active, expired, lifted')
-                    ->after('role');
-            }
-
-            // Google OAuth
-            if (!Schema::hasColumn('users', 'google_id')) {
-                $table->string('google_id', 255)->nullable()->unique()->after('avatar');
-            }
-
-            // Banned info
-            if (!Schema::hasColumn('users', 'ban_until')) {
-                $table->timestamp('ban_until')->nullable()->after('google_id');
-            }
-            if (!Schema::hasColumn('users', 'ban_reason')) {
-                $table->string('ban_reason', 255)->nullable()->after('ban_until');
-            }
-            if (!Schema::hasColumn('users', 'banned_by')) {
-                $table->unsignedBigInteger('banned_by')->nullable()->after('ban_reason');
-                $table->foreign('banned_by')->references('user_id')->on('users')->nullOnDelete();
-            }
-
-            // Academic info
-            if (!Schema::hasColumn('users', 'department')) {
-                $table->string('department', 100)->nullable()->after('banned_by');
-            }
-            if (!Schema::hasColumn('users', 'enrollment_no')) {
-                $table->string('enrollment_no', 50)->nullable()->after('department');
+                $table->string('avatar', 255)->nullable()->after('profile');
             }
         });
     }
@@ -75,31 +37,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (Schema::hasColumn('users', 'enrollment_no')) {
-                $table->dropColumn('enrollment_no');
-            }
-            if (Schema::hasColumn('users', 'department')) {
-                $table->dropColumn('department');
-            }
-            if (Schema::hasColumn('users', 'banned_by')) {
-                $table->dropForeign(['banned_by']);
-                $table->dropColumn('banned_by');
-            }
-            if (Schema::hasColumn('users', 'ban_reason')) {
-                $table->dropColumn('ban_reason');
-            }
-            if (Schema::hasColumn('users', 'ban_until')) {
-                $table->dropColumn('ban_until');
-            }
-            if (Schema::hasColumn('users', 'google_id')) {
-                $table->dropColumn('google_id');
-            }
-            if (Schema::hasColumn('users', 'status')) {
-                $table->dropColumn('status');
-            }
-            if (Schema::hasColumn('users', 'role')) {
-                $table->dropColumn('role');
-            }
             if (Schema::hasColumn('users', 'avatar')) {
                 $table->dropColumn('avatar');
             }
