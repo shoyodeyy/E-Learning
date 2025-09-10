@@ -51,7 +51,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])
         Route::get('/analytics/users/hourly', [UserAnalyticsController::class, 'getHourlyStats']);
 
         // Vouchers
-        Route::post('/vouchers', [VoucherController::class, 'store']);
+        Route::post('/admin/vouchers', [VoucherController::class, 'store']);
         Route::put('/vouchers/{id}', [VoucherController::class, 'update']);
         Route::delete('/vouchers/{id}', [VoucherController::class, 'destroy']);
         Route::get('/vouchers', [VoucherController::class, 'index']);
