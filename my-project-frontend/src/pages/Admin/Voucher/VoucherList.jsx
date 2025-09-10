@@ -1,59 +1,90 @@
-import { useEffect, useState } from "react"
-import {Pencil, Trash2, Plus, Loader2, Search} from "lucide-react"
-import {Link, useOutletContext} from "react-router-dom"
-import { toast } from "react-toastify"
-import api from "../../../api/axios.js"
+import { useEffect, useState } from "react";
+import { Pencil, Trash2, Plus, Loader2, Search } from "lucide-react";
+import { Link, useOutletContext } from "react-router-dom";
+import { toast } from "react-toastify";
+import api from "../../../api/axios.js";
 import VoucherFilterMobile from "./VoucherFilterMobile.jsx";
-
 
 export default function VoucherList() {
     const [vouchers, setVouchers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [showSearchMb, setShowSearchMb] = useState(false);
-    const {filters,setFilters} = useOutletContext();
-    const [meta, setMeta] = useState({});
+    const { filters, setFilters } = useOutletContext();
+    const [meta, setMeta] = useState({
+        current_page: 1,
+        last_page: 1,
+        total: 0,
+    });
     const [page, setPage] = useState(1);
 
     useEffect(() => {
         const delayDebounce = setTimeout(() => {
             setLoading(true);
-            api.get("/vouchers", {params: {search, page, ...filters} })
+            api.get("/vouchers", { params: { search, page, ...filters } })
                 .then((res) => {
-                    setVouchers(res.data.data);
-                    setMeta({
-                        current_page: res.data.current_page,
-                        last_page: res.data.last_page,
-                        total: res.data.total,
-                    });
+                    const response = res.data;
+
+                    // Nếu backend trả chuẩn Laravel paginate
+                    if (response.data && Array.isArray(response.data)) {
+                        setVouchers(response.data);
+                        setMeta({
+                            current_page: response.current_page ?? 1,
+                            last_page: response.last_page ?? 1,
+                            total: response.total ?? response.data.length,
+                        });
+                    }
+                    // Nếu backend custom (data + meta)
+                    else if (response.meta) {
+                        setVouchers(response.data ?? []);
+                        setMeta({
+                            current_page: response.meta.current_page,
+                            last_page: response.meta.last_page,
+                            total: response.meta.total,
+                        });
+                    }
+                    // fallback khi không có pagination
+                    else {
+                        setVouchers(response ?? []);
+                        setMeta({
+                            current_page: 1,
+                            last_page: 1,
+                            total: response.length ?? 0,
+                        });
+                    }
                 })
-                .catch((err) => console.log(err))
-                .finally(() => setLoading(false))
+                .catch((err) => {
+                    console.error("Error fetching vouchers:", err);
+                    toast.error("Failed to load vouchers");
+                })
+                .finally(() => setLoading(false));
         }, 300);
 
         return () => clearTimeout(delayDebounce);
-    }, [search,filters, page]);
+    }, [search, filters, page]);
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this voucher?")) return
+        if (!window.confirm("Are you sure you want to delete this voucher?")) return;
         try {
-            await api.delete(`/vouchers/${id}`)
-            setVouchers((prev) => prev.filter((v) => v.id !== id))
-            toast.success("Voucher deleted successfully")
+            await api.delete(`/vouchers/${id}`);
+            setVouchers((prev) => prev.filter((v) => v.id !== id));
+            toast.success("Voucher deleted successfully");
         } catch (err) {
-            console.error(err)
-            toast.error("Failed to delete this voucher")
+            console.error(err);
+            toast.error("Failed to delete this voucher");
         }
-    }
+    };
 
     return (
         <div className="p-4 md:p-6 bg-white rounded-2xl shadow-md">
             <div className="block md:hidden mb-4">
                 <VoucherFilterMobile filters={filters} setFilters={setFilters} />
             </div>
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="hidden md:block text-2xl font-bold text-gray-800">🎟️ Vouchers</h2>
 
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="hidden md:block text-2xl font-bold text-gray-800">
+                    🎟️ Vouchers
+                </h2>
                 <span className="block md:hidden text-purple-600 text-2xl">🎟️</span>
 
                 <div className="hidden md:block">
@@ -63,8 +94,8 @@ export default function VoucherList() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="border border-gray-300 rounded-lg px-4 py-2 focus:ring
-                       focus:ring-purple-200 focus:border-purple-400 transition
-                       w-64 lg:w-180"
+                           focus:ring-purple-200 focus:border-purple-400 transition
+                           w-64 lg:w-180"
                     />
                 </div>
 
@@ -84,42 +115,36 @@ export default function VoucherList() {
                             onChange={(e) => setSearch(e.target.value)}
                             autoFocus
                             className="border border-gray-300 rounded-lg px-3 py-2 focus:ring
-                           focus:ring-purple-200 focus:border-purple-400 transition
-                           w-48"
+                               focus:ring-purple-200 focus:border-purple-400 transition
+                               w-48"
                             onBlur={() => setShowSearchMb(false)}
                         />
                     )}
                 </div>
 
+                {/* Create button */}
                 <div className="hidden md:block bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg shadow transition">
-                    <Link
-                        to="/admin/vouchers/create"
-                        className="flex items-center gap-2"
-                    >
+                    <Link to="/admin/vouchers/create" className="flex items-center gap-2">
                         <Plus size={18} />
                         <span>Create</span>
                     </Link>
                 </div>
-
                 <div className="block md:hidden p-2 rounded-full bg-purple-600 text-white">
-                    <Link
-                        to="/admin/vouchers/create"
-                    >
+                    <Link to="/admin/vouchers/create">
                         <Plus size={18} />
                     </Link>
                 </div>
             </div>
 
+            {/* Content */}
             {loading ? (
                 <div className="flex justify-center items-center py-12 text-gray-500">
                     <Loader2 className="animate-spin mr-2" size={20} />
                     Loading vouchers...
                 </div>
-            ) : vouchers.length === 0 ? (
-                <div className="text-center py-12 text-gray-500">No vouchers found.</div>
-            ) : (
+            ) : vouchers && vouchers.length > 0 ? (
                 <>
-                    {/* Table for md+ screens */}
+                    {/* Table desktop */}
                     <div className="hidden md:block overflow-x-auto">
                         <table className="w-full border-collapse">
                             <thead>
@@ -138,16 +163,24 @@ export default function VoucherList() {
                             {vouchers.map((v, idx) => (
                                 <tr
                                     key={v.id}
-                                    className={`border-b hover:bg-gray-50 transition ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+                                    className={`border-b hover:bg-gray-50 transition ${
+                                        idx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                    }`}
                                 >
                                     <td className="px-4 py-3">{v.id}</td>
-                                    <td className="px-4 py-3 font-mono text-purple-600">{v.code}</td>
+                                    <td className="px-4 py-3 font-mono text-purple-600">
+                                        {v.code}
+                                    </td>
                                     <td className="px-4 py-3">
                                         {v.discount_type === "percent"
                                             ? `${parseInt(v.discount_value)}%`
                                             : `${parseInt(v.discount_value).toLocaleString()} VND`}
                                     </td>
-                                    <td className="px-4 py-3">{v.min_order ? `${parseInt(v.min_order).toLocaleString()} VND` : "—"}</td>
+                                    <td className="px-4 py-3">
+                                        {v.min_order
+                                            ? `${parseInt(v.min_order).toLocaleString()} VND`
+                                            : "—"}
+                                    </td>
                                     <td className="px-4 py-3">{v.usage_limit ?? "Unlimited"}</td>
                                     <td className="px-4 py-3">
                                         {v.start_date && v.end_date
@@ -157,7 +190,9 @@ export default function VoucherList() {
                                     <td className="px-4 py-3">
                                             <span
                                                 className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                                    v.status ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                                                    v.status
+                                                        ? "bg-green-100 text-green-700"
+                                                        : "bg-red-100 text-red-700"
                                                 }`}
                                             >
                                                 {v.status ? "Active" : "Inactive"}
@@ -183,6 +218,7 @@ export default function VoucherList() {
                         </table>
                     </div>
 
+                    {/* Mobile list */}
                     <div className="md:hidden space-y-4">
                         {vouchers.map((v) => (
                             <div key={v.id} className="bg-gray-50 rounded-lg p-4 border">
@@ -208,7 +244,9 @@ export default function VoucherList() {
                                     </div>
                                     <span
                                         className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                            v.status ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                                            v.status
+                                                ? "bg-green-100 text-green-700"
+                                                : "bg-red-100 text-red-700"
                                         }`}
                                     >
                                         {v.status ? "Active" : "Inactive"}
@@ -233,28 +271,37 @@ export default function VoucherList() {
                         ))}
                     </div>
                 </>
+            ) : (
+                <div className="text-center py-12 text-gray-500">No vouchers found.</div>
             )}
-            <div className="flex justify-center items-center gap-2 mt-6">
-                <button
-                    disabled={meta.current_page === 1}
-                    onClick={() => setPage((prev) => prev -1)}
-                    className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                >
-                    Prev
-                </button>
 
-                <span>
-                    Page {meta.current_page} / {meta.last_page}
-                </span>
+            {/* Pagination */}
+            <div className="flex flex-col items-center gap-2 mt-6">
+                <div className="text-gray-600 text-sm">
+                    Total: <span className="font-semibold">{meta.total}</span> vouchers
+                </div>
+                <div className="flex justify-center items-center gap-2">
+                    <button
+                        disabled={meta.current_page === 1}
+                        onClick={() => setPage((prev) => prev - 1)}
+                        className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                    >
+                        Prev
+                    </button>
 
-                <button
-                    disabled={meta.current_page === meta.last_page}
-                    onClick={() => setPage((prev) => prev + 1)}
-                    className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                >
-                    Next
-                </button>
+                    <span>
+                        Page {meta.current_page} / {meta.last_page}
+                    </span>
+
+                    <button
+                        disabled={meta.current_page === meta.last_page}
+                        onClick={() => setPage((prev) => prev + 1)}
+                        className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                    >
+                        Next
+                    </button>
+                </div>
             </div>
         </div>
-    )
+    );
 }
