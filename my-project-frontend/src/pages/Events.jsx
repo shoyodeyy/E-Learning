@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 import Header from "../components/Header.jsx";
 
@@ -205,7 +206,7 @@ const EventCard = ({ event }) => {
     };
 
     return (
-        <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100">
+        <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 min-h-[430px]">
             <div className="relative overflow-hidden">
                 <img
                     src={event.image || "/placeholder.svg"}
@@ -245,9 +246,9 @@ const EventCard = ({ event }) => {
                     </div>
                 </div>
 
-                <button className="w-full btn-gradient">
+                <Link to="/event/1" className="flex justify-center w-full btn-gradient">
                     View Details
-                </button>
+                </Link>
             </div>
         </div>
     );
