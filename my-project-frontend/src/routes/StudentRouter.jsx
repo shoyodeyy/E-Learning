@@ -1,7 +1,6 @@
 import { Route } from "react-router-dom";
 
 import ProtectedRoute from "./ProtectedRoute.jsx";
-
 import Dashboard from "../pages/Student/Dashboard.jsx";
 import MyRegistrations from "../pages/Student/MyRegistrations.jsx";
 import Profile from "../pages/Student/Profile.jsx";
