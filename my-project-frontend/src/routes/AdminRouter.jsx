@@ -7,7 +7,6 @@ import ChangePassword from "../pages/ChangePassword.jsx";
 import Overview from "../pages/Admin/Overview.jsx";
 import EventList from "../pages/Admin/Events/EventList.jsx"
 
-
 export default function AdminRouter() {
     return (
         <>
@@ -15,9 +14,12 @@ export default function AdminRouter() {
                 <Route path="/admin" element={<Dashboard />}>
                     <Route path="dashboard" element={<Overview />} />
 
+<<<<<<< HEAD
                     {/*Event List*/}
                     <Route path="events" element={<EventList />}/>
 
+=======
+>>>>>>> 53e940b9bed01f43b10794cbf978dfc2dcbe2fd7
                     {/* User */}
                     <Route path="user" element={<UserList />} />
 

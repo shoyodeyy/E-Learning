@@ -16,7 +16,7 @@ export default function Register() {
         email: "",
         password: "",
         password_confirmation: "",
-        role: "student",
+        role: "participant",
     })
 
     const nameRef = useRef(null)
@@ -32,12 +32,12 @@ export default function Register() {
             case "admin":
                 navigate("/admin/dashboard");
                 break;
-            case "instructor":
-                navigate("/instructor/dashboard");
+            case "organizer":
+                navigate("/organizer/dashboard");
                 break;
-            case "student":
+            case "participant":
             default:
-                navigate("/dashboard");
+                navigate("/");
                 break;
         }
     };
@@ -132,7 +132,7 @@ export default function Register() {
                 toast.success('Registration successful!');
 
                 // Google users are auto-verified, navigate based on role
-                const userRole = result.user?.role || 'student';
+                const userRole = result.user?.role || 'participant';
                 navigateByRole(userRole);
             } else {
                 toast.error(result.message || 'Google registration failed');
@@ -159,7 +159,7 @@ export default function Register() {
             <div className="w-full max-w-md relative z-10 bg-white shadow-2xl">
                 <div className="text-center pb-6 pt-6 px-6">
                     <img src="/images/logo.webp" alt="Udemy Logo" className="mx-auto h-10 mb-4" />
-                    <h1 className="text-2xl font-bold text-gray-900 mb-1">Join Udemy Business</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-1">Join FPT Aptech</h1>
                     <p className="text-gray-600 text-sm">(fpl.udemy.com)</p>
                 </div>
 
@@ -273,25 +273,25 @@ export default function Register() {
                             <div className="grid grid-cols-2 gap-3">
                                 <button
                                     type="button"
-                                    onClick={() => handleInputChange("role", "student")}
+                                    onClick={() => handleInputChange("role", "participant")}
                                     className={`p-3 rounded-lg border-2 text-sm font-medium transition-colors cursor-pointer ${
-                                        data.role === "student"
+                                        data.role === "participant"
                                             ? "border-purple-600 bg-purple-50 text-purple-700"
                                             : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
                                     }`}
                                 >
-                                    Student
+                                    Participant
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => handleInputChange("role", "instructor")}
+                                    onClick={() => handleInputChange("role", "organizer")}
                                     className={`p-3 rounded-lg border-2 text-sm font-medium transition-colors cursor-pointer ${
-                                        data.role === "instructor"
+                                        data.role === "organizer"
                                             ? "border-purple-600 bg-purple-50 text-purple-700"
                                             : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
                                     }`}
                                 >
-                                    Instructor
+                                    Organizer
                                 </button>
                             </div>
                         </div>
@@ -299,7 +299,7 @@ export default function Register() {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            className="w-full btn-gradient"
                         >
                             {processing ? "Creating account..." : "Create Account"}
                         </button>

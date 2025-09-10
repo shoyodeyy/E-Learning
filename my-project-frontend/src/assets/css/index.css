@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+/* globals.css */
+.btn-gradient {
+    @apply cursor-pointer bg-gradient-to-r from-purple-500 to-pink-500 
+           hover:from-purple-600 hover:to-pink-600 text-white py-3 rounded-xl 
+           font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 
+           transition-all duration-200;
+  }
+
+.btn-gradient-l {
+    @apply cursor-pointer bg-gradient-to-r from-purple-500 to-pink-500 
+           hover:from-purple-600 hover:to-pink-600 text-white rounded-xl 
+           font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 
+           transition-all duration-200 px-8 py-4 text-lg;
+  }
+  

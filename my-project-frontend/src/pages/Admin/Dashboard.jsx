@@ -1,6 +1,8 @@
-import {useEffect, useState} from "react"
-import {Outlet, useNavigate} from "react-router-dom"
-import {Menu, X} from "lucide-react"
+
+import { useEffect, useState } from "react"
+import { Outlet, useNavigate } from "react-router-dom"
+import { Menu, X } from "lucide-react"
+
 
 import {useAuth} from "../../context/AuthContext.jsx"
 import AdminSidebar from "./components/AdminSidebar.jsx"
@@ -101,14 +103,18 @@ export default function Dashboard() {
                             <span
                                 className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">⚠ Unverified</span>
                         )}
+<<<<<<< HEAD
                         <button onClick={handleLogout}
                                 className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+=======
+
+                        <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+>>>>>>> 53e940b9bed01f43b10794cbf978dfc2dcbe2fd7
                             Logout
                         </button>
                     </div>
                 </div>
             </header>
-
             <div className="flex">
                 <div
                     className={`

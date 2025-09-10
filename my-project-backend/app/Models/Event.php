@@ -2,33 +2,41 @@
 
 namespace App\Models;
 
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Event extends Model
 {
-    use HasFactory;
-
+    public $incrementing = false;
+    public $timestamps = true;
+    protected $keyType = 'string';
     protected $table = 'events';
-
-    protected $primaryKey = 'event_id';
-
+    protected $primaryKey = 'eventId';
     protected $fillable = [
+        'event_id',
         'title',
         'description',
         'category',
-        'event_date',
-        'event_time',
+        'start_at',
+        'duration_minutes',
         'venue',
-        'organizer_id',
-        'approved_by',
-        'max_participants',
-        'registration_deadline',
-        'banner_image',
+        'organizerId',
+        'approvedBy',
+        'maxParticipants',
+        'registrationDeadline',
+        'bannerImage',
         'status',
         'created_at',
+        'updated_at'
     ];
 
-    public $timestamps = false;
+    // relationship
+    public function organizer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'organizerId', 'user_id');
+    }
+
+    public function approvedByAdmin(): BelongsTo {
+        return $this->belongsTo(User::class, 'approvedBy', 'user_id');
+    }
 }
