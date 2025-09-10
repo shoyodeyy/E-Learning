@@ -39,7 +39,6 @@ return new class extends Migration
                 ->nullOnDelete();
         });
 
-
         Schema::create('password_reset_tokens', static function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
