@@ -15,6 +15,8 @@ import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 import Footer from "./components/Footer.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
+import EventsPage from "./pages/Events.jsx";
 
 
 function App() {
@@ -37,8 +39,8 @@ function App() {
                             {InstructorRouter()}
 
                             {/* Common */}
-                            <Route path="/" element={<Navigate to="/login" replace/>}/>
-
+                            <Route path="/" element={<Dashboard />} />
+                            <Route path="/event" element={<EventsPage />} />
                             <Route path="/login" element={<Login/>}/>
                             <Route path="/register" element={<Register/>}/>
                             <Route path="/user/forgot-password" element={<ForgotPassword/>}/>

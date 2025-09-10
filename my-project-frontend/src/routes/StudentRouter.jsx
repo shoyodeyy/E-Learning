@@ -1,6 +1,6 @@
 import { Route } from "react-router-dom";
 
-import Dashboard from "../pages/Student/Dashboard.jsx";
+import Dashboard from "../pages/Dashboard.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 
 // student feature pages
@@ -18,7 +18,6 @@ export default function StudentRouter() {
     return (
         <>
             <Route element={<ProtectedRoute />}>
-                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/courses" element={<Courses />} />
                 <Route path="/courses/:id" element={<CourseDetail />} />
                 <Route path="/feedback" element={<Feedback />} />
