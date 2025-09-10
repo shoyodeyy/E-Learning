@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('department', 100)->nullable();
             $table->string('enrollment_no', 50)->nullable();
             $table->rememberToken();
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamps();
 
             // Foreign key
             $table->foreign('banned_by')

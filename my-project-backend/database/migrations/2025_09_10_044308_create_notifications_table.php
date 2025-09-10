@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('notifications', function (Blueprint $table) {
             $table->id('notification_id');
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('event_id')->nullable();
+            $table->string('event_id')->nullable();
             $table->text('message');
             $table->enum('type', ['event_reminder', 'registration_confirm', 'event_update', 'system_announcement']);
             $table->boolean('is_read')->default(false);

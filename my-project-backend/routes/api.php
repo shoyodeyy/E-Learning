@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Chatbot\ChatController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\Organizer\EventController;
 use App\Http\Controllers\Student\ProfileController;
 use App\Services\AIClientWithFallback;
 use Illuminate\Http\Request;
@@ -20,6 +21,8 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 Route::apiResource('/courses', CourseController::class);
+
+Route::apiResource('/events', EventController::class);
 
 // Password reset routes
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
