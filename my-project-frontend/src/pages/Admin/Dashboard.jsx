@@ -9,9 +9,19 @@ export default function Dashboard() {
     const navigate = useNavigate()
     const { user, logout, refreshUser } = useAuth()
 
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
-    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+    const [filters, setFilters] = useState({
+        start_date: "",
+        end_date: "",
+        min_order: "",
+        usage_limit: "",
+        discount_type: "",
+        discount_value: "",
+        status: "",
+    });
 
     useEffect(() => {
         if (isMobileSidebarOpen) {
@@ -108,7 +118,12 @@ export default function Dashboard() {
                     }
                     `}
                 >
-                    <AdminSidebar isCollapsed={isSidebarCollapsed} setIsMobileSidebarOpen={setIsMobileSidebarOpen} />
+                    <AdminSidebar
+                        isCollapsed={isSidebarCollapsed}
+                        setIsMobileSidebarOpen={setIsMobileSidebarOpen}
+                        onFilter={setFilters}
+                        filters={filters}
+                    />
                 </div>
 
                 {isMobileSidebarOpen && (
@@ -118,8 +133,8 @@ export default function Dashboard() {
                     />
                 )}
 
-                <div className="flex-1 bg-white p-6 shadow transition-all duration-300 ease-in-out min-h-screen">
-                    <Outlet />
+                <div className="flex-1 bg-white p-6 shadow transition-all duration-300 ease-in-out overflow-y-auto">
+                    <Outlet context={{filters, setFilters}}/>
                 </div>
             </div>
         </div>

@@ -4,20 +4,57 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Notifications\UserBannedMail;
+use App\Mail\UserBannedMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
+    /**
+     * Lấy danh sách user (student + instructor) có search & paginate
+     */
     public function index(Request $request)
     {
-        $perPage = $request->get('per_page', 100);
-        return User::whereIn('role', ['student', 'instructor'])
-            ->orderBy('id')
-            ->paginate($perPage, ['*'], 'page', $request->get('page', 1));
+        $query = User::query()->whereIn('role', ['student', 'instructor']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('role') && $request->role !== 'all') {
+            $query->where('role', $request->role);
+        }
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            if ($request->status === 'banned') {
+                $query->whereNotNull('banned_until');
+            } elseif ($request->status === 'active') {
+                $query->whereNull('banned_until');
+            }
+        }
+
+        $sortField = $request->get('sortField', 'id');
+        $sortDirection = $request->get('sortDirection', 'asc');
+        $allowedSortFields = ['id', 'name', 'email', 'role', 'created_at'];
+
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'id';
+        }
+
+        $query->orderBy($sortField, $sortDirection);
+
+        $users = $query->paginate(20);
+
+        return response()->json($users);
     }
 
+    /**
+     * Ban user trong 1 năm + gửi email
+     */
     public function ban(Request $request, $id)
     {
         $request->validate([
@@ -25,22 +62,26 @@ class UserController extends Controller
         ]);
 
         $user = User::findOrFail($id);
-        $user->banned_until = now()->addYears(1);
-        $user->ban_reason = $request->reason;
-        $user->save();
+        $user->update([
+            'banned_until' => now()->addYear(),
+            'ban_reason'   => $request->reason,
+        ]);
 
-        // Gửi email cho user
         Mail::to($user->email)->send(new UserBannedMail($user, $request->reason));
 
         return response()->json(['message' => 'User banned successfully.']);
     }
 
+    /**
+     * Gỡ ban user
+     */
     public function unban($id)
     {
         $user = User::findOrFail($id);
-        $user->banned_until = null;
-        $user->ban_reason = null;
-        $user->save();
+        $user->update([
+            'banned_until' => null,
+            'ban_reason'   => null,
+        ]);
 
         return response()->json(['message' => 'User unbanned successfully.']);
     }
