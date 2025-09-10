@@ -133,7 +133,7 @@ export default function Dashboard() {
                     />
                 )}
 
-                <div className="flex-1 bg-white p-6 shadow transition-all duration-300 ease-in-out">
+                <div className="flex-1 bg-white p-6 shadow transition-all duration-300 ease-in-out overflow-y-auto">
                     <Outlet context={{filters, setFilters}}/>
                 </div>
             </div>
