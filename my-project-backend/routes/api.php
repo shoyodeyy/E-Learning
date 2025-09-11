@@ -9,7 +9,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\Chatbot\ChatController;
-//use App\Http\Controllers\CourseController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\Organizer\EventController;
 use App\Http\Controllers\Student\ProfileController;
 use App\Services\AIClientWithFallback;
@@ -21,7 +21,14 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 
-Route::apiResource('/events', EventController::class);
+//Route::apiResource('/events', EventController::class);
+Route::get('/events', [EventController::class, 'index']);
+Route::get('/events/{id}', [EventController::class, 'show']);
+
+// Event routes
+Route::post('/events', [EventController::class, 'store']);
+Route::put('/events/{id}', [EventController::class, 'update']);
+Route::delete('/events/{id}', [EventController::class, 'destroy']);
 
 // Password reset routes
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
@@ -70,6 +77,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Change password
     Route::post('/user/change-password', [AuthController::class, 'changePassword']);
+
+    // Feedback
+        Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);
+        Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
+        Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
 });
 
 // Admin routes
@@ -81,6 +93,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/analytics/users/hourly', [UserAnalyticsController::class, 'getHourlyStats']);
 
     // Users
+    Route::post('/users/{id}/approve', [UserController::class, 'approve']);
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/{id}/ban', [UserController::class, 'ban']);
     Route::post('/users/{id}/unban', [UserController::class, 'unban']);

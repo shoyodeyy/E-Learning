@@ -38,6 +38,7 @@ class User extends Authenticatable
         'avatar',
         'ban_reason',
         'banned_until',
+        'is_approved'
     ];
 
     /**
@@ -179,5 +180,15 @@ class User extends Authenticatable
     public function ApprovedByAdmin(): HasMany
     {
         return $this->hasMany(Event::class, 'approvedBy', 'user_id');
+    }
+
+    public function hasRole($role): bool
+    {
+        return $this->role === $role;
+    }
+
+    public function isOrganizerPending(): bool
+    {
+        return $this->role === 'organizer' && !$this->is_approved;
     }
 }

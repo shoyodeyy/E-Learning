@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ChevronLeft, ChevronRight, LayoutDashboard, User, Book, LogOut } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function UserSidebar({ mobile = false }) {
+export default function OrganizerSidebar({ mobile = false }) {
     const location = useLocation();
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const menuItems = [
-        { id: "dashboard", link: "/user/dashboard", label: "Dashboard", icon: LayoutDashboard },
-        { id: "profile", link: "/user/profile", label: "Profile", icon: User },
-        { id: "registrations", link: "/user/registration", label: "My Registrations", icon: Book },
+        { id: "dashboard", link: "/organizer/dashboard", label: "Dashboard", icon: "📊" },
+        { id: "manage", link: "/organizer/manage-events", label: "Manage Events", icon: "👤" },
     ];
 
     const toggleSidebar = () => setIsCollapsed(!isCollapsed);
@@ -20,16 +19,16 @@ export default function UserSidebar({ mobile = false }) {
             <nav className="w-full bg-white border-t border-gray-200 shadow-md flex justify-around py-2 rounded-lg">
                 {menuItems.map((item) => {
                     const isActive = location.pathname === item.link;
-                    const Icon = item.icon;
                     return (
                         <Link
                             key={item.id}
                             to={item.link}
-                            className={`group flex gap-1 items-center transition-colors duration-200 ${
-                                isActive ? "text-purple-600" : "text-gray-600 hover:text-purple-600"
-                            }`}
+                            className={`
+                                flex flex-col items-center text-xs font-medium flex-1 py-1
+                                ${isActive ? "text-purple-600" : "text-gray-500 hover:text-purple-600"}
+                            `}
                         >
-                            <Icon size={20} className={`shrink-0 ${isActive ? "text-purple-600" : "text-gray-600 group-hover:text-purple-600"}`} />
+                            <span className="text-xl">{item.icon}</span>
                             <span>{item.label}</span>
                         </Link>
                     );
@@ -59,7 +58,6 @@ export default function UserSidebar({ mobile = false }) {
                 <nav className="space-y-2">
                     {menuItems.map((item) => {
                         const isActive = location.pathname === item.link;
-                        const Icon = item.icon;
                         return (
                             <Link
                                 key={item.id}
@@ -75,7 +73,7 @@ export default function UserSidebar({ mobile = false }) {
                         ${isCollapsed ? "justify-center" : "space-x-3"}
                     `}
                             >
-                                <Icon size={20} className="shrink-0" />
+                                <span className="text-lg flex-shrink-0">{item.icon}</span>
 
                                 {!isCollapsed && <span className="font-medium">{item.label}</span>}
 

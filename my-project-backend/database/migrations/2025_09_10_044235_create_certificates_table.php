@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('certificates', function (Blueprint $table) {
             $table->id('certificate_id');
-            $table->string('event_id');
+            $table->unsignedBigInteger('event_id');
             $table->unsignedBigInteger('user_id');
             $table->string('certificate_url', 255);
             $table->integer('certificate_fee')->nullable();

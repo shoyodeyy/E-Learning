@@ -75,7 +75,7 @@ export default function Register() {
                 // Use AuthContext login method
                 login(result.user, result.token);
 
-                toast.success("Registration successful! Please check your email to verify your account.");
+                toast.success(result.message);
 
                 // Regular email/password users need to verify email
                 navigate("/verify-email");

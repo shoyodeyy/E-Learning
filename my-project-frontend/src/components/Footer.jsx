@@ -30,11 +30,6 @@ export default function Footer() {
                                     Blog
                                 </a>
                             </li>
-                            <li>
-                                <a href="#" className="hover:text-white transition-colors duration-200">
-                                    Investors
-                                </a>
-                            </li>
                         </ul>
                     </div>
 
@@ -75,9 +70,9 @@ export default function Footer() {
                                 </a>
                             </li>
                             <li>
-                                <a href="#" className="hover:text-white transition-colors duration-200">
+                                <Link to="/sitemap" href="#" className="hover:text-white transition-colors duration-200">
                                     Sitemap
-                                </a>
+                                </Link>
                             </li>
                             <li>
                                 <a href="#" className="hover:text-white transition-colors duration-200">

@@ -1,17 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { LogOut, User, Menu, X, LayoutDashboard } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import Avatar from "./Avatar.jsx";
-import { getProfile } from "../api/profileApi.js";
-
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import ConfirmDialog from "./ConfirmDialog.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Header() {
     const location = useLocation();
-    const [user, setUser] = useState(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [confirmOpen, setConfirmOpen] = useState(false);
     const navigate = useNavigate();
     const mobileMenuRef = useRef(null);
+    const { user, logout } = useAuth();
 
     const navItems = [
         { path: "/", label: "Home" },
@@ -19,20 +20,6 @@ export default function Header() {
         { path: "/about-us", label: "About Us" },
         { path: "/media-gallery", label: "Media Gallery" },
     ];
-
-    useEffect(() => {
-        const cachedUser = localStorage.getItem("user");
-        if (cachedUser) {
-            setUser(JSON.parse(cachedUser));
-        } else {
-            getProfile()
-                .then((u) => {
-                    setUser(u);
-                    localStorage.setItem("user", JSON.stringify(u));
-                })
-                .catch(() => setUser(null));
-        }
-    }, []);
 
     // Close mobile menu when clicking outside
     useEffect(() => {
@@ -61,12 +48,7 @@ export default function Header() {
     }, [location.pathname]);
 
     const handleLogout = () => {
-        if (!confirm("Are you sure you want to logout?")) return;
-        localStorage.removeItem("auth_token");
-        localStorage.removeItem("user");
-        setUser(null);
-        navigate("/");
-        setMobileMenuOpen(false);
+        setConfirmOpen(true);
     };
 
     const toggleMobileMenu = () => {
@@ -148,7 +130,6 @@ export default function Header() {
 
                         {/* Mobile Menu Button */}
                         <div className="flex items-center space-x-2 sm:hidden">
-                            {user && <Avatar name={user.name} avatarUrl={user.avatar} size="2rem" />}
                             <button
                                 onClick={toggleMobileMenu}
                                 className="cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
@@ -171,123 +152,139 @@ export default function Header() {
                     </div>
                 </div>
             </header>
-
             {/* Mobile/Tablet Overlay Menu */}
-            {mobileMenuOpen && (
-                <div className="fixed inset-0 z-50 lg:hidden">
-                    {/* Backdrop */}
-                    <div className="absolute inset-0 backdrop-blur-xs bg-opacity-50 transition-opacity duration-300" />
+            <div
+                className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ${
+                    mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                }`}
+            >
+                {/* Backdrop */}
+                <div
+                    className={`absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${
+                        mobileMenuOpen ? "opacity-100" : "opacity-0"
+                    }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                />
 
-                    {/* Menu Panel */}
-                    <div
-                        ref={mobileMenuRef}
-                        className="absolute top-0 right-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl transform transition-transform duration-300 overflow-y-auto"
-                    >
-                        {/* Menu Header */}
-                        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                            <div className="flex items-center space-x-3">
-                                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
-                                    <span className="text-white font-bold text-sm">✦</span>
-                                </div>
-                                <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                                    EventSphere
-                                </span>
+                {/* Menu Panel */}
+                <div
+                    ref={mobileMenuRef}
+                    className={`absolute top-0 right-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl transform transition-transform duration-300 ${
+                        mobileMenuOpen ? "translate-x-0" : "translate-x-full"
+                    }`}
+                >
+                    {/* Menu Header */}
+                    <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
+                                <span className="text-white font-bold text-sm">✦</span>
                             </div>
-                            <button onClick={toggleMobileMenu} className="cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                                <X size={20} className="text-gray-700" />
-                            </button>
+                            <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                EventSphere
+                            </span>
                         </div>
+                        <button onClick={toggleMobileMenu} className="cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                            <X size={20} className="text-gray-700" />
+                        </button>
+                    </div>
 
-                        {/* User Info (if logged in) */}
-                        {user && (
-                            <div className="px-4 py-4 border-b border-gray-200 bg-gray-50">
-                                <div className="flex items-center space-x-3">
-                                    <Avatar name={user.name} avatarUrl={user.avatar} size="2.5rem" />
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-gray-800 truncate">{user.name}</p>
-                                        <p className="text-sm text-gray-500 truncate">{user.email}</p>
-                                    </div>
+                    {/* User Info (if logged in) */}
+                    {user && (
+                        <div className="px-4 py-4 border-b border-gray-200 bg-gray-50">
+                            <div className="flex items-center space-x-3">
+                                <Avatar name={user.name} avatarUrl={user.avatar} size="2.5rem" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-gray-800 truncate">{user.name}</p>
+                                    <p className="text-sm text-gray-500 truncate">{user.email}</p>
                                 </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Navigation Links */}
+                    <div className="py-4">
+                        <nav className="space-y-1">
+                            {navItems.map((item) => {
+                                const isActive = location.pathname === item.path || (item.path !== "/" && location.pathname.startsWith(item.path));
+
+                                return (
+                                    <Link
+                                        key={item.path}
+                                        to={item.path}
+                                        className={`flex items-center px-4 py-3 text-base font-medium transition-colors duration-200 ${
+                                            isActive
+                                                ? "text-purple-600 bg-purple-50 border-r-2 border-purple-600"
+                                                : "text-gray-700 hover:text-purple-600 hover:bg-gray-50"
+                                        }`}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                );
+                            })}
+                        </nav>
+
+                        {/* User Actions */}
+                        {user ? (
+                            <div className="mt-6 pt-6 border-t border-gray-200 space-y-1">
+                                <button
+                                    onClick={() => {
+                                        navigate("/user/profile");
+                                        setMobileMenuOpen(false);
+                                    }}
+                                    className="cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors duration-200"
+                                >
+                                    <User size={20} className="mr-3" />
+                                    Profile
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        navigate("/user/dashboard");
+                                        setMobileMenuOpen(false);
+                                    }}
+                                    className=" cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors duration-200"
+                                >
+                                    <LayoutDashboard size={20} className="mr-3" />
+                                    Dashboard
+                                </button>
+                                <button
+                                    onClick={handleLogout}
+                                    className="cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 transition-colors duration-200"
+                                >
+                                    <LogOut size={20} className="mr-3" />
+                                    Logout
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="mt-6 pt-6 border-t border-gray-200 space-y-3 px-4">
+                                <Link
+                                    to="/login"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="block w-full text-center py-3 px-4 border border-purple-600 text-purple-600 font-semibold rounded-xl hover:bg-purple-50 transition-colors duration-200"
+                                >
+                                    Login
+                                </Link>
+                                <Link
+                                    to="/register"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="block w-full text-center py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                                >
+                                    Sign Up
+                                </Link>
                             </div>
                         )}
-
-                        {/* Navigation Links */}
-                        <div className="py-4">
-                            <nav className="space-y-1">
-                                {navItems.map((item) => {
-                                    const isActive =
-                                        location.pathname === item.path || (item.path !== "/" && location.pathname.startsWith(item.path));
-
-                                    return (
-                                        <Link
-                                            key={item.path}
-                                            to={item.path}
-                                            className={`flex items-center px-4 py-3 text-base font-medium transition-colors duration-200 ${
-                                                isActive
-                                                    ? "text-purple-600 bg-purple-50 border-r-2 border-purple-600"
-                                                    : "text-gray-700 hover:text-purple-600 hover:bg-gray-50"
-                                            }`}
-                                            onClick={() => setMobileMenuOpen(false)}
-                                        >
-                                            {item.label}
-                                        </Link>
-                                    );
-                                })}
-                            </nav>
-
-                            {/* User Actions */}
-                            {user ? (
-                                <div className="mt-6 pt-6 border-t border-gray-200 space-y-1">
-                                    <button
-                                        onClick={() => {
-                                            navigate("/profile");
-                                            setMobileMenuOpen(false);
-                                        }}
-                                        className="cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors duration-200"
-                                    >
-                                        <User size={20} className="mr-3" />
-                                        Profile
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            navigate("/dashboard");
-                                            setMobileMenuOpen(false);
-                                        }}
-                                        className=" cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors duration-200"
-                                    >
-                                        <LayoutDashboard size={20} className="mr-3" />
-                                        Dashboard
-                                    </button>
-                                    <button
-                                        onClick={handleLogout}
-                                        className="cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 transition-colors duration-200"
-                                    >
-                                        <LogOut size={20} className="mr-3" />
-                                        Logout
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="mt-6 pt-6 border-t border-gray-200 space-y-3 px-4">
-                                    <Link
-                                        to="/login"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="block w-full text-center py-3 px-4 border border-purple-600 text-purple-600 font-semibold rounded-xl hover:bg-purple-50 transition-colors duration-200"
-                                    >
-                                        Login
-                                    </Link>
-                                    <Link
-                                        to="/register"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className="block w-full text-center py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                                    >
-                                        Sign Up
-                                    </Link>
-                                </div>
-                            )}
-                        </div>
                     </div>
                 </div>
-            )}
+            </div>
+            <ConfirmDialog
+                open={confirmOpen}
+                message="Are you sure you want to logout?"
+                onCancel={() => setConfirmOpen(false)}
+                onConfirm={() => {
+                    logout(), navigate("/");
+                    setConfirmOpen(false);
+                }}
+            />
         </>
     );
 }
@@ -315,12 +312,12 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
     };
 
     const goToProfile = () => {
-        navigate("/profile");
+        navigate("/user/profile");
         setOpen(false);
     };
 
     const goToDashboard = () => {
-        navigate("/dashboard");
+        navigate("/user/dashboard");
         setOpen(false);
     };
 

@@ -6,7 +6,7 @@ const mockParticipantData = {
     totalEventsAttended: 12,
     upcomingRegistrations: 3,
     eventsSaved: 7,
-    communityContributions: 5
+    communityContributions: 5,
 };
 
 const recentActivities = [
@@ -15,29 +15,29 @@ const recentActivities = [
         type: "registration",
         title: "Your registration for Tech Innovation Summit is confirmed!",
         time: "5 minutes ago",
-        icon: "✅"
+        icon: "✅",
     },
     {
         id: 2,
         type: "event",
         title: "New event: Future of AI Workshop now open for registration.",
         time: "2 hours ago",
-        icon: "🆕"
+        icon: "🆕",
     },
     {
         id: 3,
         type: "reminder",
         title: "Reminder: Digital Marketing Masterclass starts tomorrow!",
         time: "Yesterday",
-        icon: "⏰"
+        icon: "⏰",
     },
     {
         id: 4,
         type: "feedback",
         title: "Feedback requested for Web Dev Bootcamp event.",
         time: "3 days ago",
-        icon: "📝"
-    }
+        icon: "📝",
+    },
 ];
 
 const upcomingEvents = [
@@ -47,7 +47,7 @@ const upcomingEvents = [
         date: "December 15, 2024",
         time: "9:00 AM - 5:00 PM",
         location: "Virtual (Online)",
-        image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop"
+        image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop",
     },
     {
         id: 2,
@@ -55,7 +55,7 @@ const upcomingEvents = [
         date: "November 18, 2024",
         time: "8:00 AM - 4:30 PM",
         location: "Convention Center, Cityville",
-        image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&h=250&fit=crop"
+        image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&h=250&fit=crop",
     },
     {
         id: 3,
@@ -63,8 +63,8 @@ const upcomingEvents = [
         date: "December 5, 2024",
         time: "10:00 AM - 3:00 PM",
         location: "Community Gardens, Greentown",
-        image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=250&fit=crop"
-    }
+        image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=250&fit=crop",
+    },
 ];
 
 // Quick Stats Component
@@ -74,26 +74,26 @@ const QuickStats = () => {
             label: "Total Events Attended",
             value: mockParticipantData.totalEventsAttended,
             icon: "🎉",
-            color: "from-blue-500 to-cyan-500"
+            color: "from-blue-500 to-cyan-500",
         },
         {
             label: "Upcoming Registrations",
             value: mockParticipantData.upcomingRegistrations,
             icon: "📅",
-            color: "from-purple-500 to-pink-500"
+            color: "from-purple-500 to-pink-500",
         },
         {
             label: "Events Saved",
             value: mockParticipantData.eventsSaved,
             icon: "💾",
-            color: "from-green-500 to-emerald-500"
+            color: "from-green-500 to-emerald-500",
         },
         {
             label: "Community Contributions",
             value: mockParticipantData.communityContributions,
             icon: "🏆",
-            color: "from-orange-500 to-red-500"
-        }
+            color: "from-orange-500 to-red-500",
+        },
     ];
 
     return (
@@ -147,12 +147,11 @@ const UpcomingEvents = () => {
             <h3 className="text-xl font-bold text-gray-900 mb-6">Upcoming Events</h3>
             <div className="space-y-4">
                 {upcomingEvents.map((event) => (
-                    <div key={event.id} className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow duration-200">
-                        <img
-                            src={event.image}
-                            alt={event.title}
-                            className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
-                        />
+                    <div
+                        key={event.id}
+                        className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow duration-200"
+                    >
+                        <img src={event.image} alt={event.title} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                             <h4 className="text-sm font-semibold text-gray-900 mb-1">{event.title}</h4>
                             <div className="flex items-center text-xs text-gray-600 mb-1">
@@ -179,27 +178,19 @@ const UpcomingEvents = () => {
 export default function ParticipantDashboard() {
     return (
         <div className="min-h-screen bg-gray-50">
-            <Header />
-            
-            <div className="flex">
-                <UserSidebar />
-                
-                <main className="flex-1 p-8">
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900">Welcome, Participant!</h1>
-                        <p className="text-gray-600 mt-2">Your event journey starts here. Explore your stats and upcoming activities.</p>
-                    </div>
-                    
-                    <div className="mb-8">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Quick Stats</h2>
-                        <QuickStats />
-                    </div>
-                    
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <RecentActivity />
-                        <UpcomingEvents />
-                    </div>
-                </main>
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900">Welcome, Participant!</h1>
+                <p className="text-gray-600 mt-2">Your event journey starts here. Explore your stats and upcoming activities.</p>
+            </div>
+
+            <div className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Quick Stats</h2>
+                <QuickStats />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <RecentActivity />
+                <UpcomingEvents />
             </div>
         </div>
     );

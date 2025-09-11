@@ -29,14 +29,14 @@ export default function VerificationResult() {
                     setMessage('Email verified successfully! Welcome to Udemy Business.')
                     // Redirect to dashboard after 3 seconds
                     setTimeout(() => {
-                        window.location.href = '/dashboard'
+                        window.location.href = '/'
                     }, 3000)
                     break
                 case 'already_verified':
                     setStatus('info')
                     setMessage('Your email is already verified.')
                     setTimeout(() => {
-                        window.location.href = '/dashboard'
+                        window.location.href = '/'
                     }, 2000)
                     break
                 default:
@@ -48,7 +48,7 @@ export default function VerificationResult() {
     const handleResendEmail = async () => {
         try {
             const token = localStorage.getItem("auth_token")
-            const apiUrl = "http://localhost:8000/api" // Thay bằng apiUrl thực tế
+            const apiUrl = "http://localhost:8000/api"
 
             const response = await fetch(`${apiUrl}/email/resend`, {
                 method: "POST",

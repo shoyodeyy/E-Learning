@@ -13,7 +13,6 @@ export default function ProtectedRoute({ allowedRoles }) {
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
     }
-console.log(user);
 
     if (allowedRoles && !allowedRoles.includes(user?.role)) {
         return <Navigate to="/403" replace />;

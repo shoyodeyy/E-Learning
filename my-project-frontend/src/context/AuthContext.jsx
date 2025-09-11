@@ -74,12 +74,14 @@ export const AuthProvider = ({ children }) => {
     };
 
     const isAuthenticated = !!token && !!user;
+    const isVerified = !!user?.email_verified_at;
 
     const value = {
         user,
         token,
         loading,
         isAuthenticated,
+        isVerified,
         login,
         logout,
         updateUser,
