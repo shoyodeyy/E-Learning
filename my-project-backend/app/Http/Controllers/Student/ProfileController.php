@@ -20,12 +20,6 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        if ($user->role !== 'participant') {
-            return response()->json([
-                'message' => 'Only participants can view their profile.'
-            ], 403);
-        }
-
         return response()->json([
             'user' => $user,
         ]);
@@ -42,28 +36,28 @@ class ProfileController extends Controller
 
             $user = $request->user();
 
-            // chỉ student mới được update
-            if ($user->role !== 'participant') {
-                return response()->json([
-                    'message' => 'Only participants can update their profile.'
-                ], 403);
-            }
-
-
-            // validate dữ liệu
-            $validated = $request->validate([
+            // --- Validation rules ---
+            $rules = [
                 'name'    => 'required|string|min:3|max:255',
-                'email'   => 'required|email|unique:users,email,' . $user->id,
+                'email'   => 'sometimes|required|email|unique:users,email,' . $user->user_id . ',user_id',
                 'phone'   => [
                     'nullable',
                     'regex:/^(0|\+84)[0-9]{9,10}$/',
-                    'unique:users,phone,' . $user->id,
+                    'unique:users,phone,' .  $user->user_id . ',user_id',
                 ],
                 'address' => 'nullable|string|max:255',
                 'gender'  => 'nullable|in:male,female,other',
                 'profile' => 'nullable|string',
                 'avatar'  => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
-            ], [
+            ];
+
+            // --- Nếu user là admin hoặc organizer thì cho phép department & enrollment_no ---
+            if (in_array($user->role, ['admin', 'organizer'])) {
+                $rules['department']    = 'nullable|string|max:100';
+                $rules['enrollment_no'] = 'nullable|string|max:50';
+            }
+
+            $validated = $request->validate($rules, [
                 'phone.regex'  => 'Phone number must start with 0 or +84 and contain 9–10 digits.',
                 'phone.unique' => 'This phone number is already in use.',
                 'avatar.image' => 'The uploaded file must be an image.',
@@ -71,20 +65,27 @@ class ProfileController extends Controller
                 'avatar.max'   => 'Avatar size must be less than 2MB.',
             ]);
 
-            // nếu user là Google login và chưa update thủ công
+            // --- Nếu user login bằng Google và chưa update thủ công ---
             if ($user->google_id && !$request->has('name')) {
                 $validated['name'] = $user->name;
             }
 
-            // xử lý avatar nếu có upload
+            // --- Xử lý avatar ---
             if ($request->hasFile('avatar')) {
+                // Xóa avatar cũ nếu có
                 if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
                     Storage::disk('public')->delete($user->avatar);
                 }
+
+                // Lưu avatar mới
                 $path = $request->file('avatar')->store('avatars', 'public');
                 $validated['avatar'] = $path;
+            } else {
+                // Nếu không upload, loại bỏ avatar khỏi validated để tránh ghi null
+                unset($validated['avatar']);
             }
 
+            // --- Update user ---
             $user->update($validated);
 
             return response()->json([

@@ -5,6 +5,7 @@ import Dashboard from "../pages/Student/Dashboard.jsx";
 import MyRegistrations from "../pages/Student/MyRegistrations.jsx";
 import Profile from "../pages/Student/Profile.jsx";
 import UserLayout from "../pages/Student/UserLayout.jsx";
+import PublicProfile from "../pages/Student/PublicProfile.jsx";
 
 export default function StudentRouter() {
     return (
@@ -14,6 +15,7 @@ export default function StudentRouter() {
                     <Route path="profile" element={<Profile />} />
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="registration" element={<MyRegistrations />} />
+                    <Route path="edit-profile" element={<PublicProfile />} />
                 </Route>
             </Route>
         </>
