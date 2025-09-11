@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('media_gallery', function (Blueprint $table) {
             $table->id('media_id');
-            $table->string('event_id');
+            $table->unsignedBigInteger('event_id');
             $table->enum('file_type', ['image', 'video']);
             $table->string('file_url', 255);
             $table->string('file_name', 255)->nullable();

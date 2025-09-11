@@ -180,4 +180,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Event::class, 'approvedBy', 'user_id');
     }
+
+    public function hasRole($role): bool
+    {
+        return $this->role === $role;
+    }
 }

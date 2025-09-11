@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('event_capacity', function (Blueprint $table) {
             $table->id('capacity_id');
-            $table->string('event_id');
+            $table->unsignedBigInteger('event_id');
             $table->integer('total_seats');
             $table->integer('registered_count')->default(0);
             $table->boolean('waitlist_enabled')->default(true);

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('feedback', function (Blueprint $table) {
             $table->id('feedback_id');
-            $table->string('event_id');
+            $table->unsignedBigInteger('event_id');
             $table->unsignedBigInteger('user_id');
             $table->enum('role', ['participant', 'organizer'])->default('participant');
             $table->decimal('rating', 2, 1)

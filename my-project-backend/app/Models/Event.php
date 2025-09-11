@@ -7,13 +7,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Event extends Model
 {
-    public $incrementing = false;
+    public $incrementing = true;
     public $timestamps = true;
-    protected $keyType = 'string';
+    protected $keyType = 'int';
     protected $table = 'events';
-    protected $primaryKey = 'eventId';
+    protected $primaryKey = 'event_id';
     protected $fillable = [
-        'event_id',
         'title',
         'description',
         'category',
