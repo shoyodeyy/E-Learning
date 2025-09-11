@@ -1,8 +1,8 @@
 import { useState } from "react";
 import api from "../api/axios";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, CalendarPlus } from "lucide-react";
 
-export default function CalendarIntegration({ eventId }) {
+export default function CalendarIntegration({ eventId, variant = "floating" }) {
   const [loading, setLoading] = useState(false);
   const [options, setOptions] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
@@ -32,8 +32,20 @@ export default function CalendarIntegration({ eventId }) {
     setShowPopup(false);
   };
 
-  return (
-    <>
+  const Trigger = () => {
+    if (variant === "inline") {
+      return (
+        <button
+          onClick={handleClick}
+          disabled={loading}
+          className="cursor-pointer flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-lg border border-gray-200 transition-all duration-200 disabled:opacity-50"
+        >
+          <CalendarPlus className="w-5 h-5" />
+          <span>Add to Calendar</span>
+        </button>
+      );
+    }
+    return (
       <button
         onClick={handleClick}
         disabled={loading}
@@ -41,6 +53,12 @@ export default function CalendarIntegration({ eventId }) {
       >
         <CalendarDays className="w-6 h-6" />
       </button>
+    );
+  };
+
+  return (
+    <>
+      <Trigger />
 
       {/* Popup */}
       {showPopup && options && (
