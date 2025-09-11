@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { getProfile, updateProfile } from "../../api/profileApi.js"; // nhớ import API
+import { getProfile, updateProfile } from "../../api/profileApi.js";
 
 export default function PublicProfile() {
     const [user, setUser] = useState(null);
@@ -8,7 +8,6 @@ export default function PublicProfile() {
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
-    // Load user profile
     useEffect(() => {
         getProfile()
             .then((u) => {
@@ -21,6 +20,8 @@ export default function PublicProfile() {
                     address: u?.address || "",
                     phone: u?.phone || "",
                     avatar: null,
+                    department: u?.department || "",
+                    enrollment_no: u?.enrollment_no || "",
                 });
             })
             .catch(() => toast.error("Failed to load profile ❌"));
@@ -43,7 +44,6 @@ export default function PublicProfile() {
             [name]: fieldValue,
         }));
 
-        // xóa lỗi khi người dùng thay đổi input
         setErrors((prev) => {
             if (prev[name]) {
                 const newErrors = { ...prev };
@@ -53,7 +53,6 @@ export default function PublicProfile() {
             return prev;
         });
     };
-
 
     const validate = () => {
         const newErrors = {};
@@ -72,7 +71,6 @@ export default function PublicProfile() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) return;
-
         if (!window.confirm("Do you want to update your profile?")) return;
 
         setProcessing(true);
@@ -89,13 +87,7 @@ export default function PublicProfile() {
             toast.success(result.message || "Profile updated successfully ✅");
             setErrors({});
         } catch (error) {
-
-            console.error("Profile update error:", {
-                message: error.message,
-                response: error.response?.data,
-                status: error.response?.status,
-            });
-
+            console.error("Profile update error:", error);
             toast.error("Update failed ❌");
         } finally {
             setProcessing(false);
@@ -103,188 +95,196 @@ export default function PublicProfile() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 py-8">
+            <main className="max-w-6xl mx-auto px-4">
+                <h1 className="text-2xl font-bold mb-6">Edit Profile</h1>
 
+                <form
+                    onSubmit={handleSubmit}
+                    encType="multipart/form-data"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                >
+                    {/* Personal Information */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
 
-            {/* Content */}
-            <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        {/* Avatar */}
+                        <div className="mb-4">
+                            <input
+                                type="file"
+                                name="avatar"
+                                accept="image/*"
+                                onChange={handleInputChange}
+                                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 border-gray-300 cursor-pointer"
+                            />
+                        </div>
 
-
-                    {/* Main form */}
-                    <section className="col-span-1 md:col-span-9 bg-white shadow rounded-2xl p-6">
-                        <h1 className="text-2xl font-semibold mb-6">Public Profile</h1>
-
-                        <form
-                            onSubmit={handleSubmit}
-                            className="space-y-6"
-                            encType="multipart/form-data"
-                        >
-                            {/* Name */}
-                            <div>
-                                <label className="block font-medium mb-2">Full Name</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleInputChange}
-                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                                        errors.name ? "border-red-500" : "border-gray-300"
-                                    }`}
-                                />
-                                {errors.name && (
-                                    <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                                )}
-                            </div>
-
-                            {/* Email */}
-                            <div>
-                                <label className="block font-medium mb-2">Email</label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    readOnly
-                                    className="w-full border rounded px-3 py-2 bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed"
-                                />
-                            </div>
-
-                            {/* Gender */}
-                            <div>
-                                <label className="block font-medium mb-2">Gender</label>
-                                <select
-                                    name="gender"
-                                    value={formData.gender}
-                                    onChange={handleInputChange}
-                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                                        errors.gender ? "border-red-500" : "border-gray-300"
-                                    } cursor-pointer`}
-                                >
-                                    <option value="">Select gender</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                                {errors.gender && (
-                                    <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
-                                )}
-                            </div>
-
-
-                            {/* Avatar */}
-                            <div>
-                                <label className="block font-medium mb-2">Avatar</label>
-                                <input
-                                    type="file"
-                                    name="avatar"
-                                    accept="image/*"
-                                    onChange={handleInputChange}
-                                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 border-gray-300 cursor-pointer"
-                                />
-                            </div>
-
-                            {/* Biography */}
-                            <div>
-                                <label className="block font-medium mb-2">Biography</label>
-                                <textarea
-                                    name="profile"
-                                    value={formData.profile}
-                                    onChange={handleInputChange}
-                                    rows="3"
-                                    className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 border-gray-300"
-                                ></textarea>
-                            </div>
-
-                            {/* Address */}
-                            <div>
-                                <label className="block font-medium mb-2">Address</label>
-                                <input
-                                    type="text"
-                                    name="address"
-                                    value={formData.address}
-                                    onChange={handleInputChange}
-                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                                        errors.address ? "border-red-500" : "border-gray-300"
-                                    }`}
-                                />
-                                {errors.address && (
-                                    <p className="text-red-500 text-sm mt-1">{errors.address}</p>
-                                )}
-                            </div>
-
-                            {/* Phone */}
-                            <div>
-                                <label className="block font-medium mb-2">Phone</label>
-                                <input
-                                    type="text"
-                                    name="phone"
-                                    value={formData.phone}
-                                    onChange={handleInputChange}
-                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                                        errors.phone ? "border-red-500" : "border-gray-300"
-                                    }`}
-                                />
-                                {errors.phone && (
-                                    <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-                                )}
-                            </div>
-
-                            {["organizer", "admin"].includes(user?.role) && (
-                                <>
-                                    {/* Department */}
-                                    <div>
-                                        <label className="block font-medium mb-2">Department</label>
-                                        <input
-                                            type="text"
-                                            name="department"
-                                            value={formData.department}
-                                            onChange={handleInputChange}
-                                            readOnly={user?.role === "organizer"} // organizer chỉ đọc
-                                            placeholder={user?.role === "organizer" ? "Only admin can edit" : "Enter department"}
-                                            className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 
-          ${user?.role === "organizer"
-                                                ? "bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed placeholder-gray-400"
-                                                : "border-gray-300"}`}
-                                        />
-                                    </div>
-
-                                    {/* Enrollment Number */}
-                                    <div>
-                                        <label className="block font-medium mb-2">Enrollment No</label>
-                                        <input
-                                            type="text"
-                                            name="enrollment_no"
-                                            value={formData.enrollment_no}
-                                            onChange={handleInputChange}
-                                            readOnly={user?.role === "organizer"} // organizer chỉ đọc
-                                            placeholder={user?.role === "organizer" ? "Only admin can edit" : "Enter enrollment number"}
-                                            className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 
-          ${user?.role === "organizer"
-                                                ? "bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed placeholder-gray-400"
-                                                : "border-gray-300"}`}
-                                        />
-                                    </div>
-                                </>
+                        {/* Name */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1">Name</label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                                    errors.name ? "border-red-500" : "border-gray-300"
+                                }`}
+                            />
+                            {errors.name && (
+                                <p className="text-red-500 text-sm">{errors.name}</p>
                             )}
+                        </div>
 
-
-                            {/* Submit */}
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                className={`cursor-pointer px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-300 border${
-                                    processing
-                                        ? "bg-purple-300 text-white cursor-not-allowed border-purple-200 shadow-none"
-                                        : "bg-white/80 backdrop-blur-sm text-purple-600 border-purple-200 shadow-md hover:shadow-lg hover:bg-white hover:scale-105"
+                        {/* Gender */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1">Gender</label>
+                            <select
+                                name="gender"
+                                value={formData.gender}
+                                onChange={handleInputChange}
+                                className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                                    errors.gender ? "border-red-500" : "border-gray-300"
                                 }`}
                             >
-                                {processing ? "Saving..." : "Save"}
-                            </button>
+                                <option value="">Select gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                            {errors.gender && (
+                                <p className="text-red-500 text-sm">{errors.gender}</p>
+                            )}
+                        </div>
 
+                        {/* About Me */}
+                        <div>
+                            <label className="block text-sm font-medium mb-1">About Me</label>
+                            <textarea
+                                name="profile"
+                                value={formData.profile}
+                                onChange={handleInputChange}
+                                rows="4"
+                                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            />
+                        </div>
+                    </div>
 
-                        </form>
-                    </section>
-                </div>
+                    {/* Contact Details */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h2 className="text-lg font-semibold mb-4">Contact Details</h2>
+
+                        {/* Email */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1">Email</label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                readOnly
+                                className="w-full border rounded px-3 py-2 bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed"
+                            />
+                        </div>
+
+                        {/* Phone */}
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1">Phone</label>
+                            <input
+                                type="text"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleInputChange}
+                                className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                                    errors.phone ? "border-red-500" : "border-gray-300"
+                                }`}
+                            />
+                            {errors.phone && (
+                                <p className="text-red-500 text-sm">{errors.phone}</p>
+                            )}
+                        </div>
+
+                        {/* Address */}
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Address</label>
+                            <input
+                                type="text"
+                                name="address"
+                                value={formData.address}
+                                onChange={handleInputChange}
+                                className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                                    errors.address ? "border-red-500" : "border-gray-300"
+                                }`}
+                            />
+                            {errors.address && (
+                                <p className="text-red-500 text-sm">{errors.address}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Organizational Details */}
+                    {["organizer", "admin"].includes(user?.role) && (
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h2 className="text-lg font-semibold mb-4">Organizational Details</h2>
+
+                            {/* Department */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-1">Department</label>
+                                <input
+                                    type="text"
+                                    name="department"
+                                    value={formData.department}
+                                    onChange={handleInputChange}
+                                    readOnly={user?.role === "organizer"}
+                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                                        user?.role === "organizer"
+                                            ? "bg-gray-100 text-gray-600 cursor-not-allowed"
+                                            : "border-gray-300"
+                                    }`}
+                                />
+                            </div>
+
+                            {/* Enrollment Number */}
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Enrollment Number</label>
+                                <input
+                                    type="text"
+                                    name="enrollment_no"
+                                    value={formData.enrollment_no}
+                                    onChange={handleInputChange}
+                                    readOnly={user?.role === "organizer"}
+                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                                        user?.role === "organizer"
+                                            ? "bg-gray-100 text-gray-600 cursor-not-allowed"
+                                            : "border-gray-300"
+                                    }`}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center items-start space-y-4">
+                        <h2 className="text-lg font-semibold">Actions</h2>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className={`w-full px-5 py-2 rounded-lg font-medium transition cursor-pointer ${
+                                processing
+                                    ? "bg-purple-300 text-white cursor-not-allowed"
+                                    : "bg-purple-600 text-white hover:bg-purple-700"
+                            }`}
+                        >
+                            {processing ? "Saving..." : "Save Changes"}
+                        </button>
+                        <button
+                            type="button"
+                            className="w-full px-5 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => window.history.back()}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </form>
             </main>
         </div>
     );
