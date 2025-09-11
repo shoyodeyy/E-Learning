@@ -6,7 +6,8 @@ import { generateShareLinks } from "./generateShareLinks";
 export default function ShareButton({ event, children }) {
   const [open, setOpen] = useState(false);
 
-  const baseUrl = "https://shareEvents.loca.lt"; // hoặc process.env.REACT_APP_SHARE_URL
+  // Ưu tiên biến môi trường, fallback domain hiện tại
+  const baseUrl = import.meta.env.VITE_PUBLIC_URL || (typeof window !== 'undefined' ? window.location.origin : '');
   const links = generateShareLinks(event, baseUrl);
 
   // Map platform -> icon + màu

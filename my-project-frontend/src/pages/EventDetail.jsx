@@ -443,7 +443,7 @@ const EventDetailPage = () => {
 
                             {/* Action Buttons */}
                             <div className="flex flex-wrap gap-4">
-                                <ShareEvent event={eventData.title}>
+                                <ShareEvent event={{ id: eventId, title: eventData.title, date: eventData.date, venue: eventData.location }}>
                                 <button className="cursor-pointer flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-lg border border-gray-200 transition-all duration-200">
                                     <Share2 className="w-5 h-5" />
                                     <span>Share Event</span>
