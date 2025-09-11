@@ -12,27 +12,14 @@ class ProfileController extends Controller
 {
     public function show(Request $request): JsonResponse
     {
-        if (!$request->user()) {
-            return response()->json([
-                'message' => 'Unauthorized. Please log in.'
-            ], 401);
-        }
-
-        $user = $request->user();
-
         return response()->json([
-            'user' => $user,
+            'user' => $request->user(),
         ]);
     }
 
     public function update(Request $request): JsonResponse
     {
         try {
-            if (!$request->user()) {
-                return response()->json([
-                    'message' => 'Unauthorized. Please log in.'
-                ], 401);
-            }
 
             $user = $request->user();
 

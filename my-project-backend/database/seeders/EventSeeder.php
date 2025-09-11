@@ -43,14 +43,8 @@ class EventSeeder extends Seeder
             ],
         ];
 
-        foreach ($events as $index => $event) {
-            $eventId = 'E' . str_pad($index + 1, 3, '0', STR_PAD_LEFT);
-            $event['event_id'] = $eventId;
-
-            Event::updateOrCreate(
-                ['event_id' => $event['event_id']],
-                $event
-            );
+        foreach ($events as $event) {
+            Event::create($event);
         }
     }
 }

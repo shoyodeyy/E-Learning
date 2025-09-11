@@ -2,6 +2,7 @@
 
 namespace Database\Seeders\Event;
 
+use App\Models\MediaGallery;
 use App\Models\Event;
 use Illuminate\Database\Seeder;
 
@@ -11,51 +12,51 @@ class EventsTableSeeder extends Seeder
     {
         $events = [
             [
-                'event_id'             => 'E001',
-                'title'                => 'Techwiz 6 Opening Ceremony',
-                'description'          => 'Techwiz 6 officially launches on September 10th with the grand opening ceremony of the global technology competition. Developers are invited to join online via Microsoft Teams or at FAT Ho Chi Minh. FPT’s spirit and colors will shine on the international stage!',
-                'category'             => 'Technical Fests',
-                'start_at'             => '2025-09-10 10:00:00',
-                'duration_minutes'     => 120,
-                'venue'                => 'Online (Microsoft Teams: https://bit.ly/Techwiz6_launch) | FAT Ho Chi Minh: 21 Bis Hau Giang, Tan Son Nhat Ward',
-                'organizerId'          => 1,
-                'approvedBy'           => 2,
-                'maxParticipants'      => 1000,
+
+                'title' => 'Techwiz 6 Opening Ceremony',
+                'description' => 'Techwiz 6 officially launches on September 10th with the grand opening ceremony of the global technology competition. Developers are invited to join online via Microsoft Teams or at FAT Ho Chi Minh. FPT’s spirit and colors will shine on the international stage!',
+                'category' => 'Technical Fests',
+                'start_at' => '2025-09-10 10:00:00',
+                'duration_minutes' => 120,
+                'venue' => 'Online (Microsoft Teams: https://bit.ly/Techwiz6_launch) | FAT Ho Chi Minh: 21 Bis Hau Giang, Tan Son Nhat Ward',
+                'organizerId' => 1,
+                'approvedBy' => 2,
+                'maxParticipants' => 1000,
                 'registrationDeadline' => '2025-09-09 23:59:59',
-                'bannerImage'          => 'my-project-backend/public/images/MediaGallery/1-Techwiz.jpg',
-                'status'               => 'approved',
+                'bannerImage' => 'my-project-backend/public/images/MediaGallery/1-Techwiz.jpg',
+                'status' => 'approved',
             ],
             [
-                'event_id' => 'E002',
-                'title'                => 'Happy Bee Music Festival Ticket Giveaway',
-                'description'          => 'Students who register for makeup classes before September 13th will receive a free ticket to the Happy Bee Music Festival – a vibrant music event with the participation of many top singers.',
-                'category'             => 'Cultural Event',
-                'start_at'             => '2025-09-13 19:00:00',
-                'duration_minutes'     => 180,
-                'venue'                => 'Happy Bee Main Stage (venue details will be shared by organizers)',
-                'organizerId'          => 1,
-                'approvedBy'           => 2,
-                'maxParticipants'      => 2000,
+
+                'title' => 'Happy Bee Music Festival Ticket Giveaway',
+                'description' => 'Students who register for makeup classes before September 13th will receive a free ticket to the Happy Bee Music Festival – a vibrant music event with the participation of many top singers.',
+                'category' => 'Cultural Event',
+                'start_at' => '2025-09-13 19:00:00',
+                'duration_minutes' => 180,
+                'venue' => 'Happy Bee Main Stage (venue details will be shared by organizers)',
+                'organizerId' => 1,
+                'approvedBy' => 2,
+                'maxParticipants' => 2000,
                 'registrationDeadline' => '2025-09-13 12:00:00',
-                'bannerImage'          => 'my-project-backend/public/images/MediaGallery/2-Dangkimonhoc.jpg',
-                'status'               => 'approved',
+                'bannerImage' => 'my-project-backend/public/images/MediaGallery/2-Dangkimonhoc.jpg',
+                'status' => 'approved',
             ],
             [
-                'event_id' => 'E003',
-                'title'                => 'Webinar Series: Find Clients. Win Projects. Grow Fast.',
-                'description'          => 'Aptech Global presents a 2-day webinar series for Arena students worldwide to kickstart their freelancing journey. Sessions cover freelancing basics, in-demand skills, client acquisition, project management, growth strategies, and building resilience. Featuring speakers Soumya Arun (15+ years in project management, e-learning, content development) and Pankaja (8+ years managing creative freelance teams).',
-                'category'             => 'Workshops and Seminars',
-                'start_at'             => '2025-09-03 16:00:00',
-                'duration_minutes'     => 120,
-                'venue'                => 'Online Webinar (Zoom/Registration link: https://bit.ly/Freelancing_Training)',
-                'organizerId'          => 1,
-                'approvedBy'           => 2,
-                'maxParticipants'      => 500,
+
+                'title' => 'Webinar Series: Find Clients. Win Projects. Grow Fast.',
+                'description' => 'Aptech Global presents a 2-day webinar series for Arena students worldwide to kickstart their freelancing journey. Sessions cover freelancing basics, in-demand skills, client acquisition, project management, growth strategies, and building resilience. Featuring speakers Soumya Arun (15+ years in project management, e-learning, content development) and Pankaja (8+ years managing creative freelance teams).',
+                'category' => 'Workshops and Seminars',
+                'start_at' => '2025-09-03 16:00:00',
+                'duration_minutes' => 120,
+                'venue' => 'Online Webinar (Zoom/Registration link: https://bit.ly/Freelancing_Training)',
+                'organizerId' => 1,
+                'approvedBy' => 2,
+                'maxParticipants' => 500,
                 'registrationDeadline' => '2025-09-02 23:59:59',
-                'bannerImage'          => 'my-project-backend/public/images/MediaGallery/3-Webinar.jpg',
-                'status'               => 'approved',
+                'bannerImage' => 'my-project-backend/public/images/MediaGallery/3-Webinar.jpg',
+                'status' => 'approved',
             ], [
-                'event_id' => 'E004',
+
                 'title' => 'Oktoberfest | 660k Free Flow German Beer & Buffet',
                 'description' => "Join us on Friday, 19th September from 6 PM to 10 PM at Parkhaus Thao Dien for the ultimate Oktoberfest night filled with German food, beer, and great company! Enjoy an all-you-can-eat German buffet featuring beef goulash, pork knuckle, Nürnberger and Bratwurst sausages, pretzels, potato salad, red cabbage, sauerkraut, and mashed potatoes — the real Oktoberfest experience in Saigon! Wash it all down with ice-cold Arco & Hofbräu German beers flowing all night long. Ticket: 660,000 VND/person. Limited seats, early booking required!",
                 'category' => 'Cultural Event',
@@ -70,8 +71,8 @@ class EventsTableSeeder extends Seeder
                 'status' => 'approved',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],  [
-                'event_id' => 'E005',
+            ], [
+
                 'title' => 'HCMC Business Summit 2025: Elevating Connections',
                 'description' => "Don't miss Vietnam’s largest-ever business and knowledge-sharing event, co-hosted by YBA HCM and HAWEE. The HCMC Business Summit 2025 officially kicks off on September 24th at Riverside Palace, Ho Chi Minh City, with four days of forums, exhibitions, and networking activities. More than 10,000 participants, 5,000+ top CEOs & entrepreneurs, and 50+ investment funds will gather to explore opportunities in the AI era. The event inspires, connects, and creates value for leaders, investors, and innovators.",
                 'category' => 'Business Summit',
@@ -86,8 +87,8 @@ class EventsTableSeeder extends Seeder
                 'status' => 'approved',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],[
-                'event_id' => 'E006',
+            ], [
+
                 'title' => 'Seminar: Do You Need English to Study IT?',
                 'description' => 'A knowledge-sharing seminar for IT students about the importance of English in Information Technology. The session discusses why English is essential for learning IT, accessing resources, international career opportunities, and tips for beginners with limited English. Organized by FPT Aptech.',
                 'category' => 'Educational Seminar',
@@ -103,7 +104,7 @@ class EventsTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ], [
-                'event_id' => 'E007',
+
                 'title' => 'Facts You Need to Know About Programming',
                 'description' => 'An educational talk and knowledge-sharing session organized by FPT Aptech. The event highlights 4 important truths about programming: you don’t need to be good at math, programming languages are not forever, no language is the best, and practice is more important than theory.',
                 'category' => 'Educational Seminar',
@@ -118,8 +119,8 @@ class EventsTableSeeder extends Seeder
                 'status' => 'approved',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],  [
-                'event_id' => 'E008',
+            ], [
+
                 'title' => 'Happy Bee 15 – Featuring Son Tung M-TP',
                 'description' => 'Happy Bee 15 is the annual student festival of FPT Polytechnic. This year, the mega music night welcomes the special appearance of Son Tung M-TP for the 4th time, promising explosive performances and unforgettable experiences for students.',
                 'category' => 'Music Festival',
@@ -134,8 +135,8 @@ class EventsTableSeeder extends Seeder
                 'status' => 'approved',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],  [
-                'event_id' => 'E009',
+            ], [
+
                 'title' => 'Beauty of Beaches – Student Project Showcase',
                 'description' => 'Beauty of Beaches is the debut project by FPT Aptech students, transforming their love for beach travel into a digital platform. Developed with ReactJS, Laravel, MySQL, and Google Maps API, it allows users to explore beautiful beaches and connect with a sea-loving community.',
                 'category' => 'Student Project',
@@ -150,8 +151,8 @@ class EventsTableSeeder extends Seeder
                 'status' => 'approved',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],[
-                'event_id' => 'E010',
+            ], [
+
                 'title' => 'Vietfuture 2025 – Online Final Round',
                 'description' => 'The final round of Vietfuture 2025 startup competition will be held online on 06/09/2025. 12 teams from Hanoi & Da Nang will pitch their innovative projects to the judging panel.',
                 'category' => 'Startup Competition',
@@ -167,7 +168,7 @@ class EventsTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ], [
-                'event_id' => 'E011',
+
                 'title' => 'Women in IT: Breaking Stereotypes',
                 'description' => 'An awareness campaign highlighting that IT is not just for men. The event encourages young women to pursue careers in programming, data, and technology, showcasing their strengths in creativity, patience, and detail orientation.',
                 'category' => 'Awareness & Career Talk',
@@ -183,7 +184,7 @@ class EventsTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ], [
-                'event_id' => 'E012',
+
                 'title' => 'ATS Study Abroad & Scholarship Festival 2025 - Hanoi',
                 'description' => 'Explore U.S. immigration-friendly majors, meet representatives from 50+ top global universities, and get scholarship opportunities up to 100%. Exclusive perks worth up to 30M VND for early registrants.',
                 'category' => 'Education & Scholarship Fair',
@@ -200,7 +201,7 @@ class EventsTableSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'event_id' => 'E013',
+
                 'title' => 'ATS Study Abroad & Scholarship Festival 2025 - Ho Chi Minh City',
                 'description' => 'Explore U.S. immigration-friendly majors, meet representatives from 50+ top global universities, and get scholarship opportunities up to 100%. Exclusive perks worth up to 30M VND for early registrants.',
                 'category' => 'Education & Scholarship Fair',
@@ -215,8 +216,8 @@ class EventsTableSeeder extends Seeder
                 'status' => 'approved',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],  [
-                'event_id' => 'E014',
+            ], [
+
                 'title' => 'Chill Workshop - Seashell Scented Candles',
                 'description' => 'Weekly creative workshops at Nha Bon Lam, Binh Thanh. Enjoy 10% off tickets, a free drink, and a riverside creative space. Session: Pour wax layers and craft seashell scented candles.',
                 'category' => 'Workshop',
@@ -233,7 +234,7 @@ class EventsTableSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'event_id' => 'E015',
+
                 'title' => 'Chill Workshop - Free Colors',
                 'description' => 'Weekly creative workshops at Nha Bon Lam, Binh Thanh. Enjoy 10% off tickets, a free drink, and a riverside creative space. Session: A morning of painting freely without rules or patterns.',
                 'category' => 'Workshop',
@@ -249,7 +250,7 @@ class EventsTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ], [
-                'event_id' => 'E016',
+
                 'title' => 'IELTS BOOSTER DAY 2025 - Hanoi',
                 'description' => 'Experience 5 exclusive BOOSTS: Speak Up (mock speaking test), IELTS Expert Decode (workshop), IELTS Reality Check (computer-based mock test), The IELTS Connector (IELTS training booths), Lucky Lift (lucky draw + VND 500,000 IELTS test discount).',
                 'category' => 'Education',
@@ -266,7 +267,7 @@ class EventsTableSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'event_id' => 'E017',
+
                 'title' => 'IELTS BOOSTER DAY 2025 - Ho Chi Minh City',
                 'description' => 'Experience 5 exclusive BOOSTS: Speak Up (mock speaking test), IELTS Expert Decode (workshop), IELTS Reality Check (computer-based mock test), The IELTS Connector (IELTS training booths), Lucky Lift (lucky draw + VND 500,000 IELTS test discount).',
                 'category' => 'Education',
@@ -281,8 +282,8 @@ class EventsTableSeeder extends Seeder
                 'status' => 'approved',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],[
-                'event_id' => 'E018',
+            ], [
+
                 'title' => 'Saigon Sống Workshop - Independence Day Celebration',
                 'description' => 'A cozy workshop to celebrate Vietnam’s Independence Day: design paper dolls with exclusive outfits on Dó paper, decorate photobooth frames with unique stickers, and enjoy tea, pastries, and live acoustic music.',
                 'category' => 'Workshop',
@@ -298,7 +299,7 @@ class EventsTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ], [
-                'event_id' => 'E019',
+
                 'title' => 'Workshop POLARIS - Set The Way, Seize The Day',
                 'description' => 'Youth For Chance (YFC) presents Workshop POLARIS with the message "Set The Way, Seize The Day!"—helping Banking University students navigate their 4-year journey through speaker sharing and practical guidance.',
                 'category' => 'Workshop',
@@ -314,7 +315,7 @@ class EventsTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ], [
-                'event_id' => 'E020',
+
                 'title' => 'U.S. Study Abroad Webinar: Early Decision & Early Action Strategies',
                 'description' => 'An exclusive online webinar with Ms. Pamela McGowen (Princeton University) to explore ED, EA, and RD strategies that can double admission chances at Ivy League and top U.S. universities.',
                 'category' => 'Webinar',
@@ -330,20 +331,7 @@ class EventsTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ], [
-                'media_id' => 20,
-                'event_id' => 'E020',
-                'file_type' => 'image',
-                'file_url' => 'uploads/banners/us_study_abroad_webinar.png',
-                'file_name' => 'us_study_abroad_webinar.png',
-                'caption' => 'U.S. Study Abroad Webinar - Early Decision & Early Action Strategies',
-                'department' => 'Admissions Consulting',
-                'event_year' => 2025,
-                'is_featured' => 1,
-                'file_size' => 3500,
-                'uploaded_by' => 1,
-                'uploaded_on' => now(),
-            ],[
-                'event_id' => 'E021',
+
                 'title' => 'Flower Arrangement Workshop – Whispering Petals (Day 1)',
                 'description' => 'A relaxing flower arrangement workshop at V’s Garden. Create your own bouquet in a glass vase and reconnect with nature.',
                 'category' => 'Workshop',
@@ -359,8 +347,8 @@ class EventsTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-             [
-                'event_id' => 'E022',
+            [
+
                 'title' => 'Canon Printing Roadshow 2025',
                 'description' => 'Canon Le Bao Minh Road Show from May to December 2025, offering hands-on experiences with Canon printers, printing workshops, promotions, and monthly lucky draws.',
                 'category' => 'Roadshow',
@@ -377,7 +365,7 @@ class EventsTableSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'event_id' => 'E023',
+
                 'title' => 'Saigon Film Photowalk - Black & White Film Developing Workshop',
                 'description' => 'A hands-on workshop immersing participants in the darkroom process of developing black and white film. Learn precise steps, control timing, temperature, and chemical ratios, and experience the magic of analog photography.',
                 'category' => 'Workshop',
@@ -393,7 +381,7 @@ class EventsTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ], [
-                'event_id' => 'E024',
+
                 'title' => 'Forvis Mazars Vietnam - Workshop on Decree 90/2025/NĐ-CP',
                 'description' => 'An exclusive workshop to decode Decree 90/2025/NĐ-CP, introducing mandatory annual audits for large enterprises in Vietnam. Gain key insights on compliance requirements and best practices.',
                 'category' => 'Workshop',
@@ -409,7 +397,7 @@ class EventsTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ], [
-                'event_id' => 'E025',
+
                 'title' => 'LG Global - Another Saigon: Cotton Candy Workshop',
                 'description' => 'Another Saigon by LG brings back the sweet childhood memories with a cotton candy workshop. Make your own cotton candy, rate the taste, and explore LG’s innovative technology in a fun, nostalgic atmosphere.',
                 'category' => 'Workshop',
@@ -424,8 +412,8 @@ class EventsTableSeeder extends Seeder
                 'status' => 'approved',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],[
-                'event_id' => 'E026',
+            ], [
+
                 'title' => 'LightUp Your Taste – Food Lighting Festival',
                 'description' => 'LightUp Your Taste is a 3-day immersive food festival where visitors experience cuisine with all five senses. Featuring international dishes, cooking workshops, food art, live shows with music and lights, and interactive games, this event creates a multi-sensory journey of flavors, emotions, and connections.',
                 'category' => 'Festival',
@@ -440,8 +428,8 @@ class EventsTableSeeder extends Seeder
                 'status' => 'approved',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],[
-                'event_id' => 'E027',
+            ], [
+
                 'title' => 'Special Workshop with Arnas Razgūnas – Saigon 2025',
                 'description' => 'Join Xoay Studio and Saigon Swing Dancing for a special workshop with Arnas Razgūnas, one of the most inspiring swing dancers from Vilnius, Lithuania. Through sessions on Shag, Balboa, and Lindy, participants will not only learn new dance moves but also deepen their musicality, strengthen partner connection, and unlock creativity on the dance floor.',
                 'category' => 'Workshop',
@@ -456,8 +444,8 @@ class EventsTableSeeder extends Seeder
                 'status' => 'approved',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],[
-                'event_id' => 'E028',
+            ], [
+
                 'title' => 'Climbing Endurance Workshop – Crescent Wall',
                 'description' => 'A practical endurance training workshop for climbers, guided by coaches Ngôn & Tú. Learn to boost overall endurance, follow tailored training programs, prevent injuries, and master mid-route recovery techniques. Suitable for climbers 14+ years old.',
                 'category' => 'Workshop',
@@ -472,8 +460,8 @@ class EventsTableSeeder extends Seeder
                 'status' => 'approved',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],[
-                'event_id' => 'E029',
+            ], [
+
                 'title' => 'AI Applications – Optimizing Learning with ASUS',
                 'description' => 'As part of SCAMP 2025, CellphoneS, ASUS, and Hung Khuc bring FPT students an exciting workshop on how to harness AI for learning and teamwork. Students will explore productivity with ASUS laptops, learn time management tips, and engage in an interactive Q&A session with Hung Khuc.',
                 'category' => 'Workshop',
@@ -488,8 +476,8 @@ class EventsTableSeeder extends Seeder
                 'status' => 'approved',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],[
-                'event_id' => 'E030',
+            ], [
+
                 'title' => 'Organic Vibes – Organic Agriculture Experience Fair',
                 'description' => 'Organic Vibes, part of the campaign "Organic Easy with Gen G" and endorsed by VOAA, is a vibrant fair showcasing organic farming in an easy and friendly way. The event features product tastings, an organic market, mascot check-in, the “Sen Zui” juice workshop, and eco-friendly gifts.',
                 'category' => 'Fair',
@@ -504,8 +492,8 @@ class EventsTableSeeder extends Seeder
                 'status' => 'approved',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],[
-                'event_id' => 'E031',
+            ], [
+
                 'title' => 'FPTU AI & Robotics Challenge 2025',
                 'description' => 'A national technology competition for high school students across Vietnam, focusing on AI, IoT, automation, and sustainable development. Nearly 70 teams competed in the Southern Knockout Round at FPT University HCMC. The best teams advance to the National Finals to win scholarships, awards, and international opportunities.',
                 'category' => 'Competition',
@@ -520,8 +508,8 @@ class EventsTableSeeder extends Seeder
                 'status' => 'approved',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],[
-                'event_id' => 'E032',
+            ], [
+
                 'title' => 'PropTech Vietnam Network – Exclusive Real Estate Investment Evening',
                 'description' => 'An exclusive networking evening for the Vietnam Real Estate Investment Network community. Designed for serious professionals to expand portfolios, find trusted partners, and build lasting industry relationships.',
                 'category' => 'Networking',
@@ -539,15 +527,20 @@ class EventsTableSeeder extends Seeder
             ]
         ];
 
-        foreach ($events as $index => $event) {
-            // Format event_id: E001, E002, ...
-            $eventId = 'E' . str_pad($index + 1, 3, '0', STR_PAD_LEFT);
-            $event['event_id'] = $eventId;
+        foreach ($events as $eventData) {
+            // 1. Tạo event
+            $event = Event::create($eventData);
 
-            Event::updateOrCreate(
-                ['event_id' => $event['event_id']],
-                $event
-            );
+            // 2. Insert media_gallery cho event đó
+            MediaGallery::create([
+                'event_id' => $event->id, // lấy id tự tăng
+                'file_type' => 'image',
+                'file_url' => $eventData['bannerImage'],
+                'file_name' => basename($eventData['bannerImage']),
+                'caption' => $eventData['title'],
+                'uploaded_by' => 1,
+                'uploaded_on' => now(),
+            ]);
         }
     }
 }

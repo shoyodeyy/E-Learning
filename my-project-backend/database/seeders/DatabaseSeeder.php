@@ -7,6 +7,8 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Database\Seeders\Event\EventsTableSeeder;
+use Database\Seeders\MediaGallery\MediaGalleryTableSeeder;
 use Database\Seeders\User\UserSeeder;
 use Illuminate\Database\Seeder;
 
@@ -31,7 +33,10 @@ class DatabaseSeeder extends Seeder
 
 //        $this->call(CourseSeeder::class);
         $this->call(EventSeeder::class);
-        $this->call(EventsTableSeeder::class);
-        $this->call(MediaGalleryTableSeeder::class);
+        $this->call([
+            EventsTableSeeder::class,
+            MediaGalleryTableSeeder::class,
+        ]);
+
     }
 }
