@@ -2,7 +2,13 @@ import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 const EventApprovals = () => {
-    const [events] = useState([
+    const [activeTab, setActiveTab] = useState("events");
+    const [users, setUsers] = useState([
+        { id: 1, name: "John Doe", email: "john@example.com", status: "pending" },
+        { id: 2, name: "Jane Smith", email: "jane@example.com", status: "pending" }
+    ]);
+
+    const [events, setEvents] = useState([
         {
             id: 1,
             title: "Annual Tech Innovators Summit",
@@ -92,8 +98,22 @@ const EventApprovals = () => {
     });
     const [showFilters, setShowFilters] = useState(false);
 
-    const handleAction = (eventId, action) => {
-        console.log(`${action} event ${eventId}`);
+    const handleAction = (type, id, action) => {
+        if (type === "event") {
+            setEvents(prev =>
+                prev.map(e =>
+                    e.id === id ? { ...e, status: action === "approve" ? "approved" : "rejected" } : e
+                )
+            );
+        }
+        if (type === "user") {
+            setUsers(prev =>
+                prev.map(u =>
+                    u.id === id ? { ...u, status: action === "approve" ? "approved" : "rejected" } : u
+                )
+            );
+        }
+        console.log(`${action} ${type} ${id}`);
     };
 
     const toggleAdminNotes = (eventId) => {
@@ -103,7 +123,7 @@ const EventApprovals = () => {
         }));
     };
 
-    // 🔎 Filter & Sort
+    // 🔎 Filter & Sort Events
     const filteredEvents = events
         .filter(
             (event) =>
@@ -128,202 +148,274 @@ const EventApprovals = () => {
             return filters.direction === "asc" ? valA - valB : valB - valA;
         });
 
-
     return (
         <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-            {/* 🔹 Search + Filter */}
-            <div className="p-4 border-b border-gray-200">
-                <input
-                    type="text"
-                    placeholder="Search by name or organizer..."
-                    value={filters.search}
-                    onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                    className="w-full border px-4 py-2 rounded-lg text-sm"
-                />
-            </div>
 
-            {/* 🔹 Filters & Sorting */}
-            <div className="p-4 border-b border-gray-200">
+            {/* 🔹 Tab Buttons */}
+            <div className="p-4 border-b border-gray-200 flex space-x-4">
                 <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900"
+                    onClick={() => setActiveTab("events")}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm ${
+                        activeTab === "events"
+                            ? "bg-purple-600 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                 >
-                    <span className="mr-2">⚙</span>
-                    Filters & Sorting
-                    <ChevronDown
-                        className={`ml-2 w-4 h-4 transition-transform ${
-                            showFilters ? "rotate-180" : ""
-                        }`}
-                    />
+                    Events
                 </button>
-
-                {showFilters && (
-                    <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                        {/* Status */}
-                        <div>
-                            <label className="block text-gray-600 mb-1">Status</label>
-                            <select
-                                value={filters.status}
-                                onChange={(e) =>
-                                    setFilters({ ...filters, status: e.target.value })
-                                }
-                                className="w-full border px-3 py-2 rounded-lg"
-                            >
-                                <option value="">All Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="approved">Approved</option>
-                                <option value="rejected">Rejected</option>
-                            </select>
-                        </div>
-
-                        {/* Sort By */}
-                        <div>
-                            <label className="block text-gray-600 mb-1">Sort By</label>
-                            <select
-                                value={filters.sortBy}
-                                onChange={(e) =>
-                                    setFilters({ ...filters, sortBy: e.target.value })
-                                }
-                                className="w-full border px-3 py-2 rounded-lg"
-                            >
-                                <option value="id">ID</option>
-                                <option value="submitted">Submitted Date</option>
-                                <option value="eventDate">Event Date</option>
-                            </select>
-                        </div>
-
-                        {/* Direction */}
-                        <div>
-                            <label className="block text-gray-600 mb-1">Direction</label>
-                            <select
-                                value={filters.direction}
-                                onChange={(e) =>
-                                    setFilters({ ...filters, direction: e.target.value })
-                                }
-                                className="w-full border px-3 py-2 rounded-lg"
-                            >
-                                <option value="asc">Ascending</option>
-                                <option value="desc">Descending</option>
-                            </select>
-                        </div>
-
-                        {/* Clear Filters */}
-                        <div className="flex items-end">
-                            <button
-                                onClick={() =>
-                                    setFilters({
-                                        search: "",
-                                        status: "",
-                                        sortBy: "id",
-                                        direction: "asc",
-                                    })
-                                }
-                                className="text-purple-600 hover:underline text-sm"
-                            >
-                                Clear All Filters
-                            </button>
-                        </div>
-                    </div>
-                )}
+                <button
+                    onClick={() => setActiveTab("users")}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm ${
+                        activeTab === "users"
+                            ? "bg-purple-600 text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                >
+                    Users
+                </button>
             </div>
 
-            <div className="max-w-7xl mx-auto flex">
-                <div className="flex-1 p-6">
-                    <div className="mb-6">
-                        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                            Event Approvals
-                        </h1>
-                        <p className="text-gray-600">
-                            Review and manage submitted events awaiting your approval
-                        </p>
+            {/* 🔹 Events Tab */}
+            {activeTab === "events" && (
+                <>
+                    {/* Search */}
+                    <div className="p-4 border-b border-gray-200">
+                        <input
+                            type="text"
+                            placeholder="Search by name or organizer..."
+                            value={filters.search}
+                            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                            className="w-full border px-4 py-2 rounded-lg text-sm"
+                        />
                     </div>
 
-                    {filteredEvents.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredEvents.map((event) => (
-                                <div
-                                    key={event.id}
-                                    className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
-                                >
-                                    <div
-                                        className="h-48 bg-cover bg-center"
-                                        style={{ backgroundImage: `url(${event.image})` }}
-                                    ></div>
+                    {/* Filters */}
+                    <div className="p-4 border-b border-gray-200">
+                        <button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900"
+                        >
+                            <span className="mr-2">⚙</span>
+                            Filters & Sorting
+                            <ChevronDown
+                                className={`ml-2 w-4 h-4 transition-transform ${
+                                    showFilters ? "rotate-180" : ""
+                                }`}
+                            />
+                        </button>
 
-                                    <div className="p-4">
-                                        <h3 className="font-semibold text-gray-900 mb-1">
-                                            {event.title}
-                                        </h3>
-                                        <p className="text-sm text-gray-600 mb-3">
-                                            {event.organizer}
-                                        </p>
-
-                                        <div className="space-y-2 mb-4 text-xs text-gray-600">
-                                            <div className="flex items-center">
-                                                <span className="font-medium w-20">Submitted:</span>
-                                                <span>{event.submitted}</span>
-                                            </div>
-                                            <div className="flex items-center">
-                                                <span className="font-medium w-20">Event Date:</span>
-                                                <span>{event.eventDate}</span>
-                                            </div>
-                                            <div className="flex items-center">
-                                                <span className="font-medium w-20">Location:</span>
-                                                <span className="truncate">{event.location}</span>
-                                            </div>
-                                        </div>
-
-                                        <p className="text-xs text-gray-600 mb-4 line-clamp-3">
-                                            {event.description}
-                                        </p>
-
-                                        <div className="flex space-x-2 mb-3">
-                                            <button
-                                                onClick={() => handleAction(event.id, "approve")}
-                                                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-sm py-2 px-3 rounded-lg font-medium transition-colors"
-                                            >
-                                                Approve
-                                            </button>
-                                            <button
-                                                onClick={() => handleAction(event.id, "reject")}
-                                                className="flex-1 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-sm py-2 px-3 rounded-lg font-medium transition-colors"
-                                            >
-                                                Reject
-                                            </button>
-                                        </div>
-
-                                        <button
-                                            onClick={() => toggleAdminNotes(event.id)}
-                                            className="w-full flex items-center justify-between text-sm text-gray-600 hover:text-gray-800 py-2 border-t border-gray-100"
-                                        >
-                                            <span>Admin Notes</span>
-                                            <ChevronDown
-                                                className={`w-4 h-4 transition-transform ${
-                                                    adminNotes[event.id] ? "rotate-180" : ""
-                                                }`}
-                                            />
-                                        </button>
-
-                                        {adminNotes[event.id] && (
-                                            <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-                        <textarea
-                            className="w-full text-xs border border-gray-200 rounded p-2 resize-none"
-                            rows="3"
-                            placeholder="Add admin notes..."
-                        ></textarea>
-                                            </div>
-                                        )}
-                                    </div>
+                        {showFilters && (
+                            <div className="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                                {/* Status */}
+                                <div>
+                                    <label className="block text-gray-600 mb-1">Status</label>
+                                    <select
+                                        value={filters.status}
+                                        onChange={(e) =>
+                                            setFilters({ ...filters, status: e.target.value })
+                                        }
+                                        className="w-full border px-3 py-2 rounded-lg"
+                                    >
+                                        <option value="">All Status</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="rejected">Rejected</option>
+                                    </select>
                                 </div>
-                            ))}
+
+                                {/* Sort By */}
+                                <div>
+                                    <label className="block text-gray-600 mb-1">Sort By</label>
+                                    <select
+                                        value={filters.sortBy}
+                                        onChange={(e) =>
+                                            setFilters({ ...filters, sortBy: e.target.value })
+                                        }
+                                        className="w-full border px-3 py-2 rounded-lg"
+                                    >
+                                        <option value="id">ID</option>
+                                        <option value="submitted">Submitted Date</option>
+                                        <option value="eventDate">Event Date</option>
+                                    </select>
+                                </div>
+
+                                {/* Direction */}
+                                <div>
+                                    <label className="block text-gray-600 mb-1">Direction</label>
+                                    <select
+                                        value={filters.direction}
+                                        onChange={(e) =>
+                                            setFilters({ ...filters, direction: e.target.value })
+                                        }
+                                        className="w-full border px-3 py-2 rounded-lg"
+                                    >
+                                        <option value="asc">Ascending</option>
+                                        <option value="desc">Descending</option>
+                                    </select>
+                                </div>
+
+                                {/* Clear Filters */}
+                                <div className="flex items-end">
+                                    <button
+                                        onClick={() =>
+                                            setFilters({
+                                                search: "",
+                                                status: "",
+                                                sortBy: "id",
+                                                direction: "asc",
+                                            })
+                                        }
+                                        className="text-purple-600 hover:underline text-sm"
+                                    >
+                                        Clear All Filters
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Event List */}
+                    <div className="max-w-7xl mx-auto flex">
+                        <div className="flex-1 p-6">
+                            <div className="mb-6">
+                                <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                                    Event Approvals
+                                </h1>
+                                <p className="text-gray-600">
+                                    Review and manage submitted events awaiting your approval
+                                </p>
+                            </div>
+
+                            {filteredEvents.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {filteredEvents.map((event) => (
+                                        <div
+                                            key={event.id}
+                                            className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+                                        >
+                                            <div
+                                                className="h-48 bg-cover bg-center"
+                                                style={{ backgroundImage: `url(${event.image})` }}
+                                            ></div>
+
+                                            <div className="p-4">
+                                                <h3 className="font-semibold text-gray-900 mb-1">
+                                                    {event.title}
+                                                </h3>
+                                                <p className="text-sm text-gray-600 mb-3">
+                                                    {event.organizer}
+                                                </p>
+
+                                                <div className="space-y-2 mb-4 text-xs text-gray-600">
+                                                    <div className="flex items-center">
+                                                        <span className="font-medium w-20">Submitted:</span>
+                                                        <span>{event.submitted}</span>
+                                                    </div>
+                                                    <div className="flex items-center">
+                                                        <span className="font-medium w-20">Event Date:</span>
+                                                        <span>{event.eventDate}</span>
+                                                    </div>
+                                                    <div className="flex items-center">
+                                                        <span className="font-medium w-20">Location:</span>
+                                                        <span className="truncate">{event.location}</span>
+                                                    </div>
+                                                </div>
+
+                                                <p className="text-xs text-gray-600 mb-4 line-clamp-3">
+                                                    {event.description}
+                                                </p>
+
+                                                <div className="flex space-x-2 mb-3">
+                                                    <button
+                                                        onClick={() => handleAction("event", event.id, "approve")}
+                                                        className="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-sm py-2 px-3 rounded-lg font-medium transition-colors"
+                                                    >
+                                                        Approve
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleAction("event", event.id, "reject")}
+                                                        className="flex-1 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 text-sm py-2 px-3 rounded-lg font-medium transition-colors"
+                                                    >
+                                                        Reject
+                                                    </button>
+                                                </div>
+
+                                                <button
+                                                    onClick={() => toggleAdminNotes(event.id)}
+                                                    className="w-full flex items-center justify-between text-sm text-gray-600 hover:text-gray-800 py-2 border-t border-gray-100"
+                                                >
+                                                    <span>Admin Notes</span>
+                                                    <ChevronDown
+                                                        className={`w-4 h-4 transition-transform ${
+                                                            adminNotes[event.id] ? "rotate-180" : ""
+                                                        }`}
+                                                    />
+                                                </button>
+
+                                                {adminNotes[event.id] && (
+                                                    <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                                                        <textarea
+                                                            className="w-full text-xs border border-gray-200 rounded p-2 resize-none"
+                                                            rows="3"
+                                                            placeholder="Add admin notes..."
+                                                        ></textarea>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-gray-500 text-center">
+                                    No events found with current filters.
+                                </p>
+                            )}
                         </div>
-                    ) : (
-                        <p className="text-gray-500 text-center">
-                            No events found with current filters.
-                        </p>
-                    )}
+                    </div>
+                </>
+            )}
+
+            {/* 🔹 Users Tab */}
+            {activeTab === "users" && (
+                <div className="p-6">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">User Approvals</h1>
+                    <p className="text-gray-600 mb-4">Review and manage user registrations</p>
+
+                    <table className="w-full border-collapse border border-gray-200 text-sm">
+                        <thead className="bg-gray-50">
+                        <tr>
+                            <th className="border border-gray-200 px-3 py-2 text-left">Name</th>
+                            <th className="border border-gray-200 px-3 py-2 text-left">Email</th>
+                            <th className="border border-gray-200 px-3 py-2 text-left">Status</th>
+                            <th className="border border-gray-200 px-3 py-2 text-left">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {users.map((user) => (
+                            <tr key={user.id}>
+                                <td className="border border-gray-200 px-3 py-2">{user.name}</td>
+                                <td className="border border-gray-200 px-3 py-2">{user.email}</td>
+                                <td className="border border-gray-200 px-3 py-2 capitalize">{user.status}</td>
+                                <td className="border border-gray-200 px-3 py-2 space-x-2">
+                                    <button
+                                        onClick={() => handleAction("user", user.id, "approve")}
+                                        className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg"
+                                    >
+                                        Approve
+                                    </button>
+                                    <button
+                                        onClick={() => handleAction("user", user.id, "reject")}
+                                        className="bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 px-3 py-1 rounded-lg"
+                                    >
+                                        Reject
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

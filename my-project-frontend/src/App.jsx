@@ -19,8 +19,8 @@ import EventDetailPage from "./pages/EventDetail.jsx";
 import Home from "./pages/Home.jsx";
 import GuestRoute from "./routes/GuestRoute.jsx";
 import Sitemap from "./pages/Sitemap.jsx";
-import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import VerifyRoute from "./routes/VerifyRoute.jsx";
+import Gallery from "./pages/Gallery.jsx";
 
 function App() {
     return (
@@ -60,6 +60,7 @@ function App() {
                             <Route path="/user/reset-password" element={<ResetPassword />} />
 
                             <Route path="/about-us" element={<AboutUs />} />
+                            <Route path="/media-gallery" element={<Gallery />} />
 
                             {/* Protected email verification page */}
                             <Route path="/403" element={<Forbidden />} />
