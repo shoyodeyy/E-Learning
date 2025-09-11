@@ -106,12 +106,31 @@ export default function EditProfile() {
             toast.success(result.message || "Profile updated successfully ✅");
             setErrors({});
         } catch (error) {
-            console.error(error);
-            toast.error("Update failed ❌");
-        } finally {
-            setProcessing(false);
+        console.error(error);
+
+        if (error.response) {
+            const { status, data } = error.response;
+
+            if (status === 422 && data.errors) {
+                // Validation error
+                setErrors(data.errors);
+                // show toast each error
+                Object.values(data.errors).forEach((msgs) => {
+                    toast.error(msgs[0]); // $validated = $request->validate
+                });
+            } else if (data.message) {
+                //other error from backend
+                toast.error(data.message);
+            } else if (data.error) {
+                toast.error(data.error);
+            } else {
+                toast.error("Update failed ❌");
+            }
+        } else {
+            toast.error("Network error ❌");
         }
-    };
+    }
+};
 
     const handleCancel = () => {
         setConfirmOpen(false);
@@ -180,7 +199,7 @@ export default function EditProfile() {
                                 value={formData.profile}
                                 onChange={handleInputChange}
                                 rows="4"
-                                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 border-gray-300 bg-white"
                             />
                         </div>
                     </div>
@@ -205,7 +224,7 @@ export default function EditProfile() {
                         <div className="mb-4">
                             <label className="block text-sm font-medium mb-1">Phone</label>
                             <input
-                                type="text"
+                                type="number"
                                 name="phone"
                                 value={formData.phone}
                                 onChange={handleInputChange}
@@ -267,8 +286,8 @@ export default function EditProfile() {
                                     value={formData.department}
                                     onChange={handleInputChange}
                                     readOnly={user?.role === "organizer"}
-                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                                        user?.role === "organizer" ? "bg-gray-100 text-gray-600 cursor-not-allowed" : "border-gray-300"
+                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 border-gray-300 ${
+                                        user?.role === "organizer" ? "bg-gray-100 text-gray-600 cursor-not-allowed" : "bg-white"
                                     }`}
                                 />
                             </div>
@@ -282,8 +301,8 @@ export default function EditProfile() {
                                     value={formData.enrollment_no}
                                     onChange={handleInputChange}
                                     readOnly={user?.role === "organizer"}
-                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                                        user?.role === "organizer" ? "bg-gray-100 text-gray-600 cursor-not-allowed" : "border-gray-300"
+                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 border-gray-300 ${
+                                        user?.role === "organizer" ? "bg-gray-100 text-gray-600 cursor-not-allowed" : "bg-white"
                                     }`}
                                 />
                             </div>
