@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
+import api from "../api/axios";
+import { toast } from "react-toastify";
 import { Calendar, Clock, MapPin, Users, Share2, Heart, CalendarPlus, User, Star, Send } from "lucide-react";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
@@ -335,6 +337,33 @@ const renderStars = (rating) => {
 const EventDetailPage = () => {
     const [activeTab, setActiveTab] = useState("overview");
     const [isFavorited, setIsFavorited] = useState(false);
+    const { id } = useParams();
+    const eventId = Number(id) || eventData.id;
+    const [reg, setReg] = useState({ registered: false, status: null });
+
+    const handleCancelRegistration = async () => {
+        try {
+            const res = await api.post(`/events/${eventId}/cancel`);
+            toast.success(res.data?.message || "Đã hủy đăng ký sự kiện");
+            setReg({ registered: false, status: 'cancelled' });
+        } catch (err) {
+            const msg = err.response?.data?.error || err.response?.data?.message || "Hủy đăng ký thất bại";
+            toast.error(msg);
+        }
+    };
+
+    // Lấy trạng thái đăng ký của user cho event để hiện nút phù hợp
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await api.get(`/events/${eventId}/registration/status`);
+                setReg(res.data);
+            } catch (e) {
+                // nếu chưa đăng nhập hoặc lỗi khác, ẩn nút hủy
+                setReg({ registered: false, status: null });
+            }
+        })();
+    }, [eventId]);
 
     const getAvailabilityColor = (available, total) => {
         const ratio = available / total;
@@ -562,9 +591,16 @@ const EventDetailPage = () => {
                                         </div>
 
                                         {/* Register Button */}
-                                        <Link to={`/event/${eventData.id}/seat`} className="w-full inline-flex justify-center btn-gradient-l">
-                                            Register Now
-                                        </Link>
+                                        {(!reg.registered || reg.status === 'cancelled') && (
+                                            <Link to={`/event/${eventId}/seat`} className="w-full inline-flex justify-center btn-gradient-l">
+                                                Register Now
+                                            </Link>
+                                        )}
+                                        {reg.registered && reg.status !== 'cancelled' && (
+                                            <button onClick={handleCancelRegistration} className="mt-3 w-full inline-flex justify-center items-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                                                Cancel Registration
+                                            </button>
+                                        )}
 
                                         <p className="text-xs text-gray-500 text-center">Taxes and fees may apply.</p>
 

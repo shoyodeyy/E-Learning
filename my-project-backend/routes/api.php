@@ -104,6 +104,8 @@ Route::middleware('auth:sanctum')->group(function () {
     //registration routes
     Route::post('/events/{eventId}/register', [EventRegistrationController::class, 'register']);
     Route::post('/events/{eventId}/cancel', [EventRegistrationController::class, 'cancel']);
+    Route::get('/events/{eventId}/registration/status', [EventRegistrationController::class, 'status']);
+    Route::get('/user/registrations', [EventRegistrationController::class, 'myRegistrations']);
 });
 //Organizer routes
 Route::middleware(['auth:sanctum', 'role:organizer'])->group(function () {
@@ -145,5 +147,3 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 //Route::middleware(['auth:sanctum', 'role:participant'])->group(function () {
 //    Route::post('media/save-selected', [MediaController::class, 'saveSelected']);
 //});
-
-

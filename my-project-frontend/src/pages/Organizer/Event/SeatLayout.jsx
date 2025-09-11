@@ -49,18 +49,13 @@ const SeatLayout = () => {
   const [occupiedSeats, setOccupiedSeats] = useState([]);
   const navigate = useNavigate();
 
-  // Mock fetch show
+  // Mock fetch show (luôn dùng mock để test, bất kể id)
   useEffect(() => {
-    if (mockShow.id === id) {
-      setShow(mockShow);
-
-      const firstDate = Object.keys(mockShow.dateTime)[0];
-      const firstTime = mockShow.dateTime[firstDate]?.[0];
-      if (firstTime) {
-        setSelectedTime(firstTime);
-      }
-    } else {
-      toast.error("Show not found");
+    setShow(mockShow);
+    const firstDate = Object.keys(mockShow.dateTime)[0];
+    const firstTime = mockShow.dateTime[firstDate]?.[0];
+    if (firstTime) {
+      setSelectedTime(firstTime);
     }
   }, [id]);
 
@@ -118,14 +113,15 @@ const SeatLayout = () => {
   );
 
   const bookTickets = async () => {
-    if (!selectedTime || !selectedSeats.length) {
-      return toast.error("Please select time and seats first");
+    if (!selectedTime) {
+      return toast.error("Please select time first");
     }
 
     try {
       const res = await api.post(`/events/${id}/register`);
       toast.success(res.data.message || `Registered for event successfully!`);
-      navigate("/checkout"); // hoặc navigate(`/events/${id}`)
+      // Chưa có flow checkout thực, quay lại trang chi tiết
+      navigate(`/event/${id}`);
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.error || "Failed to register");
