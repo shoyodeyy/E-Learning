@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Admin\UserAnalyticsController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
@@ -10,6 +9,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Chatbot\ChatController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\Organizer\EventController;
 use App\Http\Controllers\Student\ProfileController;
 use App\Services\AIClientWithFallback;
 use Illuminate\Http\Request;
@@ -19,7 +19,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
-Route::apiResource('/courses', CourseController::class);
+
+Route::apiResource('/events', EventController::class);
 
 // Password reset routes
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
@@ -77,13 +78,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/analytics/users/overview', [UserAnalyticsController::class, 'getOverview']);
     Route::get('/analytics/users/recent', [UserAnalyticsController::class, 'getRecentUsers']);
     Route::get('/analytics/users/hourly', [UserAnalyticsController::class, 'getHourlyStats']);
-
-    // Vouchers
-    Route::post('/vouchers', [VoucherController::class, 'store']);
-    Route::put('/vouchers/{id}', [VoucherController::class, 'update']);
-    Route::delete('/vouchers/{id}', [VoucherController::class, 'destroy']);
-    Route::get('/vouchers', [VoucherController::class, 'index']);
-    Route::get('/vouchers/{id}', [VoucherController::class, 'show']);
 
     // Users
     Route::get('/users', [UserController::class, 'index']);

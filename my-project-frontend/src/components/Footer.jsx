@@ -1,4 +1,4 @@
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();
@@ -18,7 +18,10 @@ export default function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <a href="https://about.udemy.com/company/?locale=en-us#contact" className="hover:text-white transition-colors duration-200">
+                                <a
+                                    href="https://about.udemy.com/company/?locale=en-us#contact"
+                                    className="hover:text-white transition-colors duration-200"
+                                >
                                     Contact us
                                 </a>
                             </li>
@@ -39,16 +42,6 @@ export default function Footer() {
                     <div>
                         <h3 className="text-white font-semibold mb-4">Discover Udemy</h3>
                         <ul className="space-y-3">
-                            <li>
-                                <a href="#" className="hover:text-white transition-colors duration-200">
-                                    Get the app
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" className="hover:text-white transition-colors duration-200">
-                                    Teach on Udemy
-                                </a>
-                            </li>
                             <li>
                                 <a href="#" className="hover:text-white transition-colors duration-200">
                                     Plans and Pricing
@@ -101,15 +94,18 @@ export default function Footer() {
                 <div className="max-w-7xl mx-auto px-6 py-6">
                     {/* Logo and Copyright */}
                     <div className="flex items-center justify-center space-x-4">
-                        <Link to="/dashboard" className="flex items-center">
-                            <img src="/images/logo-udemy-inverted.svg"
-                                 alt="Udemy Logo"
-                                 className="w-24 h-auto"/>
+                        <Link to="/" onClick={window.scrollTo({ top: 0, behavior: "smooth" })} className="cursor-pointer flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-200">
+                                <span className="text-white font-bold text-lg">✦</span>
+                            </div>
+                            <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                                EventSphere
+                            </span>
                         </Link>
                         <span className="text-gray-400 text-sm">© {currentYear} Udemy, Inc.</span>
                     </div>
                 </div>
             </div>
         </footer>
-    )
+    );
 }
