@@ -13,6 +13,7 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\Organizer\EventController;
 use App\Http\Controllers\Student\ProfileController;
 use App\Services\AIClientWithFallback;
+use App\Http\Controllers\CalendarController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,8 @@ Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 //Route::apiResource('/events', EventController::class);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
+
+// Calendar routes are protected (only for authenticated users)
 
 // Event routes
 Route::post('/events', [EventController::class, 'store']);
@@ -97,6 +100,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Change password
     Route::post('/user/change-password', [AuthController::class, 'changePassword']);
 
+    // Calendar routes (protected)
+    Route::get('/events/{id}/calendar', [CalendarController::class, 'getCalendarLinks']);
+    Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
+
+
     // Feedback
         Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);
         Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
@@ -132,5 +140,3 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
 //Route::middleware(['auth:sanctum', 'role:participant'])->group(function () {
 //    Route::post('media/save-selected', [MediaController::class, 'saveSelected']);
 //});
-
-
