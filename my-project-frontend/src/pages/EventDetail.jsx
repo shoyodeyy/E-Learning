@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin, Users, Share2, Heart, CalendarPlus, User } from "lucide-react";
 
 import Header from "../components/Header";
+import CalendarInegration from "../components/CalendarIntegration";
+import ShareEvent from "../components/ShareButton";
 
 // Mock data for the event detail
 const eventData = {
@@ -142,10 +144,12 @@ const EventDetailPage = () => {
 
                             {/* Action Buttons */}
                             <div className="flex flex-wrap gap-4">
+                                <ShareEvent event={eventData.title}>
                                 <button className="cursor-pointer flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-lg border border-gray-200 transition-all duration-200">
                                     <Share2 className="w-5 h-5" />
                                     <span>Share Event</span>
                                 </button>
+                                </ShareEvent>
 
                                 <button
                                     onClick={() => setIsFavorited(!isFavorited)}
@@ -158,11 +162,12 @@ const EventDetailPage = () => {
                                     <Heart className={`w-5 h-5 ${isFavorited ? "fill-current" : ""}`} />
                                     <span>{isFavorited ? "Favorited" : "Add to Favorites"}</span>
                                 </button>
-
-                                <button className="cursor-pointer flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-lg border border-gray-200 transition-all duration-200">
-                                    <CalendarPlus className="w-5 h-5" />
-                                    <span>Add to Calendar</span>
-                                </button>
+                                {/* <CalendarInegration eventId={}> */}
+                                    <button className="cursor-pointer flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-lg border border-gray-200 transition-all duration-200">
+                                        <CalendarPlus className="w-5 h-5" />
+                                        <span>Add to Calendar</span>
+                                    </button>
+                                {/* </CalendarInegration> */}
                             </div>
 
                             {/* Navigation Tabs */}
