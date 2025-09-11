@@ -12,7 +12,7 @@ class CalendarController extends Controller
     {
         $event = Event::findOrFail($id);
 
-        $startTimestamp = strtotime($event->event_date . ' ' . $event->event_time);
+        $startTimestamp = strtotime($event->start_at);
         $start = gmdate('Ymd\THis\Z', $startTimestamp);
 
 
@@ -35,7 +35,7 @@ class CalendarController extends Controller
     {
         $event = Event::findOrFail($id);
 
-        $startTimestamp = strtotime($event->event_date . ' ' . $event->event_time);
+        $startTimestamp = strtotime($event->start_at);
         $start = gmdate('Ymd\THis\Z', $startTimestamp);
 
         $description = $event->description ? strip_tags($event->description) : '';
