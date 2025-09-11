@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Organizer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
@@ -13,7 +14,7 @@ class EventController extends Controller
     {
         $events = Event::with(['organizer', 'approvedByAdmin'])
             ->orderBy('start_at', 'desc')
-            ->paginate(10);
+            ->paginate(5);
 
         return EventResource::collection($events);
     }
@@ -42,16 +43,35 @@ class EventController extends Controller
             'start_at' => 'required|date_format:Y-m-d H:i:s',
             'duration_minutes' => 'required|integer|min:1|max:1440',
             'venue' => 'required|string',
-//            'organizerId' => 'required|integer|exists:users,user_id',
+            'approvedBy' => 'nullable|string',
             'maxParticipants' => 'required|integer|min:1|max:10000',
             'registrationDeadline' => 'required|date_format:Y-m-d H:i:s',
-            'bannerImage' => 'required|string',
+            'bannerImage' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'status' => 'nullable|string',
         ]);
 
         $data['status'] = 'pending';
         $data['organizerId'] = auth()->id();
+        $data['bannerImage'] = '';
 
         $event = Event::create($data);
+
+        // Xử lý upload file sau khi đã có eventId
+        if ($request->hasFile('bannerImage')) {
+            $file = $request->file('bannerImage');
+            $fileName = $event->event_id . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+            $path = $file->storeAs(
+                'public/events/banners/' . $event->event_id,
+                $fileName
+            );
+
+            // Cập nhật lại đường dẫn ảnh cho sự kiện
+            $event->bannerImage = Storage::url($path);
+            $event->save();
+        }
+
+        $event->load(['organizer', 'approvedByAdmin']);
 
         return new EventResource($event);
     }
