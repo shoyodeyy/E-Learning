@@ -18,8 +18,8 @@ export default function VerifyEmail() {
                 const token = localStorage.getItem("auth_token");
                 const res = await fetch(`${apiUrl}/email/verify-status`, {
                     headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Accept": "application/json",
+                        Authorization: `Bearer ${token}`,
+                        Accept: "application/json",
                     },
                 });
 
@@ -28,7 +28,6 @@ export default function VerifyEmail() {
                     if (data.verified) {
                         await refreshUser();
                         toast.success("Email verified successfully!");
-                        navigateByRole(data.role);
                     }
                 }
             } catch (err) {
@@ -45,37 +44,17 @@ export default function VerifyEmail() {
             navigate("/login");
             return;
         }
-
-        // If user is already verified or is Google user, redirect to appropriate dashboard
-        if (user.email_verified_at || user.is_google_user) {
-            navigateByRole(user.role);
-            return;
-        }
     }, [user]);
 
     useEffect(() => {
         let interval;
         if (countdown > 0) {
             interval = setInterval(() => {
-                setCountdown(count => count - 1);
+                setCountdown((count) => count - 1);
             }, 1000);
         }
         return () => clearInterval(interval);
     }, [countdown]);
-
-    const navigateByRole = (role) => {
-        switch (role) {
-            case "admin":
-                navigate("/admin/dashboard");
-                break;
-            case "instructor":
-                navigate("/instructor/dashboard");
-                break;
-            default:
-                navigate("/dashboard");
-                break;
-        }
-    };
 
     const handleResendEmail = async () => {
         if (countdown > 0) return;
@@ -87,9 +66,9 @@ export default function VerifyEmail() {
             const response = await fetch(`${apiUrl}/email/resend`, {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
-                    "Accept": "application/json",
+                    Accept: "application/json",
                 },
             });
 
@@ -122,45 +101,46 @@ export default function VerifyEmail() {
         <div className="min-h-screen relative flex items-center justify-center p-4">
             {/* Background */}
             <div className="absolute inset-0 z-0">
-                <img
-                    src="/images/udemy-background.jpg"
-                    alt="Learning background"
-                    className="w-full h-full object-cover"
-                />
+                <img src="/images/udemy-background.jpg" alt="Learning background" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-black/20" />
             </div>
 
             {/* Verification Card */}
             <div className="w-full max-w-md relative z-10 bg-white shadow-2xl rounded-lg">
                 <div className="text-center p-8">
-                    <img
-                        src="/images/logo.webp"
-                        alt="Udemy Logo"
-                        className="mx-auto h-10 mb-6"
-                    />
+                    <img src="/images/logo.webp" alt="Udemy Logo" className="mx-auto h-10 mb-6" />
 
                     {/* Email Icon */}
                     <div className="w-16 h-16 mx-auto mb-6 bg-purple-100 rounded-full flex items-center justify-center">
                         <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                            />
                         </svg>
                     </div>
 
-                    <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                        Verify Your Email
-                    </h1>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-4">Verify Your Email</h1>
 
                     <p className="text-gray-600 text-sm mb-6">
-                        We've sent a verification email to <strong>{user.email}</strong>.
-                        Please check your inbox and click the verification link to activate your account.
+                        We've sent a verification email to <strong>{user.email}</strong>. Please check your inbox and click the verification link to
+                        activate your account.
                     </p>
 
                     {/* User Info */}
                     <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                         <div className="text-sm text-gray-600 space-y-1">
-                            <p><strong>Name:</strong> {user.name}</p>
-                            <p><strong>Email:</strong> {user.email}</p>
-                            <p><strong>Role:</strong> {user.role}</p>
+                            <p>
+                                <strong>Name:</strong> {user.name}
+                            </p>
+                            <p>
+                                <strong>Email:</strong> {user.email}
+                            </p>
+                            <p>
+                                <strong>Role:</strong> {user.role}
+                            </p>
                         </div>
                     </div>
 
@@ -169,22 +149,14 @@ export default function VerifyEmail() {
                         <button
                             onClick={handleResendEmail}
                             disabled={resending || countdown > 0}
-                            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="cursor-pointer w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                            {resending ? (
-                                "Sending..."
-                            ) : countdown > 0 ? (
-                                `Resend in ${countdown}s`
-                            ) : (
-                                "Resend Verification Email"
-                            )}
+                            {resending ? "Sending..." : countdown > 0 ? `Resend in ${countdown}s` : "Resend Verification Email"}
                         </button>
 
                         {/* Instructions */}
                         <div className="text-left p-4 bg-blue-50 rounded-lg">
-                            <h3 className="text-sm font-medium text-blue-800 mb-2">
-                                Don't see the email?
-                            </h3>
+                            <h3 className="text-sm font-medium text-blue-800 mb-2">Don't see the email?</h3>
                             <ul className="text-xs text-blue-700 space-y-1">
                                 <li>• Check your spam or junk folder</li>
                                 <li>• Make sure you entered the correct email</li>
@@ -197,13 +169,13 @@ export default function VerifyEmail() {
                         <div className="flex space-x-3">
                             <button
                                 onClick={handleLogout}
-                                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg text-sm font-medium transition-colors"
+                                className="cursor-pointer flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg text-sm font-medium transition-colors"
                             >
                                 Sign Out
                             </button>
                             <button
                                 onClick={() => window.location.reload()}
-                                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-sm font-medium transition-colors"
+                                className="cursor-pointer flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-sm font-medium transition-colors"
                             >
                                 I've Verified
                             </button>

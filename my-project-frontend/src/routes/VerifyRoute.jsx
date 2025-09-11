@@ -1,10 +1,10 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 
-export default function GuestRoute() {
-    const { isAuthenticated, isVerified, loading } = useAuth();
+export default function VerifyRoute() {
+    const { isVerified, loading } = useAuth();
 
     if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
-    return isAuthenticated && isVerified ? <Navigate to="/" /> : <Outlet />;
+    return isVerified ? <Navigate to="/" /> : <Outlet />;
 }

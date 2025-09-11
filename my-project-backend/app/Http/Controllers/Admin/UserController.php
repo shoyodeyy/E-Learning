@@ -18,6 +18,19 @@ class UserController extends Controller
             ->paginate($perPage, ['*'], 'page', $request->get('page', 1));
     }
 
+    public function approve($id)
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->role !== 'organizer') {
+            return response()->json(['message' => 'Only organizers can be approved.'], 400);
+        }
+
+        $user->update(['is_approved' => true]);
+
+        return response()->json(['message' => 'Organizer approved successfully.']);
+    }
+
     public function ban(Request $request, $id)
     {
         $request->validate([

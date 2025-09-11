@@ -92,6 +92,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/analytics/users/hourly', [UserAnalyticsController::class, 'getHourlyStats']);
 
     // Users
+    Route::post('/users/{id}/approve', [UserController::class, 'approve']);
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/{id}/ban', [UserController::class, 'ban']);
     Route::post('/users/{id}/unban', [UserController::class, 'unban']);
