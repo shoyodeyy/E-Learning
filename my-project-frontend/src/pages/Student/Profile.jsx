@@ -18,7 +18,7 @@ const mockUserData = {
 
 export default function Profile() {
     const handleEditProfile = () => {
-        console.log("Edit profile clicked");
+        console.log("/public-profile");
     };
 
     const handleChangePassword = () => {

@@ -43,9 +43,9 @@ class ProfileController extends Controller
             $user = $request->user();
 
             // chỉ student mới được update
-            if ($user->role !== 'student') {
+            if ($user->role !== 'participant') {
                 return response()->json([
-                    'message' => 'Only students can update their profile.'
+                    'message' => 'Only participants can update their profile.'
                 ], 403);
             }
 

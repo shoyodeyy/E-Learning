@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import Header from "../../components/Header.jsx";
-import ProfileSidebar from "../../components/ProfileSidebar.jsx";
 import { getProfile, updateProfile } from "../../api/profileApi.js";
+import UserSidebar from "../../components/UserSidebar.jsx";
 
 export default function PublicProfile() {
     const [user, setUser] = useState(null);
@@ -116,7 +116,7 @@ export default function PublicProfile() {
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                     {/* Sidebar */}
                     <div className="col-span-1 md:col-span-3 order-1 md:order-1">
-                        <ProfileSidebar user={user} />
+                        <UserSidebar user={user} />
                     </div>
 
                     {/* Form */}
