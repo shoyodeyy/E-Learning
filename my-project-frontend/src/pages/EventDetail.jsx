@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Calendar, Clock, MapPin, Users, Share2, Heart, CalendarPlus, User } from "lucide-react";
 
 import Header from "../components/Header";
@@ -266,7 +267,9 @@ const EventDetailPage = () => {
                                         </div>
 
                                         {/* Register Button */}
-                                        <button className="w-full btn-gradient-l">Register Now</button>
+                                        <Link to={`/event/${eventData.id}/seat`} className="w-full inline-flex justify-center btn-gradient-l">
+                                            Register Now
+                                        </Link>
 
                                         <p className="text-xs text-gray-500 text-center">Taxes and fees may apply.</p>
 

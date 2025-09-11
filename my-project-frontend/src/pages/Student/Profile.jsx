@@ -1,6 +1,5 @@
-import Header from "../../components/Header";
-import CollapsibleSidebar from "../../components/UserSidebar.jsx";
 import { Edit, Key } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // Mock user data
 const mockUserData = {
@@ -17,12 +16,14 @@ const mockUserData = {
 };
 
 export default function Profile() {
+    const navigate = useNavigate();
+
     const handleEditProfile = () => {
         console.log("Edit profile clicked");
     };
 
     const handleChangePassword = () => {
-        console.log("Change password clicked");
+        navigate("/user/change-password")
     };
 
     return (
