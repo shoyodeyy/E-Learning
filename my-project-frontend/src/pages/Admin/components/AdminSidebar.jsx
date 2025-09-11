@@ -1,18 +1,27 @@
 import { Link } from "react-router-dom"
-import { User, LayoutDashboard, BookOpen, KeyRound, LogOut, Ticket } from "lucide-react"
+import {
+    User,
+    LayoutDashboard,
+    KeyRound,
+    Sparkles,
+    ListTodo,
+    ChevronLeft,
+    ChevronRight,
+} from "lucide-react"
 
-import { useAuth } from "../../../context/AuthContext.jsx"
-
-const AdminSidebar = ({ isCollapsed = false, setIsMobileSidebarOpen }) => {
-    const { logout } = useAuth()
-
-    const handleLogout = (e) => {
-        e.preventDefault()
-        const confirmed = window.confirm("Are you sure you want to log out?")
-        if (confirmed) {
-            logout()
-        }
-    }
+const AdminSidebar = ({
+                          isCollapsed = false,
+                          setIsCollapsed,
+                          setIsMobileSidebarOpen,
+                          horizontal = false,
+                      }) => {
+    const menuItems = [
+        { to: "dashboard", icon: <LayoutDashboard size={18} />, label: "Dashboard" },
+        { to: "events", icon: <Sparkles size={18} />, label: "Events" },
+        { to: "approval", icon: <ListTodo size={18} />, label: "Approvals" },
+        { to: "user", icon: <User size={18} />, label: "User" },
+        { to: "change-password", icon: <KeyRound size={18} />, label: "Change Password" },
+    ]
 
     const handleLinkClick = () => {
         if (window.innerWidth < 768 && setIsMobileSidebarOpen) {
@@ -23,99 +32,41 @@ const AdminSidebar = ({ isCollapsed = false, setIsMobileSidebarOpen }) => {
     return (
         <aside
             className={`
-            ${isCollapsed ? "w-38 lg:w-20" : "w-64 lg:w-64"} 
-            h-full bg-purple-700 text-white flex flex-col shadow-lg transition-all duration-300 ease-in-out
-        `}
-            style={{ minHeight: "100vh" }}
+                bg-purple-700 text-white shadow-lg
+                ${horizontal
+                ? "w-full flex flex-row justify-around items-center py-2"
+                : `${isCollapsed ? "w-20" : "w-64"} h-full flex flex-col`}
+                transition-all duration-300 ease-in-out
+            `}
+            style={!horizontal ? { minHeight: "100vh" } : {}}
         >
-            <div className="flex-row px-2 lg:px-4 py-4">
-                <ul className="space-y-2">
-                    <li>
-                        <Link
-                            to="/admin/dashboard"
-                            onClick={handleLinkClick}
-                            className={`
-                                flex items-center gap-2 lg:gap-3 px-3 py-2 rounded-lg hover:bg-purple-600 transition
-                                ${isCollapsed ? "lg:justify-center" : ""}
-                            `}
-                            title={isCollapsed ? "Dashboard" : ""}
-                        >
-                            <LayoutDashboard size={18} className="flex-shrink-0" />
-                            <span className={isCollapsed ? "lg:hidden" : ""}>Dashboard</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link
-                            to="/admin/course"
-                            onClick={handleLinkClick}
-                            className={`
-                                flex items-center gap-2 lg:gap-3 px-3 py-2 rounded-lg hover:bg-purple-600 transition
-                                ${isCollapsed ? "lg:justify-center" : ""}
-                            `}
-                            title={isCollapsed ? "Course" : ""}
-                        >
-                            <BookOpen size={18} className="flex-shrink-0" />
-                            <span className={isCollapsed ? "lg:hidden" : ""}>Course</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link
-                            to="/admin/user"
-                            onClick={handleLinkClick}
-                            className={`
-                                flex items-center gap-2 lg:gap-3 px-3 py-2 rounded-lg hover:bg-purple-600 transition
-                                ${isCollapsed ? "lg:justify-center" : ""}
-                            `}
-                            title={isCollapsed ? "User" : ""}
-                        >
-                            <User size={18} className="flex-shrink-0" />
-                            <span className={isCollapsed ? "lg:hidden" : ""}>User</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link
-                            to="/admin/vouchers"
-                            onClick={handleLinkClick}
-                            className={`
-                                flex items-center gap-2 lg:gap-3 px-3 py-2 rounded-lg hover:bg-purple-600 transition
-                                ${isCollapsed ? "lg:justify-center" : ""}
-                            `}
-                            title={isCollapsed ? "Voucher" : ""}
-                        >
-                            <Ticket size={18} className="flex-shrink-0" />
-                            <span className={isCollapsed ? "lg:hidden" : ""}>Voucher</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link
-                            to="/admin/change-password"
-                            onClick={handleLinkClick}
-                            className={`
-                                flex items-center gap-2 lg:gap-3 px-3 py-2 rounded-lg hover:bg-purple-600 transition
-                                ${isCollapsed ? "lg:justify-center" : ""}
-                            `}
-                            title={isCollapsed ? "Change Password" : ""}
-                        >
-                            <KeyRound size={18} className="flex-shrink-0" />
-                            <span className={isCollapsed ? "lg:hidden" : ""}>Change Password</span>
-                        </Link>
-                    </li>
-                </ul>
-            </div>
-
-            <div className="p-4 border-t border-purple-600">
+            {!horizontal && (
                 <button
-                    onClick={handleLogout}
-                    className={`
-                        flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-red-600 transition cursor-pointer
-                        ${isCollapsed ? "lg:justify-center" : ""}
-                    `}
-                    title={isCollapsed ? "Logout" : ""}
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className="flex items-center justify-center w-full py-2 hover:bg-purple-600 transition"
                 >
-                    <LogOut size={18} className="flex-shrink-0" />
-                    <span className={isCollapsed ? "lg:hidden" : ""}>Logout</span>
+                    {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
                 </button>
-            </div>
+            )}
+
+            <ul className={`${horizontal ? "flex flex-row gap-4" : "flex-1 p-4 space-y-2"}`}>
+                {menuItems.map((item, idx) => (
+                    <li key={idx}>
+                        <Link
+                            to={item.to}
+                            onClick={handleLinkClick}
+                            className={`
+                                flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-purple-600 transition
+                                ${isCollapsed || horizontal ? "justify-center" : ""}
+                            `}
+                            title={isCollapsed || horizontal ? item.label : ""}
+                        >
+                            {item.icon}
+                            {!isCollapsed && !horizontal && <span>{item.label}</span>}
+                        </Link>
+                    </li>
+                ))}
+            </ul>
         </aside>
     )
 }

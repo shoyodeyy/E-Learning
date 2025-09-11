@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -37,5 +38,10 @@ class Event extends Model
 
     public function approvedByAdmin(): BelongsTo {
         return $this->belongsTo(User::class, 'approvedBy', 'user_id');
+    }
+
+    public function getEndAtAttribute()
+    {
+        return Carbon::parse($this->start_at)->addMinutes($this->duration_minutes);
     }
 }

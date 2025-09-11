@@ -32,7 +32,7 @@ class VerificationController extends Controller
     {
         $dashboardUrl = match($user->role) {
             'admin' => 'admin/dashboard',
-            'instructor' => 'instructor/dashboard',
+            'organizer' => 'organizer/dashboard',
             default => 'dashboard'
         };
 

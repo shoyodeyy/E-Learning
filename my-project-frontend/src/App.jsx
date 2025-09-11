@@ -19,6 +19,7 @@ import EventsPage from "./pages/Events.jsx";
 import EventDetailPage from "./pages/EventDetail.jsx";
 import Home from "./pages/Home.jsx";
 import GuestRoute from "./routes/GuestRoute.jsx";
+import Sitemap from "./pages/Sitemap.jsx";
 
 function App() {
     return (
@@ -62,6 +63,7 @@ function App() {
                                 <Route path="/verify-email" element={<VerifyEmail />} />
                             </Route>
                             <Route path="/403" element={<Forbidden />} />
+                            <Route path="/sitemap" element={<Sitemap />} />
                             <Route path="*" element={<NotFound />} />
                         </Routes>
                     </main>
