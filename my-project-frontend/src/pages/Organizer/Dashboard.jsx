@@ -2,8 +2,8 @@ import { useEffect, useState } from "react"
 import { Outlet } from "react-router-dom"
 
 import { useAuth } from "../../context/AuthContext.jsx"
-import AdminSidebar from "./components/AdminSidebar.jsx"
 import Header from "../../components/Header.jsx"
+import OrganizerSidebar from "./component/OrganizerSidebar.jsx";
 
 export default function Dashboard() {
     const { user, refreshUser } = useAuth()
@@ -41,7 +41,7 @@ export default function Dashboard() {
             {windowWidth < 768 ? (
                 <div>
                     <div className="sticky top-[64px] z-50">
-                        <AdminSidebar horizontal={true} isCollapsed={true} />
+                        <OrganizerSidebar horizontal={true} isCollapsed={true} />
                     </div>
                     <div className="bg-white p-4 shadow mt-2">
                         <Outlet />
@@ -50,7 +50,7 @@ export default function Dashboard() {
             ) : (
                 <div className="flex">
                     <div className="relative">
-                        <AdminSidebar
+                        <OrganizerSidebar
                             isCollapsed={isSidebarCollapsed}
                             setIsCollapsed={setIsSidebarCollapsed}
                         />

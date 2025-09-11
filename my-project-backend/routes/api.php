@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\Chatbot\ChatController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\Organizer\EventController;
@@ -96,3 +97,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::post('/users/{id}/ban', [UserController::class, 'ban']);
     Route::post('/users/{id}/unban', [UserController::class, 'unban']);
 });
+
+//Route::middleware(['auth:sanctum', 'role:participant'])->group(function () {
+//    Route::post('media/save-selected', [MediaController::class, 'saveSelected']);
+//});

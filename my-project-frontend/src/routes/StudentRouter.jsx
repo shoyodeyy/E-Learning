@@ -7,6 +7,7 @@ import Profile from "../pages/Student/Profile.jsx";
 import UserLayout from "../pages/Student/UserLayout.jsx";
 import SeatLayout from "../pages/Organizer/Event/SeatLayout.jsx";
 import ChangePassword from "../pages/ChangePassword.jsx";
+import Gallery from "../pages/Gallery.jsx";
 
 export default function StudentRouter() {
     return (
@@ -18,6 +19,7 @@ export default function StudentRouter() {
                     <Route path="registration" element={<MyRegistrations />} />
                     <Route path="change-password" element={<ChangePassword />} />
                 </Route>
+                <Route path="/media-gallery" element={<Gallery />} />
                 <Route path="/event/:id/seat" element={<SeatLayout />} />
             </Route>
         </>

@@ -3,24 +3,21 @@ import {
     User,
     LayoutDashboard,
     KeyRound,
-    Sparkles,
-    ListTodo,
     ChevronLeft,
-    ChevronRight,
+    ChevronRight, BookmarkPlus,
 } from "lucide-react"
 
-const AdminSidebar = ({
+const OrganizerSidebar = ({
                           isCollapsed = false,
                           setIsCollapsed,
                           setIsMobileSidebarOpen,
                           horizontal = false,
                       }) => {
     const menuItems = [
-        { to: "dashboard", icon: <LayoutDashboard size={18} />, label: "Dashboard" },
-        { to: "events", icon: <Sparkles size={18} />, label: "Events" },
-        { to: "approval", icon: <ListTodo size={18} />, label: "Approvals" },
-        { to: "user", icon: <User size={18} />, label: "User" },
-        { to: "change-password", icon: <KeyRound size={18} />, label: "Change Password" },
+        { to: "", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
+        { to: "events", icon: <BookmarkPlus size={20}/> , label: "Create Events" },
+        { to: "user", icon: <User size={20} />, label: "Events List" },
+        { to: "change-password", icon: <KeyRound size={20} />, label: "Change Password" },
     ]
 
     const handleLinkClick = () => {
@@ -71,4 +68,4 @@ const AdminSidebar = ({
     )
 }
 
-export default AdminSidebar
+export default OrganizerSidebar
