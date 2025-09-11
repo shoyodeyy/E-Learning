@@ -33,7 +33,7 @@ class VerificationController extends Controller
         $dashboardUrl = match($user->role) {
             'admin' => 'admin/dashboard',
             'organizer' => 'organizer/dashboard',
-            default => '/'
+            default => 'dashboard'
         };
 
         if ($message) {

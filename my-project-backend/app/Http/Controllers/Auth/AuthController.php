@@ -15,15 +15,15 @@ class AuthController extends Controller
 {
     public function register(Request $request): JsonResponse
     {
-        // $key = Str::lower('register:' . $request->ip());
+        $key = Str::lower('register:' . $request->ip());
 
-        // if (RateLimiter::tooManyAttempts($key, 3)) {
-        //     return response()->json([
-        //         'message' => 'Too many attempts. Please try again in a few minutes.'
-        //     ], 429);
-        // }
+        if (RateLimiter::tooManyAttempts($key, 3)) {
+            return response()->json([
+                'message' => 'Too many attempts. Please try again in a few minutes.'
+            ], 429);
+        }
 
-        // RateLimiter::hit($key, 600);
+        RateLimiter::hit($key, 600);
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -37,7 +37,6 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role ?? 'participant',
-            'is_approved' => $request->role === 'organizer' ? false : true,
         ]);
 
         // Send email verification
@@ -46,7 +45,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user->only(['id', 'name', 'email', 'role', 'email_verified_at', 'is_approved']),
+            'user' => $user->only(['user_id', 'name', 'email', 'role', 'email_verified_at']),
             'token' => $token,
             'message' => 'Registration successful! Please check your email to verify your account.',
             'email_verification_required' => true,
@@ -80,7 +79,8 @@ class AuthController extends Controller
 
         // Check if user is banned
         if ($user->isBanned()) {
-            $bannedUntil = $user->banned_until->format('d/m/Y H:i');
+            // Sử dụng thuộc tính ban_until đã được cast thành datetime
+            $bannedUntil = $user->ban_until->format('d/m/Y H:i');
             return response()->json([
                 'message' => 'Your account has been banned.',
                 'error' => 'account_banned',
@@ -91,26 +91,12 @@ class AuthController extends Controller
             ], 403);
         }
 
-        if ($user->isOrganizerPending()) {
-            return response()->json([
-                'message' => 'Your organizer account is pending admin approval.',
-                'error' => 'account_not_approved',
-            ], 403);
-        }
-
-        if (!$user->hasVerifiedEmail()) {
-            return response()->json([
-                'message' => 'You must verify your email before logging in.',
-                'error' => 'email_not_verified',
-            ], 403);
-        }
-
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful',
             'user' => [
-                'id' => $user->id,
+                'user_id' => $user->user_id,
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
@@ -138,7 +124,7 @@ class AuthController extends Controller
     public function changePassword(Request $request)
     {
         $user = $request->user();
-        $key = Str::lower("change-password:" . $user->id);
+        $key = Str::lower("change-password:" . $user->user_id);
 
         // Giới hạn 3 lần trong 1 giờ
         if (RateLimiter::tooManyAttempts($key, 3)) {
@@ -168,7 +154,6 @@ class AuthController extends Controller
 
         $user->update([
             'password' => Hash::make($validated['new_password']),
-            'has_password' => true,
         ]);
 
         return response()->json([

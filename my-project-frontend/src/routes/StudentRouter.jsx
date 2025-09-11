@@ -5,6 +5,9 @@ import Dashboard from "../pages/Student/Dashboard.jsx";
 import MyRegistrations from "../pages/Student/MyRegistrations.jsx";
 import Profile from "../pages/Student/Profile.jsx";
 import UserLayout from "../pages/Student/UserLayout.jsx";
+
+import PublicProfile from "../pages/Student/PublicProfile.jsx";
+
 import SeatLayout from "../pages/Organizer/Event/SeatLayout.jsx";
 import ChangePassword from "../pages/ChangePassword.jsx";
 
@@ -16,6 +19,8 @@ export default function StudentRouter() {
                     <Route path="profile" element={<Profile />} />
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="registration" element={<MyRegistrations />} />
+
+                    <Route path="edit-profile" element={<PublicProfile />} />
                     <Route path="change-password" element={<ChangePassword />} />
                 </Route>
                 <Route path="/event/:id/seat" element={<SeatLayout />} />
