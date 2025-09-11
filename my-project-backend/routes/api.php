@@ -23,9 +23,10 @@ Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 //Route::apiResource('/events', EventController::class);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
-Route::post('/events', [EventController::class, 'store']);
-Route::put('/events/{id}', [EventController::class, 'update']);
-Route::delete('/events/{id}', [EventController::class, 'destroy']);
+// Creation and modifications require auth; see authenticated group below
+// Route::post('/events', [EventController::class, 'store']);
+// Route::put('/events/{id}', [EventController::class, 'update']);
+// Route::delete('/events/{id}', [EventController::class, 'destroy']);
 
 // Password reset routes
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
@@ -68,9 +69,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Event routes
-//    Route::post('/events', [EventController::class, 'store']);
-//    Route::put('/events/{id}', [EventController::class, 'update']);
-//    Route::delete('/events/{id}', [EventController::class, 'destroy']);
+    Route::post('/events', [EventController::class, 'store']);
+    Route::put('/events/{id}', [EventController::class, 'update']);
+    Route::delete('/events/{id}', [EventController::class, 'destroy']);
 
     // Chatbot routes
     Route::get('/chat/{sessionId}/history', [ChatController::class, 'history']);

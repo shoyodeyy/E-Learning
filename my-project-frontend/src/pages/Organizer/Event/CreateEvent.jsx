@@ -24,7 +24,8 @@ export default function CreateEventForm() {
 
     const [formData, setFormData] = useState({
         title: '',
-        category: '',
+        // Set a valid default to satisfy backend `in:` rule
+        category: 'Cultural Event',
         description: '',
         startAt: '',
         duration_minutes: '',
@@ -131,7 +132,7 @@ export default function CreateEventForm() {
             await axios.post(`${apiUrl}/events`, data, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    // 'Authorization': `Bearer ${token}`
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
                 }
             });
 
@@ -139,7 +140,13 @@ export default function CreateEventForm() {
             navigate('/organizer/events?page=1');
         } catch (error) {
             if (error.response && error.response.status === 422) {
-                setErrors(error.response.data.errors);
+                const serverErrors = error.response.data.errors || {};
+                // Map backend snake_case keys to form field names when needed
+                const mapped = {
+                    ...serverErrors,
+                    ...(serverErrors.start_at ? { startAt: serverErrors.start_at } : {}),
+                };
+                setErrors(mapped);
             } else {
                 toast.error('Failed to create event.');
             }
@@ -257,6 +264,26 @@ export default function CreateEventForm() {
                                     </div>
                                     {errors.startAt && <p className="text-red-500 text-xs mt-1">{errors.startAt}</p>}
                                 </div>
+                            </div>
+
+                            {/* Duration (minutes) */}
+                            <div>
+                                <label
+                                    htmlFor="duration_minutes"
+                                    className="block text-sm font-medium text-gray-700 mb-2">
+                                    Duration (minutes)
+                                </label>
+                                <input
+                                    type="number"
+                                    id="duration_minutes"
+                                    name="duration_minutes"
+                                    min="1"
+                                    max="1440"
+                                    value={formData.duration_minutes}
+                                    onChange={handleChange}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
+                                />
+                                {errors.duration_minutes && <p className="text-red-500 text-xs mt-1">{errors.duration_minutes}</p>}
                             </div>
 
                             {/* Venue */}
