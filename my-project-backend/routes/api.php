@@ -14,6 +14,7 @@ use App\Http\Controllers\Student\ProfileController;
 use App\Services\AIClientWithFallback;
 use App\Http\Controllers\CalendarController;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Student\EventRegistrationController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -80,6 +81,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Calendar routes
     Route::get('/events/{id}/calendar', [CalendarController::class, 'getCalendarLinks']);
     Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
+    //registration routes
+    Route::post('/events/{eventId}/register', [EventRegistrationController::class, 'register']);
+    Route::post('/events/{eventId}/cancel', [EventRegistrationController::class, 'cancel']);
+});
+//Organizer routes
+Route::middleware(['auth:sanctum', 'role:organizer'])->group(function () {
+    Route::get('/events/{eventId}/registrations', [EventRegistrationController::class, 'listByEvent']);
+    Route::post('/registrations/{id}/attendance', [EventRegistrationController::class, 'markAttendance']);
 });
 
 // Admin routes
