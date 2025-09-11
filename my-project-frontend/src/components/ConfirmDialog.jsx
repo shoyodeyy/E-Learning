@@ -19,11 +19,11 @@ export default function ConfirmDialog({ open, message, onConfirm, onCancel }) {
                     >
                         <p className="text-gray-800 mb-6">{message}</p>
                         <div className="flex justify-end gap-3">
-                            <button onClick={onCancel} className="cursor-pointer px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300">
+                            <button onClick={onCancel} className="cursor-pointer px-4 py-2 rounded-xl bg-red-400 hover:bg-red-600 text-white">
                                 Cancel
                             </button>
-                            <button onClick={onConfirm} className="cursor-pointer px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600">
-                                Logout
+                            <button onClick={onConfirm} className="cursor-pointer px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300">
+                                Ok
                             </button>
                         </div>
                     </motion.div>

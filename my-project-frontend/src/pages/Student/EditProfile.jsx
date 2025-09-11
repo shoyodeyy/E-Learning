@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { updateProfile } from "../../api/profileApi.js";
+import ConfirmDialog from "../../components/ConfirmDialog.jsx";
 
 export default function EditProfile() {
     const { user, updateUser } = useAuth();
+    const [confirmOpen, setConfirmOpen] = useState(false);
     const [formData, setFormData] = useState({});
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
@@ -63,7 +65,7 @@ export default function EditProfile() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) return;
-        if (!window.confirm("Do you want to update your profile?")) return;
+        setConfirmOpen(true);
 
         setProcessing(true);
         try {
@@ -86,6 +88,33 @@ export default function EditProfile() {
         } finally {
             setProcessing(false);
         }
+    };
+
+    const handleConfirm = async () => {
+        setConfirmOpen(false);
+        setProcessing(true);
+        try {
+            const data = new FormData();
+            Object.keys(formData).forEach((key) => {
+                if (formData[key] !== null && formData[key] !== "") {
+                    data.append(key, formData[key]);
+                }
+            });
+
+            const result = await updateProfile(data);
+            updateUser(result.user);
+            toast.success(result.message || "Profile updated successfully ✅");
+            setErrors({});
+        } catch (error) {
+            console.error(error);
+            toast.error("Update failed ❌");
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const handleCancel = () => {
+        setConfirmOpen(false);
     };
 
     return (
@@ -262,7 +291,11 @@ export default function EditProfile() {
                     )}
 
                     {/* Actions */}
-                    <div className={`${["participant"].includes(user?.role) ? "block sm:hidden" : ""} bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center items-start space-y-4`}>
+                    <div
+                        className={`${
+                            ["participant"].includes(user?.role) ? "block sm:hidden" : ""
+                        } bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center items-start space-y-4`}
+                    >
                         <h2 className="text-lg font-semibold">Actions</h2>
                         <button
                             type="submit"
@@ -283,6 +316,8 @@ export default function EditProfile() {
                     </div>
                 </form>
             </main>
+
+            <ConfirmDialog open={confirmOpen} message="Do you want to update your profile?" onConfirm={handleConfirm} onCancel={handleCancel} />
         </div>
     );
 }
