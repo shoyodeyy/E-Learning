@@ -23,14 +23,13 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        $this->call(ChatbotTestSeeder::class);
+//        $this->call(ChatbotTestSeeder::class);
 
         $this->call([
-            UserSeeder::class,
+//            UserSeeder::class,
         ]);
 
-
-        $this->call(CourseSeeder::class);
-
+//        $this->call(CourseSeeder::class);
+        $this->call(EventSeeder::class);
     }
 }

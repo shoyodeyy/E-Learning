@@ -15,10 +15,15 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $primaryKey = 'user_id';
+    protected $keyType = 'int';
+    public $incrementing = true;
+
     /**
      * Các field có thể gán
      */
     protected $fillable = [
+        'user_id',
         'name',
         'email',
         'password',
@@ -166,17 +171,18 @@ class User extends Authenticatable
      * ===============================
      */
 
-    // Các khóa học mà user này là giảng viên
-
-    public function coursesAsInstructors(): HasMany
+    public function eventsAsInstructors(): HasMany
     {
-        return $this->hasMany(Course::class, 'instructorID', 'id');
+        return $this->hasMany(Event::class, 'organizerId', 'user_id');
     }
 
-    // Các khóa học mà user này phê duyệt
-
-    public function coursesApproved(): HasMany
+    public function ApprovedByAdmin(): HasMany
     {
-        return $this->hasMany(Course::class, 'approvedID', 'id');
+        return $this->hasMany(Event::class, 'approvedBy', 'user_id');
+    }
+
+    public function hasRole($role): bool
+    {
+        return $this->role === $role;
     }
 }
