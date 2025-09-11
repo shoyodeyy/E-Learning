@@ -20,7 +20,8 @@ class User extends Authenticatable
     public $incrementing = true;
 
     /**
-     * Các field có thể gán
+     * Các field có thể gán hàng loạt.
+     * Thêm 'enrollment_no' và 'department' để đồng bộ với DB.
      */
     protected $fillable = [
         'user_id',
@@ -37,16 +38,18 @@ class User extends Authenticatable
         'status',
         'avatar',
         'ban_reason',
-        'banned_until',
+        'ban_until',
+        'enrollment_no',
+        'department',
     ];
 
     /**
-     * Append thêm thuộc tính ảo
+     * Append thêm thuộc tính ảo.
      */
     protected $appends = ['has_password', 'avatar_url'];
 
     /**
-     * Các field ẩn khi trả về JSON
+     * Các field ẩn khi trả về JSON.
      */
     protected $hidden = [
         'password',
@@ -54,19 +57,20 @@ class User extends Authenticatable
     ];
 
     /**
-     * Cast các field đặc biệt
+     * Cast các field đặc biệt.
+     * Tên cột 'ban_until' đã khớp với DB.
      */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'banned_until' => 'datetime',
+            'ban_until' => 'datetime',
             'password' => 'hashed',
         ];
     }
 
     /**
-     * Gửi email reset password
+     * Gửi email reset password.
      */
     public function sendPasswordResetNotification($token): void
     {
@@ -74,7 +78,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check nếu là user login qua Google
+     * Check nếu là user login qua Google.
      */
     public function isGoogleUser(): bool
     {
@@ -82,7 +86,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check nếu user cần verify email
+     * Check nếu user cần verify email.
      */
     public function needsEmailVerification(): bool
     {
@@ -93,24 +97,23 @@ class User extends Authenticatable
     }
 
     /**
-     * Check email đã verify chưa
+     * Check email đã verify chưa.
      */
     public function hasVerifiedEmail(): bool
     {
         return !is_null($this->email_verified_at);
     }
 
-
     /**
-     * Check nếu user bị ban
+     * Check nếu user bị ban.
      */
     public function isBanned(): bool
     {
-        return !is_null($this->banned_until) && $this->banned_until->isFuture();
+        return !is_null($this->ban_until) && $this->ban_until->isFuture();
     }
 
     /**
-     * Thuộc tính ảo: user có password hay không
+     * Thuộc tính ảo: user có password hay không.
      */
     public function getHasPasswordAttribute(): bool
     {
@@ -118,7 +121,7 @@ class User extends Authenticatable
     }
 
     /**
-     * ✅ Trả về URL đầy đủ cho avatar
+     * ✅ Trả về URL đầy đủ cho avatar.
      */
     public function getAvatarUrlAttribute(): ?string
     {
@@ -129,22 +132,23 @@ class User extends Authenticatable
 
     /**
      * ===============================
-     * 🎯 Các hàm liên quan đến STUDENT
+     * 🎯 Các hàm liên quan đến participant
      * ===============================
      */
 
     /**
-     * Kiểm tra user có phải student không
+     * Kiểm tra user có phải participant không.
+     * Đã đổi tên hàm từ isparticipant() thành isParticipant().
      */
-    public function isStudent(): bool
+    public function isParticipant(): bool
     {
-        return $this->role === 'student';
+        return $this->role === 'participant';
     }
 
     /**
-     * Các field mà student có thể edit
+     * Các field mà participant có thể edit.
      */
-    public function studentEditableFields(): array
+    public function participantEditableFields(): array
     {
         return [
             'name',
@@ -158,11 +162,12 @@ class User extends Authenticatable
     }
 
     /**
-     * Scope: chỉ lấy user có role student
+     * Scope: chỉ lấy user có role participant.
+     * Đã đổi tên scope từ scopeparticipants() thành scopeParticipants().
      */
-    public function scopeStudents($query)
+    public function scopeParticipants($query)
     {
-        return $query->where('role', 'student');
+        return $query->where('role', 'participant');
     }
 
     /**
@@ -176,8 +181,16 @@ class User extends Authenticatable
         return $this->hasMany(Event::class, 'organizerId', 'user_id');
     }
 
-    public function ApprovedByAdmin(): HasMany
+    /**
+     * Đã đổi tên relationship từ ApprovedByAdmin() thành approvedByAdmin() để tuân theo chuẩn camelCase.
+     */
+    public function approvedByAdmin(): HasMany
     {
         return $this->hasMany(Event::class, 'approvedBy', 'user_id');
+    }
+
+    public function hasRole($role): bool
+    {
+        return $this->role === $role;
     }
 }

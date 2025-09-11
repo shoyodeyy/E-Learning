@@ -232,7 +232,7 @@ export default function ResetPassword() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                            className="w-full btn-gradient disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
                             {isLoading ? 'Resetting...' : 'Reset Password'}
                         </button>

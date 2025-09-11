@@ -2,18 +2,18 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Event extends Model
 {
-    public $incrementing = false;
+    public $incrementing = true;
     public $timestamps = true;
-    protected $keyType = 'string';
+    protected $keyType = 'int';
     protected $table = 'events';
-    protected $primaryKey = 'eventId';
+    protected $primaryKey = 'event_id';
     protected $fillable = [
-        'event_id',
         'title',
         'description',
         'category',
@@ -38,5 +38,10 @@ class Event extends Model
 
     public function approvedByAdmin(): BelongsTo {
         return $this->belongsTo(User::class, 'approvedBy', 'user_id');
+    }
+
+    public function getEndAtAttribute()
+    {
+        return Carbon::parse($this->start_at)->addMinutes($this->duration_minutes);
     }
 }

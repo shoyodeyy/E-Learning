@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('feedback', function (Blueprint $table) {
             $table->id('feedback_id');
-            $table->string('event_id');
+            $table->unsignedBigInteger('event_id');
             $table->unsignedBigInteger('user_id');
             $table->enum('role', ['participant', 'organizer'])->default('participant');
             $table->decimal('rating', 2, 1)
                   ->comment('Rating from 1.0 to 5.0')
                   ->check('rating >= 1 AND rating <= 5');
             $table->text('comments')->nullable();
+            $table->boolean('edited')->default(false);
             $table->dateTime('submitted_on')->useCurrent();
 
             $table->unique(['event_id', 'user_id']);
