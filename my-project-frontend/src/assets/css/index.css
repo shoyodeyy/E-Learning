@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@theme {
+    --color-primary: #a855f7; /* purple-500 */
+    --color-primary-dark: #9333ea; /* purple-600 */
+    --color-primary-light: #d946ef; /* pink-500 */
+  }
+
 /* globals.css */
 .btn-gradient {
     @apply cursor-pointer bg-gradient-to-r from-purple-500 to-pink-500 

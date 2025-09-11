@@ -1,9 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Edit, Key } from "lucide-react";
 import { getProfile } from "../../api/profileApi.js";
 import Avatar from "../../components/Avatar.jsx"; // API call tới backend
-
 
 
 export default function Profile() {
@@ -16,6 +16,7 @@ export default function Profile() {
             .catch(() => console.error("Failed to load profile"));
     }, []);
 
+
     const handleEditProfile = () => {
         navigate("/user/edit-profile");
     };
@@ -23,6 +24,8 @@ export default function Profile() {
     const handleChangePassword = () => {
         console.log("Change password clicked");
         // Bạn có thể chuyển sang trang đổi mật khẩu hoặc mở modal
+        navigate("/user/change-password")
+
     };
 
     if (!user) {
