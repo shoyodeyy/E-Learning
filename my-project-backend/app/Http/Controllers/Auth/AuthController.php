@@ -29,14 +29,14 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:student,instructor',
+            'role' => 'required|in:participant,organizer',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role ?? 'student',
+            'role' => $request->role ?? 'participant',
         ]);
 
         // Send email verification
@@ -77,6 +77,7 @@ class AuthController extends Controller
             ]);
         }
 
+
         // Check if user is banned
         if ($user->isBanned()) {
             $bannedUntil = $user->banned_until->format('d/m/Y H:i');
@@ -89,6 +90,7 @@ class AuthController extends Controller
                 ]
             ], 403);
         }
+
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -162,5 +164,4 @@ class AuthController extends Controller
                 : 'Password not changed.',
         ]);
     }
-
 }

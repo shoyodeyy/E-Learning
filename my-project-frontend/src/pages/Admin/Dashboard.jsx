@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react"
 import { Outlet, useNavigate } from "react-router-dom"
 import { Menu, X } from "lucide-react"
@@ -99,13 +100,13 @@ export default function Dashboard() {
                         ) : (
                             <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">⚠ Unverified</span>
                         )}
+
                         <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
                             Logout
                         </button>
                     </div>
                 </div>
             </header>
-
             <div className="flex">
                 <div
                     className={`
