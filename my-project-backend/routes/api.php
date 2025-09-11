@@ -8,7 +8,7 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Chatbot\ChatController;
-use App\Http\Controllers\CourseController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\Organizer\EventController;
 use App\Http\Controllers\Student\ProfileController;
 use App\Services\AIClientWithFallback;
@@ -76,6 +76,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Change password
     Route::post('/user/change-password', [AuthController::class, 'changePassword']);
+
+    // Feedback
+        Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);
+        Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
+        Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
 });
 
 // Admin routes

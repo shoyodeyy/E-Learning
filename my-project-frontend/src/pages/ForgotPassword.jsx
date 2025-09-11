@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { toast } from 'react-toastify';
 
 import { apiUrl } from '../services/http';
+import Header from '../components/Header';
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState('');
@@ -65,22 +66,7 @@ export default function ForgotPassword() {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
-            {/* Header */}
-            <header className="flex justify-between items-center p-6">
-                <Link to="/">
-                    <img
-                        src="/images/logo.webp"
-                        alt="Udemy Logo"
-                        className="h-10"
-                    />
-                </Link>
-                <Link
-                    to="/login"
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors duration-200 font-medium"
-                >
-                    Log in or sign up
-                </Link>
-            </header>
+            <Header />
 
             {/* Main Content */}
             <main className="flex-1 flex items-center justify-center px-4 relative">
@@ -158,7 +144,7 @@ export default function ForgotPassword() {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                                    className="w-full btn-gradient cursor-pointer"
                                 >
                                     {isLoading ? 'Sending...' : 'Reset Password'}
                                 </button>
@@ -189,7 +175,7 @@ export default function ForgotPassword() {
                             <div className="space-y-4">
                                 <button
                                     onClick={handleResend}
-                                    className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium transition-colors duration-200 cursor-pointer"
+                                    className="w-full btn-gradient cursor-pointer"
                                 >
                                     Send Another Email
                                 </button>
