@@ -1,40 +1,22 @@
 
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Edit, Key } from "lucide-react";
-import { getProfile } from "../../api/profileApi.js";
-import Avatar from "../../components/Avatar.jsx"; // API call tới backend
 
+import Avatar from "../../components/Avatar.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 export default function Profile() {
-    const [user, setUser] = useState(null);
     const navigate = useNavigate();
-
-    useEffect(() => {
-        getProfile()
-            .then((res) => setUser(res))
-            .catch(() => console.error("Failed to load profile"));
-    }, []);
-
+    const { user } = useAuth();
 
     const handleEditProfile = () => {
         navigate("/user/edit-profile");
     };
 
     const handleChangePassword = () => {
-        console.log("Change password clicked");
-        // Bạn có thể chuyển sang trang đổi mật khẩu hoặc mở modal
         navigate("/user/change-password")
 
     };
-
-    if (!user) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                Loading...
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-gray-50">

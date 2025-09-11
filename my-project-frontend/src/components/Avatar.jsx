@@ -1,24 +1,16 @@
-import { useEffect, useState } from "react"
-
-import { getProfile } from "../api/profileApi.js";
 import { User } from "lucide-react";
 
-export default function Avatar({ size = 40 }) {
-    const [user, setUser] = useState(null)
+import { useAuth } from "../context/AuthContext";
 
-    useEffect(() => {
-        getProfile().then(setUser).catch(() => setUser(null))
-    }, [])
+export default function Avatar({ size = 40 }) {
+    const { user } = useAuth();
 
     if (!user) {
         return (
-            <div
-                className="flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold"
-                style={{ width: size, height: size }}
-            >
+            <div className="flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold" style={{ width: size, height: size }}>
                 <User />
             </div>
-        )
+        );
     }
 
     return user.avatar ? (
@@ -29,15 +21,12 @@ export default function Avatar({ size = 40 }) {
             style={{ width: size, height: size }}
         />
     ) : (
-        <div
-            className="flex items-center justify-center rounded-full bg-black text-white font-semibold"
-            style={{ width: size, height: size }}
-        >
+        <div className="flex items-center justify-center rounded-full bg-black text-white font-semibold" style={{ width: size, height: size }}>
             {user.name
                 .split(" ")
                 .map((n) => n[0])
                 .join("")
                 .toUpperCase()}
         </div>
-    )
+    );
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronLeft, ChevronRight, LayoutDashboard, User, Book, LogOut } from "lucide-react";
 
@@ -11,6 +11,8 @@ export default function UserSidebar({ mobile = false }) {
         { id: "profile", link: "/user/profile", label: "Profile", icon: User },
         { id: "registrations", link: "/user/registration", label: "My Registrations", icon: Book },
     ];
+
+    useEffect(() => window.scrollTo(0, 0), []);
 
     const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 
