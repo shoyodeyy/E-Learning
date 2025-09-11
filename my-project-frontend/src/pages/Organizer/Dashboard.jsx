@@ -1,55 +1,65 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext.jsx";
+import { useEffect, useState } from "react"
+import { Outlet } from "react-router-dom"
+
+import { useAuth } from "../../context/AuthContext.jsx"
+import Header from "../../components/Header.jsx"
+import OrganizerSidebar from "./component/OrganizerSidebar.jsx";
 
 export default function Dashboard() {
-    const navigate = useNavigate();
-    const { user, logout, refreshUser } = useAuth();
+    const { user, refreshUser } = useAuth()
+
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
     useEffect(() => {
-        if (!user) return;
+        const handleResize = () => setWindowWidth(window.innerWidth)
+        window.addEventListener("resize", handleResize)
+        return () => window.removeEventListener("resize", handleResize)
+    }, [])
 
-        if (!user.email_verified_at) {
-            refreshUser();
+    useEffect(() => {
+        if (windowWidth < 768) {
+            setIsSidebarCollapsed(true)
         }
-    }, [user, refreshUser]);
+    }, [windowWidth])
 
-    const handleLogout = () => {
-        logout();
-        navigate("/login");
-    };
+    useEffect(() => {
+        if (!user) return
+        if (!user.email_verified_at) {
+            refreshUser()
+        }
+    }, [user, refreshUser])
 
     if (!user) {
-        return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+        return <div className="min-h-screen flex items-center justify-center">Loading...</div>
     }
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <header className="bg-white shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center py-6">
-                    <h1 className="text-xl font-bold">Organizer Dashboard</h1>
-                    <div className="flex items-center space-x-3">
-                        {user.email_verified_at ? (
-                            <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">✓ Verified</span>
-                        ) : (
-                            <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">⚠ Unverified</span>
-                        )}
-                        <button
-                            onClick={handleLogout}
-                            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                        >
-                            Logout
-                        </button>
+            <Header />
+
+            {windowWidth < 768 ? (
+                <div>
+                    <div className="sticky top-[64px] z-50">
+                        <OrganizerSidebar horizontal={true} isCollapsed={true} />
+                    </div>
+                    <div className="bg-white p-4 shadow mt-2">
+                        <Outlet />
                     </div>
                 </div>
-            </header>
-
-            <main className="max-w-7xl mx-auto p-6">
-                <div className="bg-white rounded-lg shadow p-6">
-                    <h2 className="text-lg font-bold">Instructor Controls</h2>
-                    <p className="mt-2 text-gray-600">Create and manage your courses here.</p>
+            ) : (
+                <div className="flex">
+                    <div className="relative">
+                        <OrganizerSidebar
+                            isCollapsed={isSidebarCollapsed}
+                            setIsCollapsed={setIsSidebarCollapsed}
+                        />
+                    </div>
+                    <div className="flex-1 bg-white pr-6 pb-6 pl-6 shadow transition-all duration-300 ease-in-out overflow-y-auto pt-0">
+                        <Outlet />
+                    </div>
                 </div>
-            </main>
+            )}
         </div>
-    );
+    )
 }

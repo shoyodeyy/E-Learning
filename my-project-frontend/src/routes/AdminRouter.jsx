@@ -6,6 +6,7 @@ import UserList from "../pages/Admin/User/UserList.jsx";
 import ChangePassword from "../pages/ChangePassword.jsx";
 import Overview from "../pages/Admin/Overview.jsx";
 import EventList from "../pages/Admin/Events/EventList.jsx"
+import ApprovalEvent from "../pages/Admin/components/ApprovalEvent.jsx";
 
 export default function AdminRouter() {
     return (
@@ -16,6 +17,8 @@ export default function AdminRouter() {
 
                     {/*Event List*/}
                     <Route path="events" element={<EventList />}/>
+
+                    <Route path="approval" element={<ApprovalEvent />} />
 
                     {/* User */}
                     <Route path="user" element={<UserList />} />
