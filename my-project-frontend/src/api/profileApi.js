@@ -29,7 +29,7 @@ api.interceptors.request.use(
 export async function getProfile() {
     try {
         const res = await api.get("/profile");
-        return res.data.user;
+        return res.data;
     } catch (error) {
         console.error("Failed to fetch profile:", error);
         throw error;
