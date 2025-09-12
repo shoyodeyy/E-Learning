@@ -10,28 +10,31 @@ use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $events = Event::with(['organizer', 'approvedByAdmin'])
-            ->orderBy('start_at', 'desc')
-            ->paginate(6);
+        $query = Event::with(['organizer', 'approvedByAdmin'])
+            ->orderBy('start_at', 'desc');
 
-        return EventResource::collection($events);
-    }
-
-    public function show($id)
-    {
-        $event = Event::with(['organizer', 'approvedByAdmin'])
-            ->where('event_id', $id)
-            ->first();
-
-        if (!$event) {
-            return response()->json([
-                'message' => 'Event not found'
-            ], 404);
+        // Search toàn bộ (title + venue + description)
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('venue', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
         }
 
-        return new EventResource($event);
+        // Filter (ví dụ: status, category)
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        if ($request->has('category') && $request->category !== 'all') {
+            $query->where('category', $request->category);
+        }
+
+        $events = $query->paginate(6);
+
+        return EventResource::collection($events);
     }
 
     public function store(Request $request)
@@ -79,14 +82,14 @@ class EventController extends Controller
     public function update(Request $request, $id)
     {
         $event = Event::findOrFail($id);
-        
+
         // Kiểm tra authentication trước
         if (!auth()->check()) {
             return response()->json([
                 'message' => 'Unauthenticated'
             ], 401);
         }
-        
+
         $user = auth()->user();
 
         // Debug log để xem chi tiết khi lỗi 403
@@ -107,7 +110,7 @@ class EventController extends Controller
         // check role (chỉ admin hoặc chính organizer mới được sửa)
         // Kiểm tra hasRole method có tồn tại không
         $isAdmin = method_exists($user, 'hasRole') ? $user->hasRole('admin') : ($user->role === 'admin');
-        
+
         if (!$isAdmin && $user->user_id !== $event->organizerId) {
             return response()->json([
                 'message' => 'You can only update your own events'
@@ -209,19 +212,19 @@ class EventController extends Controller
     public function destroy(Request $request, $id)
     {
         $event = Event::findOrFail($id);
-        
+
         // Kiểm tra authentication trước
         if (!auth()->check()) {
             return response()->json([
                 'message' => 'Unauthenticated'
             ], 401);
         }
-        
+
         $user = auth()->user();
 
         // check status
         $isAdmin = method_exists($user, 'hasRole') ? $user->hasRole('admin') : ($user->role === 'admin');
-        
+
         if (!$isAdmin && $event->status === 'completed') {
             return response()->json([
                 'message' => 'Completed events cannot be deleted.'
@@ -237,7 +240,7 @@ class EventController extends Controller
                     Storage::disk('public')->delete($filePath);
                 }
             }
-            
+
             $event->delete();
 
             return response()->json([
@@ -259,7 +262,7 @@ class EventController extends Controller
                     Storage::disk('public')->delete($filePath);
                 }
             }
-            
+
             $event->delete();
 
             return response()->json([
