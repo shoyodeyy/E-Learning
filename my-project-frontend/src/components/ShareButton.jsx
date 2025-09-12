@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { FaFacebook, FaWhatsapp, FaLinkedin, FaTwitter, FaEnvelope } from "react-icons/fa";
 import { generateShareLinks } from "./generateShareLinks";
@@ -6,8 +6,27 @@ import { generateShareLinks } from "./generateShareLinks";
 export default function ShareButton({ event, children }) {
   const [open, setOpen] = useState(false);
 
-  // Ưu tiên biến môi trường, fallback domain hiện tại
-  const baseUrl = import.meta.env.VITE_PUBLIC_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+  const baseUrl = useMemo(() => {
+    if (typeof window === 'undefined') return import.meta.env.VITE_PUBLIC_URL || '';
+
+    // Ưu tiên URL public nếu có (prod)
+    if (import.meta.env.VITE_PUBLIC_URL) return String(import.meta.env.VITE_PUBLIC_URL).replace(/\/$/, '');
+
+    const { protocol, hostname, port, origin } = window.location;
+    const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
+
+    // chuyển localhost sang IP mạng cục bộ nếu đang ở môi trường local
+    if (import.meta.env.DEV && isLocalHost) {
+      const devHost = import.meta.env.VITE_DEV_NETWORK_HOST;
+      if (devHost && devHost !== 'localhost') {
+        const p = port ? `:${port}` : '';
+        return `${protocol}//${devHost}${p}`.replace(/\/$/, '');
+      }
+    }
+
+    // Mặc định: giữ nguyên origin hiện tại
+    return origin.replace(/\/$/, '');
+  }, []);
   const links = generateShareLinks(event, baseUrl);
 
   // Map platform -> icon + màu
