@@ -18,7 +18,8 @@ const AdminSidebar = ({
     const menuItems = [
         { to: "dashboard", icon: <LayoutDashboard size={18} />, label: "Dashboard" },
         { to: "events", icon: <Sparkles size={18} />, label: "Events" },
-        { to: "approval", icon: <ListTodo size={18} />, label: "Approvals" },
+        { to: "approval/event", icon: <ListTodo size={18} />, label: "Approvals Event" },
+        { to: "approval/organizer", icon: <ListTodo size={18} />, label: "Approvals Organizer" },
         { to: "user", icon: <User size={18} />, label: "User" },
         { to: "change-password", icon: <KeyRound size={18} />, label: "Change Password" },
     ]

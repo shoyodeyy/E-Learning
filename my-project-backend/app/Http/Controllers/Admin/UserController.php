@@ -31,9 +31,9 @@ class UserController extends Controller
 
         if ($request->filled('status') && $request->status !== 'all') {
             if ($request->status === 'banned') {
-                $query->whereNotNull('banned_until');
+                $query->whereNotNull('ban_until');
             } elseif ($request->status === 'active') {
-                $query->whereNull('banned_until');
+                $query->whereNull('ban_until');
             }
         }
 
@@ -102,5 +102,16 @@ class UserController extends Controller
             'message' => "Organizer status updated to {$request->status}.",
             'user' => $user,
         ]);
+    }
+
+    public function getOrganizers(Request $request)
+    {
+        $status = $request->query('status', 'pending');
+
+        $organizers = User::where('role', 'organizer')
+            ->where('status', $status)
+            ->get();
+
+        return response()->json($organizers);
     }
 }
