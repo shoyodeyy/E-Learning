@@ -183,19 +183,19 @@ export default function UpdateEventForm() {
         }
 
         // Banner Image
-        if (!formData.bannerImage) {
-            newErrors.bannerImage = 'Banner image is required.';
-            isValid = false;
-        } else {
-            const allowedExtensions = ['jpeg', 'png', 'jpg', 'gif', 'svg'];
-            const fileName = formData.bannerImage.name || '';
-            const fileExt = fileName.split('.').pop().toLowerCase();
-
-            if (!allowedExtensions.includes(fileExt)) {
-                newErrors.bannerImage = 'Banner image must be a jpeg, jpg, png, gif, or svg file.';
-                isValid = false;
-            }
-        }
+        // if (!formData.bannerImage) {
+        //     newErrors.bannerImage = 'Banner image is required.';
+        //     isValid = false;
+        // } else {
+        //     const allowedExtensions = ['jpeg', 'png', 'jpg', 'gif', 'svg'];
+        //     const fileName = formData.bannerImage.name || '';
+        //     const fileExt = fileName.split('.').pop().toLowerCase();
+        //
+        //     if (!allowedExtensions.includes(fileExt)) {
+        //         newErrors.bannerImage = 'Banner image must be a jpeg, jpg, png, gif, or svg file.';
+        //         isValid = false;
+        //     }
+        // }
 
         setErrors(newErrors);
         return isValid;
