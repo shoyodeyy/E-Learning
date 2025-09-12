@@ -2,16 +2,16 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Calendar, Clock, MapPin, Users, Share2, Heart, CalendarPlus, User, Star, Send } from "lucide-react";
 import axios from "axios";
-import { apiUrl } from "../services/http.jsx";
+import { format, addMinutes } from "date-fns";
+import { toast } from "react-toastify";
 
+import { apiUrl } from "../services/http.jsx";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext.jsx";
 import Header from "../components/Header";
 import CalendarInegration from "../components/CalendarIntegration";
 import ShareEvent from "../components/ShareButton";
-import { format, addMinutes } from "date-fns";
 import Avatar from "../components/Avatar.jsx";
-
 
 // Mock data for the event detail
 const eventData = {
@@ -42,116 +42,162 @@ const eventData = {
     ],
 };
 
-// Mock feedbacks
-const mockFeedbacks = [
-    {
-        id: 1,
-        user: {
-            name: "Alice Johnson",
-            avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-        },
-        rating: 5,
-        comment: "Amazing event! The workshops were highly informative and engaging.",
-        date: "2024-10-28",
-        helpful: 12,
-    },
-    {
-        id: 2,
-        user: {
-            name: "Mark Thompson",
-            avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-        },
-        rating: 4,
-        comment: "Great networking opportunities, but the schedule felt a bit tight.",
-        date: "2024-10-27",
-        helpful: 8,
-    },
-    {
-        id: 3,
-        user: {
-            name: "Sophie Lee",
-            avatar: "https://randomuser.me/api/portraits/women/65.jpg",
-        },
-        rating: 5,
-        comment: "Loved the keynote on AI trends! Learned a lot about emerging tech.",
-        date: "2024-10-26",
-        helpful: 15,
-    },
-    {
-        id: 4,
-        user: {
-            name: "Daniel Kim",
-            avatar: "https://randomuser.me/api/portraits/men/47.jpg",
-        },
-        rating: 3,
-        comment: "Good content, but the venue was a bit crowded.",
-        date: "2024-10-28",
-        helpful: 4,
-    },
-    {
-        id: 5,
-        user: {
-            name: "Emma Wilson",
-            avatar: "https://randomuser.me/api/portraits/women/12.jpg",
-        },
-        rating: 4,
-        comment: "Workshops were excellent. Would love more hands-on sessions next time.",
-        date: "2024-10-27",
-        helpful: 7,
-    },
-];
+const bannedWords = ["badword1", "badword2", "offensive", "xxx"];
+const containsBannedWords = (text) => {
+    const lowerText = text.toLowerCase();
+    return bannedWords.some((word) => lowerText.includes(word));
+};
 
-const FeedbackSection = () => {
+const FeedbackSection = ({ eventId, userRole, eventStatus }) => {
+    const { user, token } = useAuth();
+    const [feedbacks, setFeedbacks] = useState([]);
     const [rating, setRating] = useState(0);
     const [hoveredRating, setHoveredRating] = useState(0);
     const [comment, setComment] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [showSubmitForm, setShowSubmitForm] = useState(false);
+    const [canSubmit, setCanSubmit] = useState(false);
+    const [feedbackDeadline, setFeedbackDeadline] = useState(null);
+    const [editingFeedback, setEditingFeedback] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [userHasFeedback, setUserHasFeedback] = useState(false);
+
+    useEffect(() => {
+        if (eventStatus === "completed") {
+            fetchFeedbacks();
+        } else {
+            setLoading(false);
+        }
+    }, [eventId, eventStatus]);
+
+    const fetchFeedbacks = async () => {
+        try {
+            const response = await axios.get(`${apiUrl}/events/${eventId}/feedbacks`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            setFeedbacks(response.data.data);
+            setCanSubmit(response.data.can_submit);
+            setFeedbackDeadline(response.data.feedback_deadline);
+
+            // Kiểm tra xem user đã feedback chưa
+            const userFeedback = response.data.data.find((f) => f.user_id === user?.user_id);
+            setUserHasFeedback(!!userFeedback);
+        } catch (error) {
+            console.error("Failed to fetch feedbacks:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleRatingClick = (value) => {
         setRating(value);
     };
 
     const handleSubmit = async () => {
+        if (isDeadlinePassed) {
+            toast.error("Feedback submission period has ended.");
+            return;
+        }
+
         if (rating === 0) {
-            alert("Please select a rating before submitting");
+            toast.warn("Please select a rating before submitting");
+            return;
+        }
+
+        if (containsBannedWords(comment)) {
+            toast.warn("Your comment contains inappropriate words.");
             return;
         }
 
         setIsSubmitting(true);
 
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        try {
+            const response = await axios.post(
+                `${apiUrl}/events/${eventId}/feedbacks`,
+                { rating, comments: comment },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
 
-        setSubmitted(true);
-        setIsSubmitting(false);
+            setSubmitted(true);
+            setFeedbacks((prev) => [response.data.data, ...prev]);
+            setCanSubmit(false);
+            setUserHasFeedback(true);
 
-        // Reset form after 2 seconds and hide form
-        setTimeout(() => {
-            setSubmitted(false);
+            setTimeout(() => {
+                setSubmitted(false);
+                setRating(0);
+                setComment("");
+                setShowSubmitForm(false);
+            }, 2000);
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Failed to submit feedback");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleEdit = async (feedbackId) => {
+        if (isDeadlinePassed) {
+            toast.error("Feedback submission period has ended.");
+            return;
+        }
+
+        if (rating === 0) {
+            toast.warn("Please select a rating before updating");
+            return;
+        }
+
+        if (containsBannedWords(comment)) {
+            toast.error("Your comment contains inappropriate words.");
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            const response = await axios.put(
+                `${apiUrl}/feedbacks/${feedbackId}`,
+                { rating, comments: comment },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            setFeedbacks((prev) => prev.map((f) => (f.feedback_id === feedbackId ? response.data.data : f)));
+
+            setEditingFeedback(null);
             setRating(0);
             setComment("");
             setShowSubmitForm(false);
-        }, 2000);
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Failed to update feedback");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
+    const startEdit = (feedback) => {
+        setEditingFeedback(feedback);
+        setRating(feedback.rating);
+        setComment(feedback.comments || "");
+        setShowSubmitForm(true);
+    };
 
-const renderStars = (rating) => {
-    return (
-        <div className="flex space-x-1">
-            {[1, 2, 3, 4, 5].map((star) => {
-                if (star <= Math.floor(rating)) {
-                    return <FaStar key={star} className="w-4 h-4 text-yellow-400" />;
-                } else if (star === Math.ceil(rating) && !Number.isInteger(rating)) {
-                    return <FaStarHalfAlt key={star} className="w-4 h-4 text-yellow-400" />;
-                } else {
-                    return <FaRegStar key={star} className="w-4 h-4 text-gray-300" />;
-                }
-            })}
-        </div>
-    );
-};
+    const renderStars = (rating) => {
+        return (
+            <div className="flex space-x-1">
+                {[1, 2, 3, 4, 5].map((star) => {
+                    if (star <= Math.floor(rating)) {
+                        return <FaStar key={star} className="w-4 h-4 text-yellow-400" />;
+                    } else if (star === Math.ceil(rating) && !Number.isInteger(rating)) {
+                        return <FaStarHalfAlt key={star} className="w-4 h-4 text-yellow-400" />;
+                    } else {
+                        return <FaRegStar key={star} className="w-4 h-4 text-gray-300" />;
+                    }
+                })}
+            </div>
+        );
+    };
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString("en-US", {
@@ -161,6 +207,27 @@ const renderStars = (rating) => {
         });
     };
 
+    if (eventStatus !== "completed") {
+        return (
+            <div className="text-center py-12">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">⏳</span>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Feedback Not Available</h2>
+                <p className="text-gray-600">Feedback will be available after the event is completed.</p>
+            </div>
+        );
+    }
+
+    if (loading) {
+        return (
+            <div className="text-center py-12">
+                <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading feedback...</p>
+            </div>
+        );
+    }
+
     if (submitted) {
         return (
             <div className="text-center py-12">
@@ -168,20 +235,27 @@ const renderStars = (rating) => {
                     <span className="text-2xl">✅</span>
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Thank You!</h2>
-                <p className="text-gray-600">Your feedback has been submitted successfully.</p>
+                <p className="text-gray-600">Your feedback has been {editingFeedback ? "updated" : "submitted"} successfully.</p>
             </div>
         );
     }
 
+    const isDeadlinePassed = feedbackDeadline && new Date() > new Date(feedbackDeadline);
+
     return (
         <div className="space-y-8">
-            {/* Header with Submit Button */}
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Event Feedback</h1>
-                    <p className="text-gray-600">See what others think about this event</p>
+                    <p className="text-gray-600">Reviews from {userRole === "organizer" ? "organizers" : "participants"}</p>
+                    {feedbackDeadline && !userHasFeedback && !editingFeedback && (
+                        <p className="text-sm text-gray-500 mt-1">
+                            Feedback deadline: {formatDate(feedbackDeadline)}
+                            {isDeadlinePassed && <span className="text-red-500 ml-2">(Expired)</span>}
+                        </p>
+                    )}
                 </div>
-                {!showSubmitForm && (
+                {canSubmit && !showSubmitForm && !isDeadlinePassed && !userHasFeedback && (
                     <button
                         onClick={() => setShowSubmitForm(true)}
                         className="cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center space-x-2"
@@ -190,14 +264,27 @@ const renderStars = (rating) => {
                         <span>Write Review</span>
                     </button>
                 )}
+                {userHasFeedback &&
+                    !showSubmitForm &&
+                    !isDeadlinePassed &&
+                    (() => {
+                        const userFeedback = feedbacks.find((f) => f.user_id === user?.user_id);
+                        return userFeedback && !userFeedback.edited ? (
+                            <button
+                                onClick={() => startEdit(userFeedback)}
+                                className="cursor-pointer bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center space-x-2"
+                            >
+                                <Send className="w-4 h-4" />
+                                <span>Edit Review</span>
+                            </button>
+                        ) : null;
+                    })()}
             </div>
 
-            {/* Submit Form (when toggled) */}
             {showSubmitForm && (
                 <div className="bg-gray-50 rounded-xl p-6 border-2 border-dashed border-gray-300">
-                    <h2 className="text-xl font-bold text-gray-900 mb-6">Submit Your Feedback</h2>
+                    <h2 className="text-xl font-bold text-gray-900 mb-6">{editingFeedback ? "Edit Your Feedback" : "Submit Your Feedback"}</h2>
 
-                    {/* Rating Section */}
                     <div className="mb-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-3">Your Rating</h3>
                         <div className="flex space-x-2">
@@ -221,7 +308,6 @@ const renderStars = (rating) => {
                         {rating > 0 && <p className="text-sm text-gray-600 mt-2">You rated: {rating} out of 5 stars</p>}
                     </div>
 
-                    {/* Comments Section */}
                     <div className="mb-6">
                         <h3 className="text-lg font-semibold text-gray-900 mb-3">Comments</h3>
                         <textarea
@@ -229,16 +315,15 @@ const renderStars = (rating) => {
                             onChange={(e) => setComment(e.target.value)}
                             placeholder="Share your thoughts on the event..."
                             rows={4}
-                            maxLength={500}
+                            maxLength={1000}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-gray-700 placeholder-gray-400"
                         />
-                        <p className="text-sm text-gray-500 mt-2">{comment.length}/500 characters</p>
+                        <p className="text-sm text-gray-500 mt-2">{comment.length}/1000 characters</p>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex space-x-3">
+                    <div className="flex space-x-3 gap-2">
                         <button
-                            onClick={handleSubmit}
+                            onClick={editingFeedback ? () => handleEdit(editingFeedback.feedback_id) : handleSubmit}
                             disabled={isSubmitting || rating === 0}
                             className={`cursor-pointer px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200 flex items-center space-x-2 ${
                                 isSubmitting || rating === 0
@@ -249,12 +334,12 @@ const renderStars = (rating) => {
                             {isSubmitting ? (
                                 <>
                                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                    <span>Submitting...</span>
+                                    <span>{editingFeedback ? "Updating..." : "Submitting..."}</span>
                                 </>
                             ) : (
                                 <>
                                     <Send className="w-4 h-4" />
-                                    <span>Submit Feedback</span>
+                                    <span>{editingFeedback ? "Update Feedback" : "Submit Feedback"}</span>
                                 </>
                             )}
                         </button>
@@ -262,6 +347,7 @@ const renderStars = (rating) => {
                         <button
                             onClick={() => {
                                 setShowSubmitForm(false);
+                                setEditingFeedback(null);
                                 setRating(0);
                                 setComment("");
                             }}
@@ -273,66 +359,79 @@ const renderStars = (rating) => {
                 </div>
             )}
 
-            {/* Feedback Statistics */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="text-center">
-                        <div className="text-3xl font-bold text-gray-900">4.5</div>
-                        <div className="flex justify-center mb-2">{renderStars(4.5)}</div>
-                        <div className="text-sm text-gray-600">Average Rating</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="text-3xl font-bold text-gray-900">{mockFeedbacks.length}</div>
-                        <div className="text-sm text-gray-600">Total Reviews</div>
-                    </div>
-                    <div className="text-center">
-                        <div className="text-3xl font-bold text-gray-900">94%</div>
-                        <div className="text-sm text-gray-600">Recommended</div>
+            {feedbacks.length > 0 && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="text-center">
+                            <div className="text-3xl font-bold text-gray-900">
+                                {(feedbacks.reduce((sum, f) => sum + parseFloat(f.rating), 0) / feedbacks.length).toFixed(1)}
+                            </div>
+                            <div className="flex justify-center mb-2">
+                                {renderStars(feedbacks.reduce((sum, f) => sum + parseFloat(f.rating), 0) / feedbacks.length)}
+                            </div>
+                            <div className="text-sm text-gray-600">Average Rating</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-3xl font-bold text-gray-900">{feedbacks.length}</div>
+                            <div className="text-sm text-gray-600">Total Reviews</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-3xl font-bold text-gray-900">
+                                {feedbacks.length > 0 ? Math.round((feedbacks.filter((f) => f.rating >= 4).length / feedbacks.length) * 100) : 0}%
+                            </div>
+                            <div className="text-sm text-gray-600">Recommended</div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
-            {/* Feedback List */}
             <div className="space-y-6">
-                <h2 className="text-xl font-bold text-gray-900">Reviews ({mockFeedbacks.length})</h2>
+                <h2 className="text-xl font-bold text-gray-900">Reviews ({feedbacks.length})</h2>
 
-                {mockFeedbacks.map((feedback) => (
-                    <div key={feedback.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                        {/* User Info */}
-                        <div className="flex items-start space-x-4">
-                            <img src={feedback.user.avatar} alt={feedback.user.name} className="w-12 h-12 rounded-full object-cover" />
-                            <div className="flex-1">
-                                <div className="flex items-center justify-between mb-2">
-                                    <div>
-                                        <h4 className="font-semibold text-gray-900">{feedback.user.name}</h4>
-                                        <div className="flex items-center space-x-2 mt-1">
-                                            {renderStars(feedback.rating)}
-                                            <span className="text-sm text-gray-500">• {formatDate(feedback.date)}</span>
+                {feedbacks.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">No reviews yet. Be the first to share your experience!</div>
+                ) : (
+                    feedbacks.map((feedback) => (
+                        <div
+                            key={feedback.feedback_id}
+                            className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+                        >
+                            <div className="flex items-start space-x-4">
+                                <img
+                                    src={feedback.user.avatar || "https://ui-avatars.com/api/?name=" + feedback.user.name}
+                                    alt={feedback.user.name}
+                                    className="w-12 h-12 rounded-full object-cover"
+                                />
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div>
+                                            <div className="flex items-center space-x-2">
+                                                <h4 className="font-semibold text-gray-900">{feedback.user.name}</h4>
+                                                {feedback.edited && (
+                                                    <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Updated</span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center space-x-2 mt-1">
+                                                {renderStars(feedback.rating)}
+                                                <span className="text-sm text-gray-500">• {formatDate(feedback.submitted_on)}</span>
+                                            </div>
                                         </div>
+                                        {user && feedback.user_id === user.user_id && !feedback.edited && !isDeadlinePassed && (
+                                            <button
+                                                onClick={() => startEdit(feedback)}
+                                                className="cursor-pointer text-sm text-purple-600 hover:text-purple-800 px-3 py-1 rounded hover:bg-purple-50 transition-colors"
+                                            >
+                                                Edit
+                                            </button>
+                                        )}
                                     </div>
-                                </div>
 
-                                {/* Comment */}
-                                <p className="text-gray-700 leading-relaxed mb-3">{feedback.comment}</p>
-
-                                {/* Helpful Button */}
-                                <div className="flex items-center space-x-4">
-                                    <button className="cursor-pointer flex items-center space-x-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
-                                        <span>👍</span>
-                                        <span>Helpful ({feedback.helpful})</span>
-                                    </button>
+                                    {feedback.comments && <p className="text-gray-700 leading-relaxed mb-3">{feedback.comments}</p>}
                                 </div>
                             </div>
                         </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Load More Button */}
-            <div className="text-center">
-                <button className="cursor-pointer px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                    Load More Reviews
-                </button>
+                    ))
+                )}
             </div>
         </div>
     );
@@ -341,18 +440,16 @@ const renderStars = (rating) => {
 const EventDetailPage = () => {
     const { id } = useParams();
     const { user, token } = useAuth();
-    const eventId = Number(id) || events.eventId;
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("overview");
     const [isFavorited, setIsFavorited] = useState(false);
-
-    const [ events, setEvents ] = useState([]);
-    const [ loading, setLoading ] = useState(true);
 
     useEffect(() => {
         const fetchEvent = async () => {
             try {
                 const res = await axios.get(`${apiUrl}/events/${id}`, {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
                 });
 
                 setEvents(res.data.data);
@@ -364,13 +461,13 @@ const EventDetailPage = () => {
         };
 
         fetchEvent();
-        window.scrollTo({ top: 0, behavior: "smooth"});
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }, [id, token]);
 
     if (loading) {
         return <p className="p-6 text-gray-600">Loading event details...</p>;
     }
-    if (!event) {
+    if (!events) {
         return <p className="p-6 text-red-500">Event not found.</p>;
     }
 
@@ -378,15 +475,14 @@ const EventDetailPage = () => {
         try {
             return format(new Date(dateString), "MMMM dd, yyyy");
         } catch (error) {
-            return dateString; // fallback nếu có lỗi
+            return dateString;
         }
     };
 
-    // Lấy thời gian kết thúc dựa vào start_at + duration_minutes
     const formatTimeRange = (start_at, duration_minutes) => {
         try {
             const start = new Date(start_at);
-            const end = addMinutes(start, duration_minutes); // cộng phút vào
+            const end = addMinutes(start, duration_minutes);
             return `${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
         } catch (error) {
             return start_at;
@@ -478,28 +574,26 @@ const EventDetailPage = () => {
                                 <div className="flex items-center space-x-4">
                                     <Avatar size={40} />
                                     <div>
-                                        <h3 className="font-bold text-gray-900">{user.name}</h3>
-                                        <p className="text-gray-600">{user.profile}</p>
+                                        <h3 className="font-bold text-gray-900">{user?.name}</h3>
+                                        <p className="text-gray-600">{user?.profile}</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Category Tags */}
                             <div className="flex flex-wrap gap-3">
-                                <span
-                                    className="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"
-                                >
+                                <span className="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
                                     {events.category}
                                 </span>
                             </div>
 
                             {/* Action Buttons */}
                             <div className="flex flex-wrap gap-4">
-                                <ShareEvent event={{ id: eventId, title: eventData.title, date: eventData.date, venue: eventData.location }}>
-                                <button className="cursor-pointer flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-lg border border-gray-200 transition-all duration-200">
-                                    <Share2 className="w-5 h-5" />
-                                    <span>Share Event</span>
-                                </button>
+                                <ShareEvent event={{ id: id, title: eventData.title, date: eventData.date, venue: eventData.location }}>
+                                    <button className="cursor-pointer flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-lg border border-gray-200 transition-all duration-200">
+                                        <Share2 className="w-5 h-5" />
+                                        <span>Share Event</span>
+                                    </button>
                                 </ShareEvent>
 
                                 <button
@@ -514,13 +608,13 @@ const EventDetailPage = () => {
                                     <span>{isFavorited ? "Favorited" : "Add to Favorites"}</span>
                                 </button>
                                 {/* Calendar button (inline, always visible) */}
-                                <CalendarInegration eventId={eventId} variant="inline" />
+                                <CalendarInegration eventId={id} variant="inline" />
                             </div>
 
                             {/* Navigation Tabs */}
                             <div className="bg-white rounded-xl shadow-lg border border-gray-100">
                                 <div className="border-b border-gray-200">
-                                    <nav className="flex space-x-8 px-6">
+                                    <nav className="flex space-x-8 px-6 gap-4">
                                         {tabs.map((tab) => (
                                             <button
                                                 key={tab.id}
@@ -569,7 +663,13 @@ const EventDetailPage = () => {
                                         </div>
                                     )}
 
-                                    {activeTab === "feedback" && <FeedbackSection />}
+                                    {activeTab === "feedback" && (
+                                        <FeedbackSection
+                                            eventId={events.eventId}
+                                            userRole={user?.role || "participant"}
+                                            eventStatus={events.status}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </div>

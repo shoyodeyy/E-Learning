@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom"
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { apiUrl } from "../services/http.jsx";
 
@@ -11,10 +11,7 @@ async function fetchFeaturedEvents() {
     try {
         const res = await axios.get(`${apiUrl}/events/quantity/6`);
 
-        const filteredFeaturedEvents = (res.data.data || []).filter(event => [
-                "approved",
-            ].includes(event.status)
-        );
+        const filteredFeaturedEvents = (res.data.data || []).filter((event) => ["approved"].includes(event.status));
 
         return filteredFeaturedEvents || [];
     } catch (error) {
@@ -130,18 +127,6 @@ const EventCard = ({ event }) => {
         }
     };
 
-    // const getStatusColor = (status, seats) => {
-    //     if (seats <= 20) return "bg-gradient-to-r from-red-500 to-pink-500";
-    //     if (seats <= 75) return "bg-gradient-to-r from-yellow-500 to-orange-500";
-    //     return "bg-gradient-to-r from-green-500 to-emerald-500";
-    // };
-    //
-    // const getStatusText = (seats) => {
-    //     if (seats <= 20) return `${seats} Left`;
-    //     if (seats <= 75) return `${seats} Left`;
-    //     return `${seats} Available`;
-    // };
-
     const getAvailabilityColor = (available, total) => {
         const ratio = available / total;
         if (ratio <= 0.1) return "bg-red-500";
@@ -190,9 +175,7 @@ const EventCard = ({ event }) => {
                         <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
                             <span className="text-purple-600 text-xs">🕒</span>
                         </div>
-                        <span className="font-medium text-gray-700">
-                            {formatTimeRange(event.start_at, event.duration_minutes)}
-                        </span>
+                        <span className="font-medium text-gray-700">{formatTimeRange(event.start_at, event.duration_minutes)}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                         <div className="w-5 h-5 bg-pink-100 rounded-full flex items-center justify-center">
@@ -202,10 +185,7 @@ const EventCard = ({ event }) => {
                     </div>
                 </div>
 
-                <Link
-                    to={`/event/${event.eventId}`}
-                    onClick={() => window.screenTop(0, 0)}
-                    className="flex justify-center w-full btn-gradient">
+                <Link to={`/event/${event.eventId}`} onClick={() => window.screenTop(0, 0)} className="flex justify-center w-full btn-gradient">
                     View Details
                 </Link>
             </div>
@@ -233,10 +213,8 @@ const FeaturedEvents = ({ events }) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {events.map((event, index) => (
-                        <div key={event.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
-                            <EventCard
-                                key={event.eventId}
-                                event={event} />
+                        <div key={event.eventId} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+                            <EventCard key={event.eventId} event={event} />
                         </div>
                     ))}
                 </div>
@@ -250,7 +228,6 @@ const FeaturedEvents = ({ events }) => {
         </section>
     );
 };
-
 
 // Main Dashboard Component
 export default function Home() {
