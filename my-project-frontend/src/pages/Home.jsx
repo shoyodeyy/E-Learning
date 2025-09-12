@@ -1,66 +1,27 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link } from "react-router-dom"
+import axios from "axios";
+import { apiUrl } from "../services/http.jsx";
 
 import Header from "../components/Header";
+import { addMinutes, format } from "date-fns";
 
-// Mock data for events
-const mockEvents = [
-    {
-        id: 1,
-        title: "Tech Innovation Summit 2024",
-        date: "October 26, 2024",
-        location: "Virtual & San Francisco",
-        availableSeats: 150,
-        status: "Available",
-        image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop",
-    },
-    {
-        id: 2,
-        title: "Global Marketing Conference",
-        date: "November 10, 2024",
-        location: "New York City",
-        availableSeats: 75,
-        status: "Left",
-        image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&h=250&fit=crop",
-    },
-    {
-        id: 3,
-        title: "Future of AI in Healthcare",
-        date: "December 5, 2024",
-        location: "Boston Convention Center",
-        availableSeats: 20,
-        status: "Left",
-        image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&h=250&fit=crop",
-    },
-    {
-        id: 4,
-        title: "Creative Design Workshop",
-        date: "January 15, 2025",
-        location: "Los Angeles",
-        availableSeats: 30,
-        status: "Available",
-        image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=250&fit=crop",
-    },
-    {
-        id: 5,
-        title: "Startup Pitch Competition",
-        date: "February 20, 2025",
-        location: "Austin Convention Center",
-        availableSeats: 100,
-        status: "Available",
-        image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=400&h=250&fit=crop",
-    },
-    {
-        id: 6,
-        title: "Environmental Sustainability Summit",
-        date: "March 10, 2025",
-        location: "Seattle",
-        availableSeats: 80,
-        status: "Available",
-        image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=250&fit=crop",
-    },
-];
+async function fetchFeaturedEvents() {
+    try {
+        const res = await axios.get(`${apiUrl}/events/quantity/6`);
+
+        const filteredFeaturedEvents = (res.data.data || []).filter(event => [
+                "approved",
+            ].includes(event.status)
+        );
+
+        return filteredFeaturedEvents || [];
+    } catch (error) {
+        console.error("Failed to fetch featured events:", error);
+        return [];
+    }
+}
 
 function RandomBlob({ className, color }) {
     const [target, setTarget] = useState({ x: 0, y: 0 });
@@ -150,35 +111,65 @@ const HeroSection = () => {
 
 // Event Card Component
 const EventCard = ({ event }) => {
-    const getStatusColor = (status, seats) => {
-        if (seats <= 20) return "bg-gradient-to-r from-red-500 to-pink-500";
-        if (seats <= 75) return "bg-gradient-to-r from-yellow-500 to-orange-500";
-        return "bg-gradient-to-r from-green-500 to-emerald-500";
+    const formatDate = (dateString) => {
+        try {
+            return format(new Date(dateString), "MMMM dd, yyyy");
+        } catch (error) {
+            return dateString; // fallback nếu có lỗi
+        }
     };
 
-    const getStatusText = (seats) => {
-        if (seats <= 20) return `${seats} Left`;
-        if (seats <= 75) return `${seats} Left`;
-        return `${seats} Available`;
+    // Lấy thời gian kết thúc dựa vào start_at + duration_minutes
+    const formatTimeRange = (start_at, duration_minutes) => {
+        try {
+            const start = new Date(start_at);
+            const end = addMinutes(start, duration_minutes); // cộng phút vào
+            return `${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
+        } catch (error) {
+            return start_at;
+        }
+    };
+
+    // const getStatusColor = (status, seats) => {
+    //     if (seats <= 20) return "bg-gradient-to-r from-red-500 to-pink-500";
+    //     if (seats <= 75) return "bg-gradient-to-r from-yellow-500 to-orange-500";
+    //     return "bg-gradient-to-r from-green-500 to-emerald-500";
+    // };
+    //
+    // const getStatusText = (seats) => {
+    //     if (seats <= 20) return `${seats} Left`;
+    //     if (seats <= 75) return `${seats} Left`;
+    //     return `${seats} Available`;
+    // };
+
+    const getAvailabilityColor = (available, total) => {
+        const ratio = available / total;
+        if (ratio <= 0.1) return "bg-red-500";
+        if (ratio <= 0.3) return "bg-yellow-500";
+        return "bg-green-500";
+    };
+
+    const getAvailabilityText = (available, total) => {
+        return `${available} / ${total} Slots Available`;
     };
 
     return (
         <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 min-h-[450px] flex-col justify-between">
             <div className="relative overflow-hidden">
                 <img
-                    src={event.image || "/placeholder.svg"}
+                    src={event.bannerImage ? `http://localhost:8000${event.bannerImage}` : "/placeholder.svg"}
                     alt={event.title}
                     className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute top-4 right-4">
                     <div
-                        className={`px-3 py-1.5 rounded-full text-white text-sm font-semibold shadow-lg ${getStatusColor(
-                            event.status,
-                            event.availableSeats
+                        className={`px-3 py-1.5 rounded-full text-white text-sm font-semibold shadow-lg ${getAvailabilityColor(
+                            event.availableSlots,
+                            event.totalSlots
                         )}`}
                     >
-                        {getStatusText(event.availableSeats)}
+                        {getAvailabilityText(event.maxParticipants, event.maxParticipants)}
                     </div>
                 </div>
             </div>
@@ -193,17 +184,28 @@ const EventCard = ({ event }) => {
                         <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
                             <span className="text-purple-600 text-xs">📅</span>
                         </div>
-                        <span className="font-medium text-gray-700">{event.date}</span>
+                        <span className="font-medium text-gray-700">{formatDate(event.start_at)}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
+                            <span className="text-purple-600 text-xs">🕒</span>
+                        </div>
+                        <span className="font-medium text-gray-700">
+                            {formatTimeRange(event.start_at, event.duration_minutes)}
+                        </span>
                     </div>
                     <div className="flex items-center space-x-2">
                         <div className="w-5 h-5 bg-pink-100 rounded-full flex items-center justify-center">
                             <span className="text-pink-600 text-xs">📍</span>
                         </div>
-                        <span className="font-medium text-gray-700">{event.location}</span>
+                        <span className="font-medium text-gray-700">{event.venue}</span>
                     </div>
                 </div>
 
-                <Link to={`/event/${event.id}`} onClick={() => window.screenTop(0, 0)} className="flex justify-center w-full btn-gradient">
+                <Link
+                    to={`/event/${event.eventId}`}
+                    onClick={() => window.screenTop(0, 0)}
+                    className="flex justify-center w-full btn-gradient">
                     View Details
                 </Link>
             </div>
@@ -232,7 +234,9 @@ const FeaturedEvents = ({ events }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {events.map((event, index) => (
                         <div key={event.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
-                            <EventCard event={event} />
+                            <EventCard
+                                key={event.eventId}
+                                event={event} />
                         </div>
                     ))}
                 </div>
@@ -247,11 +251,28 @@ const FeaturedEvents = ({ events }) => {
     );
 };
 
+
 // Main Dashboard Component
 export default function Home() {
     const [showMessage, setShowMessage] = useState(false);
     const [messageContent, setMessageContent] = useState("");
     const [messageType, setMessageType] = useState("success");
+
+    const [featuredEvents, setFeaturedEvents] = useState([]);
+    const [loadingFeatured, setLoadingFeatured] = useState(true);
+
+    useEffect(() => {
+        const getEvents = async () => {
+            setLoadingFeatured(true);
+
+            const events = await fetchFeaturedEvents();
+
+            setFeaturedEvents(events);
+            setLoadingFeatured(false);
+        };
+
+        getEvents();
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -281,7 +302,7 @@ export default function Home() {
                 {/* Main Content */}
                 <main>
                     <HeroSection />
-                    <FeaturedEvents events={mockEvents} />
+                    <FeaturedEvents events={featuredEvents} />
                 </main>
             </div>
         </div>

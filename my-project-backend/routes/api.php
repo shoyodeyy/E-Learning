@@ -24,6 +24,7 @@ Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 //Route::apiResource('/events', EventController::class);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
+Route::get('/events/quantity/{quantity}', [EventController::class, 'showWithQuantity']);
 
 // Password reset routes
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
@@ -84,9 +85,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // Feedback
-        Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);
-        Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
-        Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
+    Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);
+    Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
+    Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
 });
 
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);

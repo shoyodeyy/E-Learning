@@ -1,11 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Calendar, Clock, MapPin, Users, Share2, Heart, CalendarPlus, User, Star, Send } from "lucide-react";
-import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
+import axios from "axios";
+import { apiUrl } from "../services/http.jsx";
 
+import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext.jsx";
 import Header from "../components/Header";
 import CalendarInegration from "../components/CalendarIntegration";
 import ShareEvent from "../components/ShareButton";
+import { format, addMinutes } from "date-fns";
+import Avatar from "../components/Avatar.jsx";
+
 
 // Mock data for the event detail
 const eventData = {
@@ -334,9 +340,58 @@ const renderStars = (rating) => {
 
 const EventDetailPage = () => {
     const { id } = useParams();
-    const eventId = Number(id) || eventData.id;
+    const { user, token } = useAuth();
+    const eventId = Number(id) || events.eventId;
     const [activeTab, setActiveTab] = useState("overview");
     const [isFavorited, setIsFavorited] = useState(false);
+
+    const [ events, setEvents ] = useState([]);
+    const [ loading, setLoading ] = useState(true);
+
+    useEffect(() => {
+        const fetchEvent = async () => {
+            try {
+                const res = await axios.get(`${apiUrl}/events/${id}`, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                });
+
+                setEvents(res.data.data);
+            } catch (error) {
+                console.error("Failed to fetch event: ", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchEvent();
+        window.scrollTo({ top: 0, behavior: "smooth"});
+    }, [id, token]);
+
+    if (loading) {
+        return <p className="p-6 text-gray-600">Loading event details...</p>;
+    }
+    if (!event) {
+        return <p className="p-6 text-red-500">Event not found.</p>;
+    }
+
+    const formatDate = (dateString) => {
+        try {
+            return format(new Date(dateString), "MMMM dd, yyyy");
+        } catch (error) {
+            return dateString; // fallback nếu có lỗi
+        }
+    };
+
+    // Lấy thời gian kết thúc dựa vào start_at + duration_minutes
+    const formatTimeRange = (start_at, duration_minutes) => {
+        try {
+            const start = new Date(start_at);
+            const end = addMinutes(start, duration_minutes); // cộng phút vào
+            return `${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
+        } catch (error) {
+            return start_at;
+        }
+    };
 
     const getAvailabilityColor = (available, total) => {
         const ratio = available / total;
@@ -358,14 +413,18 @@ const EventDetailPage = () => {
                 {/* Hero Section */}
                 <div className="relative">
                     <div className="h-96 overflow-hidden">
-                        <img src={eventData.image} alt={eventData.title} className="w-full h-full object-cover" />
+                        <img
+                            src={events.bannerImage ? `http://localhost:8000${events.bannerImage}` : "/placeholder.svg"}
+                            alt={events.title}
+                            className="w-full h-full object-cover"
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                     </div>
 
                     {/* Event Title Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 p-8">
                         <div className="max-w-7xl mx-auto">
-                            <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg">{eventData.title}</h1>
+                            <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-lg">{events.title}</h1>
                         </div>
                     </div>
                 </div>
@@ -384,7 +443,7 @@ const EventDetailPage = () => {
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500">Date</p>
-                                            <p className="font-semibold text-gray-900">{eventData.date}</p>
+                                            <p className="font-semibold text-gray-900">{formatDate(events.start_at)}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -396,7 +455,7 @@ const EventDetailPage = () => {
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500">Time</p>
-                                            <p className="font-semibold text-gray-900">{eventData.time}</p>
+                                            <p className="font-semibold text-gray-900">{formatTimeRange(events.start_at, events.duration_minutes)}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -408,7 +467,7 @@ const EventDetailPage = () => {
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500">Location</p>
-                                            <p className="font-semibold text-gray-900">{eventData.location}</p>
+                                            <p className="font-semibold text-gray-900">{events.venue}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -417,28 +476,21 @@ const EventDetailPage = () => {
                             {/* Organizer Info */}
                             <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
                                 <div className="flex items-center space-x-4">
-                                    <img
-                                        src={eventData.organizer.avatar}
-                                        alt={eventData.organizer.name}
-                                        className="w-12 h-12 rounded-full object-cover"
-                                    />
+                                    <Avatar size={40} />
                                     <div>
-                                        <h3 className="font-bold text-gray-900">{eventData.organizer.name}</h3>
-                                        <p className="text-gray-600">{eventData.organizer.tagline}</p>
+                                        <h3 className="font-bold text-gray-900">{user.name}</h3>
+                                        <p className="text-gray-600">{user.profile}</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Category Tags */}
                             <div className="flex flex-wrap gap-3">
-                                {eventData.categories.map((category, index) => (
-                                    <span
-                                        key={index}
-                                        className="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"
-                                    >
-                                        {category}
-                                    </span>
-                                ))}
+                                <span
+                                    className="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"
+                                >
+                                    {events.category}
+                                </span>
                             </div>
 
                             {/* Action Buttons */}
