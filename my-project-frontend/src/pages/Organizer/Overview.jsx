@@ -1,335 +1,264 @@
-import { useState, useEffect } from "react"
-import {
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    Legend,
-    ResponsiveContainer,
-    BarChart,
-    Bar,
-    PieChart,
-    Pie,
-    Cell,
-} from "recharts"
-import { Users, TrendingUp, TrendingDown, Calendar, Mail, UserCheck, UserX, Shield } from "lucide-react"
+import { useState } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
 
-import api from "../../api/axios.js"
+// Sample data for charts
+const userRegistrationData = [
+    { date: "Aug 12", desktop: 300, mobile: 200 },
+    { date: "Aug 18", desktop: 450, mobile: 350 },
+    { date: "Aug 23", desktop: 320, mobile: 280 },
+    { date: "Aug 24", desktop: 380, mobile: 400 },
+    { date: "Sep 7", desktop: 500, mobile: 450 },
+    { date: "Sep 8", desktop: 420, mobile: 380 },
+    { date: "Sep 9", desktop: 480, mobile: 420 },
+];
 
-const Overview = () => {
-    const [users, setUsers] = useState([])
-    const [stats, setStats] = useState([])
-    const [overview, setOverview] = useState({})
-    const [timeFilter, setTimeFilter] = useState("day")
-    const [loading, setLoading] = useState(true)
+const eventComparisonData = [
+    { month: "April 2023", online: 14, offline: 21, hybrid: 18 },
+    { month: "May 2023", online: 18, offline: 25, hybrid: 22 },
+    { month: "June 2023", online: 22, offline: 28, hybrid: 26 },
+];
 
-    useEffect(() => {
-        const fetchAnalytics = async () => {
-            try {
-                const [statsRes, overviewRes] = await Promise.all([
-                    api.get(`/analytics/users/stats?period=${timeFilter}`),
-                    api.get("/analytics/users/overview"),
-                ])
+const recentEvents = [
+    {
+        id: 1,
+        title: 'Rock Concert "The World That Never Sleeps"',
+        date: "Aug 25, 2024",
+        status: "active",
+    },
+    {
+        id: 2,
+        title: "Hanoi International Marathon",
+        date: "Sep 1, 2024",
+        status: "active",
+    },
+    {
+        id: 3,
+        title: "AI Technology Conference 2024",
+        date: "Sep 5, 2024",
+        status: "inactive",
+    },
+    {
+        id: 4,
+        title: "Street Art Workshop",
+        date: "Sep 12, 2024",
+        status: "active",
+    },
+    {
+        id: 5,
+        title: "Autumn Food Festival",
+        date: "Sep 18, 2024",
+        status: "active",
+    },
+];
 
-                const statsData = statsRes.data
-                const overviewData = overviewRes.data
-
-                setStats(statsData.stats || [])
-                setOverview(overviewData.overview || {})
-                setUsers(overviewData.users || [])
-                setLoading(false)
-            } catch (error) {
-                console.error("Error fetching analytics:", error)
-                setLoading(false)
-            }
-        }
-
-        fetchAnalytics()
-    }, [timeFilter])
-
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center px-4">
-                <p className="text-gray-600 text-center">Loading data...</p>
-            </div>
-        )
-    }
-
-    // Calculate growth rate
-    const calculateGrowthRate = (current, previous) => {
-        if (previous === 0) return current > 0 ? 100 : 0
-        return (((current - previous) / previous) * 100).toFixed(1)
-    }
-
-    const currentPeriodUsers = stats[stats.length - 1]?.newUsers || 0
-    const previousPeriodUsers = stats[stats.length - 2]?.newUsers || 0
-    const growthRate = calculateGrowthRate(currentPeriodUsers, previousPeriodUsers)
-
-    // Overview statistics
-    const totalUsers = overview.totalUsers || 0
-    const verifiedUsers = overview.verifiedUsers || 0
-    const bannedUsers = overview.bannedUsers || 0
-    const googleUsers = overview.googleUsers || 0
-
-    // Pie chart data (role distribution)
-    const roleStats = overview.roleStats || {}
-    const pieData = Object.entries(roleStats).map(([role, count]) => ({
-        name: role.charAt(0).toUpperCase() + role.slice(1),
-        value: count,
-        percentage: totalUsers > 0 ? ((count / totalUsers) * 100).toFixed(1) : 0,
-    }))
-
-    const COLORS = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444"]
-
-    const StatCard = ({ title, value, change, icon: Icon, trend }) => (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+// Stats Card Component
+const StatsCard = ({ title, value, subtitle, icon, color }) => {
+    return (
+        <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 border border-gray-100">
             <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">{title}</p>
-                    <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">
-                        {value.toLocaleString()}
-                    </p>
-                    {change !== undefined && (
-                        <div
-                            className={`flex items-center mt-1 sm:mt-2 text-xs sm:text-sm ${
-                                trend === "up" ? "text-green-600" : trend === "down" ? "text-red-600" : "text-gray-600"
-                            }`}
-                        >
-                            {trend === "up" ? (
-                                <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" />
-                            ) : trend === "down" ? (
-                                <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" />
-                            ) : null}
-                            <span className="truncate">{Math.abs(change)}% vs previous</span>
-                        </div>
-                    )}
+                <div>
+                    <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
+                    <p className="text-3xl font-bold text-gray-900 mb-2">{value}</p>
+                    <p className="text-sm text-gray-500">{subtitle}</p>
                 </div>
-                <div className="p-2 sm:p-3 bg-blue-50 rounded-lg ml-3 flex-shrink-0">
-                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-blue-600" />
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${color}`}>
+                    <span className="text-white text-xl">{icon}</span>
                 </div>
             </div>
         </div>
-    )
+    );
+};
 
+// Chart Component
+const ChartCard = ({ title, children }) => {
     return (
-        <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6">
-            <div className="max-w-7xl mx-auto">
-                <div className="mb-6 sm:mb-8">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Admin Dashboard</h1>
-                    <p className="text-sm sm:text-base text-gray-600">Overview of users and growth trends</p>
-                </div>
+        <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">{title}</h3>
+            {children}
+        </div>
+    );
+};
 
-                <div className="mb-4 sm:mb-6">
-                    <div className="flex flex-wrap gap-2 sm:gap-4">
-                        {[
-                            { value: "day", label: "Daily" },
-                            { value: "month", label: "Monthly" },
-                            { value: "year", label: "Yearly" },
-                        ].map(({ value, label }) => (
-                            <button
-                                key={value}
-                                onClick={() => setTimeFilter(value)}
-                                className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors cursor-pointer text-sm sm:text-base ${
-                                    timeFilter === value
-                                        ? "bg-blue-600 text-white"
-                                        : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
-                                }`}
-                            >
-                                {label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+// Event List Component
+const EventList = () => {
+    return (
+        <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+            <div className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Recent Events</h3>
+                <p className="text-sm text-gray-500 mb-6">The 5 most recently created or updated events.</p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-                    <StatCard
-                        title="Total Users"
-                        value={totalUsers}
-                        change={Math.abs(Number.parseFloat(growthRate))}
-                        trend={Number.parseFloat(growthRate) >= 0 ? "up" : "down"}
-                        icon={Users}
-                    />
-                    <StatCard title="Verified Emails" value={verifiedUsers} icon={UserCheck} />
-                    <StatCard title="Google Sign-ins" value={googleUsers} icon={Mail} />
-                    <StatCard title="Banned" value={bannedUsers} icon={UserX} />
-                </div>
-
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                    {/* Line Chart - User Growth */}
-                    <div className="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-2">
-                            <h3 className="text-base sm:text-lg font-semibold text-gray-900">User Growth</h3>
-                            <div className="flex items-center text-xs sm:text-sm text-gray-600">
-                                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 flex-shrink-0" />
-                                <span className="truncate">
-                  {timeFilter === "day" ? "Last 30 days" : timeFilter === "month" ? "Last 12 months" : "Last 5 years"}
-                </span>
-                            </div>
-                        </div>
-                        <div className="h-64 sm:h-80">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={stats}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis
-                                        dataKey="period"
-                                        tick={{ fontSize: 10 }}
-                                        angle={-45}
-                                        textAnchor="end"
-                                        height={60}
-                                        interval="preserveStartEnd"
-                                    />
-                                    <YAxis tick={{ fontSize: 10 }} />
-                                    <Tooltip
-                                        contentStyle={{
-                                            backgroundColor: "#fff",
-                                            border: "1px solid #e5e7eb",
-                                            borderRadius: "8px",
-                                            fontSize: "12px",
-                                        }}
-                                    />
-                                    <Legend wrapperStyle={{ fontSize: "12px" }} />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="newUsers"
-                                        stroke="#3B82F6"
-                                        strokeWidth={2}
-                                        name="New Users"
-                                        dot={{ fill: "#3B82F6", strokeWidth: 2, r: 3 }}
-                                    />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="totalUsers"
-                                        stroke="#10B981"
-                                        strokeWidth={2}
-                                        name="Total Users"
-                                        strokeDasharray="5 5"
-                                    />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Role Distribution</h3>
-                        <div className="h-64 sm:h-80">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={pieData}
-                                        cx="50%"
-                                        cy="50%"
-                                        outerRadius={60}
-                                        fill="#8884d8"
-                                        dataKey="value"
-                                        label={({ name, percentage }) => `${name}: ${percentage}%`}
-                                        labelStyle={{ fontSize: "10px" }}
-                                    >
-                                        {pieData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip contentStyle={{ fontSize: "12px" }} />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-2">
-                        <h3 className="text-base sm:text-lg font-semibold text-gray-900">User Activity Breakdown</h3>
-                        <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 self-start sm:self-center" />
-                    </div>
-                    <div className="h-64 sm:h-80">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={stats}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis
-                                    dataKey="period"
-                                    tick={{ fontSize: 10 }}
-                                    angle={-45}
-                                    textAnchor="end"
-                                    height={60}
-                                    interval="preserveStartEnd"
-                                />
-                                <YAxis tick={{ fontSize: 10 }} />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: "#fff",
-                                        border: "1px solid #e5e7eb",
-                                        borderRadius: "8px",
-                                        fontSize: "12px",
-                                    }}
-                                />
-                                <Legend wrapperStyle={{ fontSize: "12px" }} />
-                                <Bar dataKey="verifiedUsers" fill="#10B981" name="Verified" />
-                                <Bar dataKey="googleUsers" fill="#3B82F6" name="Google Sign-in" />
-                                <Bar dataKey="bannedUsers" fill="#EF4444" name="Banned" />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-gray-200">
-                        <h3 className="text-base sm:text-lg font-semibold text-gray-900">Statistics Details</h3>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Period
-                                </th>
-                                <th className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    New Users
-                                </th>
-                                <th className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Total
-                                </th>
-                                <th className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Verified
-                                </th>
-                                <th className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Google
-                                </th>
-                                <th className="px-3 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Banned
-                                </th>
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="border-b border-gray-100">
+                                <th className="text-left py-3 px-4 font-semibold text-gray-600 text-sm">Title</th>
+                                <th className="text-left py-3 px-4 font-semibold text-gray-600 text-sm">Date</th>
+                                <th className="text-center py-3 px-4 font-semibold text-gray-600 text-sm">Actions</th>
                             </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                            {stats.slice(-10).map((stat, index) => (
-                                <tr key={index} className="hover:bg-gray-50">
-                                    <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
-                                        {stat.period}
+                        </thead>
+                        <tbody>
+                            {recentEvents.map((event) => (
+                                <tr key={event.id} className="border-b border-gray-50 hover:bg-purple-50 transition-colors">
+                                    <td className="py-4 px-4">
+                                        <div className="font-medium text-gray-900">{event.title}</div>
                                     </td>
-                                    <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
-                                        {stat.newUsers.toLocaleString()}
-                                    </td>
-                                    <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
-                                        {stat.totalUsers.toLocaleString()}
-                                    </td>
-                                    <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
-                                        {stat.verifiedUsers.toLocaleString()}
-                                    </td>
-                                    <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
-                                        {stat.googleUsers.toLocaleString()}
-                                    </td>
-                                    <td className="px-3 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
-                                        {stat.bannedUsers.toLocaleString()}
+                                    <td className="py-4 px-4 text-sm text-gray-600">{event.date}</td>
+                                    <td className="py-4 px-4">
+                                        <div className="flex items-center justify-center space-x-2">
+                                            <button className="p-2 text-gray-400 hover:text-purple-600 transition-colors">
+                                                <span className="text-lg">👁️</span>
+                                            </button>
+                                            <button className="p-2 text-gray-400 hover:text-purple-600 transition-colors">
+                                                <span className="text-lg">✏️</span>
+                                            </button>
+                                            <button
+                                                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                                    event.status === "active" ? "bg-red-500 text-white" : "bg-gray-500 text-white"
+                                                }`}
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
-                            </tbody>
-                        </table>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default Overview
+const Overview = () => {
+    return (
+        <div className="min-h-screen bg-gray-50 p-3 sm:p-4 lg:p-6">
+            {/* Header */}
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Overview</h1>
+                <p className="text-gray-600">Welcome back! Here’s an overview of your activities.</p>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <StatsCard
+                    title="Active Events"
+                    value="12"
+                    subtitle="+3.1% compared to last month"
+                    icon="📅"
+                    color="bg-gradient-to-r from-blue-500 to-cyan-500"
+                />
+                <StatsCard
+                    title="Total Registrations"
+                    value="789"
+                    subtitle="+15.3% compared to last month"
+                    icon="👥"
+                    color="bg-gradient-to-r from-purple-500 to-pink-500"
+                />
+                <StatsCard
+                    title="Media Assets"
+                    value="235"
+                    subtitle="+5.2% compared to last week"
+                    icon="📊"
+                    color="bg-gradient-to-r from-green-500 to-emerald-500"
+                />
+            </div>
+
+            {/* Charts Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <ChartCard title="User Registrations Over Time">
+                    <div className="h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={userRegistrationData}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} />
+                                <Line
+                                    type="monotone"
+                                    dataKey="desktop"
+                                    stroke="#8b5cf6"
+                                    strokeWidth={3}
+                                    dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 4 }}
+                                    name="Desktop"
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="mobile"
+                                    stroke="#ec4899"
+                                    strokeWidth={3}
+                                    dot={{ fill: "#ec4899", strokeWidth: 2, r: 4 }}
+                                    name="Mobile"
+                                />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="flex items-center justify-center space-x-6 mt-4">
+                        <div className="flex items-center space-x-2">
+                            <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                            <span className="text-sm text-gray-600">Desktop</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <div className="w-3 h-3 bg-pink-500 rounded-full"></div>
+                            <span className="text-sm text-gray-600">Mobile</span>
+                        </div>
+                    </div>
+                </ChartCard>
+
+                <ChartCard title="Event Type Comparison">
+                    <div className="h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={eventComparisonData}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#6b7280" }} />
+                                <Line
+                                    type="monotone"
+                                    dataKey="online"
+                                    stroke="#10b981"
+                                    strokeWidth={3}
+                                    dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
+                                    name="Online"
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="offline"
+                                    stroke="#3b82f6"
+                                    strokeWidth={3}
+                                    dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
+                                    name="Offline"
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="hybrid"
+                                    stroke="#8b5cf6"
+                                    strokeWidth={3}
+                                    dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 4 }}
+                                    name="Hybrid"
+                                />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="flex items-center justify-center space-x-6 mt-4">
+                        <div className="flex items-center space-x-2">
+                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span className="text-sm text-gray-600">Online</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span className="text-sm text-gray-600">Offline</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                            <span className="text-sm text-gray-600">Hybrid</span>
+                        </div>
+                    </div>
+                </ChartCard>
+            </div>
+
+            {/* Recent Events Table */}
+            <EventList />
+        </div>
+    );
+};
+
+export default Overview;
