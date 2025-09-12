@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Calendar, Clock, MapPin, Users, Share2, Heart, CalendarPlus, User } from "lucide-react";
+import { Link, useParams } from "react-router-dom";
+import { Calendar, Clock, MapPin, Users, Share2, Heart, CalendarPlus, User, Star, Send } from "lucide-react";
+import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
 import Header from "../components/Header";
+import CalendarInegration from "../components/CalendarIntegration";
+import ShareEvent from "../components/ShareButton";
 
 // Mock data for the event detail
 const eventData = {
@@ -33,7 +36,305 @@ const eventData = {
     ],
 };
 
+// Mock feedbacks
+const mockFeedbacks = [
+    {
+        id: 1,
+        user: {
+            name: "Alice Johnson",
+            avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+        },
+        rating: 5,
+        comment: "Amazing event! The workshops were highly informative and engaging.",
+        date: "2024-10-28",
+        helpful: 12,
+    },
+    {
+        id: 2,
+        user: {
+            name: "Mark Thompson",
+            avatar: "https://randomuser.me/api/portraits/men/32.jpg",
+        },
+        rating: 4,
+        comment: "Great networking opportunities, but the schedule felt a bit tight.",
+        date: "2024-10-27",
+        helpful: 8,
+    },
+    {
+        id: 3,
+        user: {
+            name: "Sophie Lee",
+            avatar: "https://randomuser.me/api/portraits/women/65.jpg",
+        },
+        rating: 5,
+        comment: "Loved the keynote on AI trends! Learned a lot about emerging tech.",
+        date: "2024-10-26",
+        helpful: 15,
+    },
+    {
+        id: 4,
+        user: {
+            name: "Daniel Kim",
+            avatar: "https://randomuser.me/api/portraits/men/47.jpg",
+        },
+        rating: 3,
+        comment: "Good content, but the venue was a bit crowded.",
+        date: "2024-10-28",
+        helpful: 4,
+    },
+    {
+        id: 5,
+        user: {
+            name: "Emma Wilson",
+            avatar: "https://randomuser.me/api/portraits/women/12.jpg",
+        },
+        rating: 4,
+        comment: "Workshops were excellent. Would love more hands-on sessions next time.",
+        date: "2024-10-27",
+        helpful: 7,
+    },
+];
+
+const FeedbackSection = () => {
+    const [rating, setRating] = useState(0);
+    const [hoveredRating, setHoveredRating] = useState(0);
+    const [comment, setComment] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [showSubmitForm, setShowSubmitForm] = useState(false);
+
+    const handleRatingClick = (value) => {
+        setRating(value);
+    };
+
+    const handleSubmit = async () => {
+        if (rating === 0) {
+            alert("Please select a rating before submitting");
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        // Simulate API call
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        setSubmitted(true);
+        setIsSubmitting(false);
+
+        // Reset form after 2 seconds and hide form
+        setTimeout(() => {
+            setSubmitted(false);
+            setRating(0);
+            setComment("");
+            setShowSubmitForm(false);
+        }, 2000);
+    };
+
+
+const renderStars = (rating) => {
+    return (
+        <div className="flex space-x-1">
+            {[1, 2, 3, 4, 5].map((star) => {
+                if (star <= Math.floor(rating)) {
+                    return <FaStar key={star} className="w-4 h-4 text-yellow-400" />;
+                } else if (star === Math.ceil(rating) && !Number.isInteger(rating)) {
+                    return <FaStarHalfAlt key={star} className="w-4 h-4 text-yellow-400" />;
+                } else {
+                    return <FaRegStar key={star} className="w-4 h-4 text-gray-300" />;
+                }
+            })}
+        </div>
+    );
+};
+
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        });
+    };
+
+    if (submitted) {
+        return (
+            <div className="text-center py-12">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">✅</span>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Thank You!</h2>
+                <p className="text-gray-600">Your feedback has been submitted successfully.</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-8">
+            {/* Header with Submit Button */}
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Event Feedback</h1>
+                    <p className="text-gray-600">See what others think about this event</p>
+                </div>
+                {!showSubmitForm && (
+                    <button
+                        onClick={() => setShowSubmitForm(true)}
+                        className="cursor-pointer bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 flex items-center space-x-2"
+                    >
+                        <Send className="w-4 h-4" />
+                        <span>Write Review</span>
+                    </button>
+                )}
+            </div>
+
+            {/* Submit Form (when toggled) */}
+            {showSubmitForm && (
+                <div className="bg-gray-50 rounded-xl p-6 border-2 border-dashed border-gray-300">
+                    <h2 className="text-xl font-bold text-gray-900 mb-6">Submit Your Feedback</h2>
+
+                    {/* Rating Section */}
+                    <div className="mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Your Rating</h3>
+                        <div className="flex space-x-2">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                    key={star}
+                                    type="button"
+                                    onClick={() => handleRatingClick(star)}
+                                    onMouseEnter={() => setHoveredRating(star)}
+                                    onMouseLeave={() => setHoveredRating(0)}
+                                    className="cursor-pointer focus:outline-none transition-transform hover:scale-110"
+                                >
+                                    <Star
+                                        className={`w-8 h-8 transition-colors ${
+                                            star <= (hoveredRating || rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"
+                                        }`}
+                                    />
+                                </button>
+                            ))}
+                        </div>
+                        {rating > 0 && <p className="text-sm text-gray-600 mt-2">You rated: {rating} out of 5 stars</p>}
+                    </div>
+
+                    {/* Comments Section */}
+                    <div className="mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Comments</h3>
+                        <textarea
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            placeholder="Share your thoughts on the event..."
+                            rows={4}
+                            maxLength={500}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-gray-700 placeholder-gray-400"
+                        />
+                        <p className="text-sm text-gray-500 mt-2">{comment.length}/500 characters</p>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex space-x-3">
+                        <button
+                            onClick={handleSubmit}
+                            disabled={isSubmitting || rating === 0}
+                            className={`cursor-pointer px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200 flex items-center space-x-2 ${
+                                isSubmitting || rating === 0
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transform hover:scale-105 shadow-lg"
+                            }`}
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    <span>Submitting...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="w-4 h-4" />
+                                    <span>Submit Feedback</span>
+                                </>
+                            )}
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setShowSubmitForm(false);
+                                setRating(0);
+                                setComment("");
+                            }}
+                            className="cursor-pointer px-6 py-3 rounded-lg font-semibold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Feedback Statistics */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="text-center">
+                        <div className="text-3xl font-bold text-gray-900">4.5</div>
+                        <div className="flex justify-center mb-2">{renderStars(4.5)}</div>
+                        <div className="text-sm text-gray-600">Average Rating</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="text-3xl font-bold text-gray-900">{mockFeedbacks.length}</div>
+                        <div className="text-sm text-gray-600">Total Reviews</div>
+                    </div>
+                    <div className="text-center">
+                        <div className="text-3xl font-bold text-gray-900">94%</div>
+                        <div className="text-sm text-gray-600">Recommended</div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Feedback List */}
+            <div className="space-y-6">
+                <h2 className="text-xl font-bold text-gray-900">Reviews ({mockFeedbacks.length})</h2>
+
+                {mockFeedbacks.map((feedback) => (
+                    <div key={feedback.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                        {/* User Info */}
+                        <div className="flex items-start space-x-4">
+                            <img src={feedback.user.avatar} alt={feedback.user.name} className="w-12 h-12 rounded-full object-cover" />
+                            <div className="flex-1">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900">{feedback.user.name}</h4>
+                                        <div className="flex items-center space-x-2 mt-1">
+                                            {renderStars(feedback.rating)}
+                                            <span className="text-sm text-gray-500">• {formatDate(feedback.date)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Comment */}
+                                <p className="text-gray-700 leading-relaxed mb-3">{feedback.comment}</p>
+
+                                {/* Helpful Button */}
+                                <div className="flex items-center space-x-4">
+                                    <button className="cursor-pointer flex items-center space-x-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                                        <span>👍</span>
+                                        <span>Helpful ({feedback.helpful})</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Load More Button */}
+            <div className="text-center">
+                <button className="cursor-pointer px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    Load More Reviews
+                </button>
+            </div>
+        </div>
+    );
+};
+
 const EventDetailPage = () => {
+    const { id } = useParams();
+    const eventId = Number(id) || eventData.id;
     const [activeTab, setActiveTab] = useState("overview");
     const [isFavorited, setIsFavorited] = useState(false);
 
@@ -142,10 +443,12 @@ const EventDetailPage = () => {
 
                             {/* Action Buttons */}
                             <div className="flex flex-wrap gap-4">
+                                <ShareEvent event={{ id: eventId, title: eventData.title, date: eventData.date, venue: eventData.location }}>
                                 <button className="cursor-pointer flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-lg border border-gray-200 transition-all duration-200">
                                     <Share2 className="w-5 h-5" />
                                     <span>Share Event</span>
                                 </button>
+                                </ShareEvent>
 
                                 <button
                                     onClick={() => setIsFavorited(!isFavorited)}
@@ -158,11 +461,8 @@ const EventDetailPage = () => {
                                     <Heart className={`w-5 h-5 ${isFavorited ? "fill-current" : ""}`} />
                                     <span>{isFavorited ? "Favorited" : "Add to Favorites"}</span>
                                 </button>
-
-                                <button className="cursor-pointer flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-lg border border-gray-200 transition-all duration-200">
-                                    <CalendarPlus className="w-5 h-5" />
-                                    <span>Add to Calendar</span>
-                                </button>
+                                {/* Calendar button (inline, always visible) */}
+                                <CalendarInegration eventId={eventId} variant="inline" />
                             </div>
 
                             {/* Navigation Tabs */}
@@ -217,14 +517,7 @@ const EventDetailPage = () => {
                                         </div>
                                     )}
 
-                                    {activeTab === "feedback" && (
-                                        <div className="text-center py-12">
-                                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                <span className="text-2xl">💬</span>
-                                            </div>
-                                            <p className="text-gray-500">Feedback section will be available after the event</p>
-                                        </div>
-                                    )}
+                                    {activeTab === "feedback" && <FeedbackSection />}
                                 </div>
                             </div>
                         </div>
