@@ -85,4 +85,20 @@ class UserController extends Controller
 
         return response()->json(['message' => 'User unbanned successfully.']);
     }
+
+    public function approveOrganizer(Request $request, $id)
+    {
+        $user = User::where('role', 'organizer')->findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|in:active,rejected',
+        ]);
+
+        $user->update(['status' => $request->status]);
+
+        return response()->json([
+            'message' => "Organizer status updated to {$request->status}.",
+            'user' => $user,
+        ]);
+    }
 }

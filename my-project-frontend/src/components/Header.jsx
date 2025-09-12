@@ -229,17 +229,6 @@ export default function Header() {
                             <div className="mt-6 pt-6 border-t border-gray-200 space-y-1">
                                 <button
                                     onClick={() => {
-                                        if (user.role === "participant") navigate("/user/profile");
-                                        else if (user.role === "organizer") navigate("/organizer/profile");
-                                        setMobileMenuOpen(false);
-                                    }}
-                                    className="cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors duration-200"
-                                >
-                                    <User size={20} className="mr-3" />
-                                    Profile
-                                </button>
-                                <button
-                                    onClick={() => {
                                         if (user.role === "participant") navigate("/user/dashboard");
                                         else if (user.role === "organizer") navigate("/organizer/dashboard");
                                         setMobileMenuOpen(false);
@@ -249,6 +238,19 @@ export default function Header() {
                                     <LayoutDashboard size={20} className="mr-3" />
                                     Dashboard
                                 </button>
+                                {["organizer", "participant"].includes(user.role) && (
+                                    <button
+                                        onClick={() => {
+                                            if (user.role === "participant") navigate("/user/profile");
+                                            else if (user.role === "organizer") navigate("/organizer/profile");
+                                            setMobileMenuOpen(false);
+                                        }}
+                                        className="cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors duration-200"
+                                    >
+                                        <User size={20} className="mr-3" />
+                                        Profile
+                                    </button>
+                                )}
                                 <button
                                     onClick={handleLogout}
                                     className="cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 transition-colors duration-200"
@@ -315,7 +317,9 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
     };
 
     const goToProfile = () => {
-        navigate("/user/profile");
+        if (user.role === "organizer") {
+            navigate("/organizer/profile");
+        } else navigate("/user/profile");
         setOpen(false);
     };
 
@@ -368,19 +372,21 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
                     </div>
                     <div className="py-1">
                         <button
-                            onClick={goToProfile}
-                            className="cursor-pointer flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-200"
-                        >
-                            <User size={16} />
-                            Profile
-                        </button>
-                        <button
                             onClick={goToDashboard}
                             className="cursor-pointer flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-200"
                         >
                             <LayoutDashboard size={16} />
                             Dashboard
                         </button>
+                        {["organizer", "participant"].includes(user.role) && (
+                            <button
+                                onClick={goToProfile}
+                                className="cursor-pointer flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors duration-200"
+                            >
+                                <User size={16} />
+                                Profile
+                            </button>
+                        )}
                         <button
                             onClick={onLogout}
                             className="cursor-pointer flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"

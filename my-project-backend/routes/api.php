@@ -16,19 +16,9 @@ use App\Services\AIClientWithFallback;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
-// Public routes
-
-
-// Auth
-
-// Public routes
-
-
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
-
 
 //Route::apiResource('/events', EventController::class);
 Route::get('/events', [EventController::class, 'index']);
@@ -40,7 +30,6 @@ Route::put('/events/{id}', [EventController::class, 'update']);
 Route::delete('/events/{id}', [EventController::class, 'destroy']);
 
 Route::apiResource('/events', EventController::class);
-
 
 // Password reset routes
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
@@ -67,20 +56,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', fn(Request $request) => $request->user());
     Route::post('/logout', [AuthController::class, 'logout']);
 
-
     // Email verification routes
-
-    // Email verification
-
-    // Email verification routes
-
     Route::post('/email/verification-notification', [VerificationController::class, 'send'])
         ->middleware(['throttle:6,1'])
         ->name('verification.send');
     Route::post('/email/resend', [VerificationController::class, 'resend'])
         ->middleware(['throttle:6,1']);
     Route::get('/email/verify-status', [VerificationController::class, 'status']);
-
 
     // Profile routes
     Route::prefix('profile')->group(function () {
@@ -102,8 +84,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
         Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
 });
-
-
 
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
 Route::post('/user/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
@@ -127,6 +107,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/{id}/ban', [UserController::class, 'ban']);
     Route::post('/users/{id}/unban', [UserController::class, 'unban']);
+    Route::post('/admin/organizer/{id}/approve', [UserController::class, 'approveOrganizer']);
 });
 
 //Route::middleware(['auth:sanctum', 'role:participant'])->group(function () {
