@@ -1,40 +1,43 @@
-import { useState, useRef } from "react"
-import { toast } from "react-toastify"
-import { useNavigate } from "react-router-dom"
-import {GoogleLogin} from "@react-oauth/google";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"
+import { useState, useRef } from "react";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
-import { apiUrl } from "../services/http"
+import { apiUrl } from "../services/http";
 import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
-    const [showPassword, setShowPassword] = useState(false)
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-    const [processing, setProcessing] = useState(false)
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [processing, setProcessing] = useState(false);
     const [data, setData] = useState({
         name: "",
         email: "",
         password: "",
         password_confirmation: "",
         role: "participant",
-    })
+    });
 
-    const nameRef = useRef(null)
-    const emailRef = useRef(null)
-    const passwordRef = useRef(null)
-    const passwordConfirmRef = useRef(null)
+    const nameRef = useRef(null);
+    const emailRef = useRef(null);
+    const passwordRef = useRef(null);
+    const passwordConfirmRef = useRef(null);
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const { login } = useAuth();
 
-    const navigateByRole = (userRole) => {
+    const navigateByRole = (userRole, userStatus) => {
+        if (userStatus === "pending" && userRole === "organizer") {
+            navigate("/organizer/pending-approval");
+            return;
+        }
+
         switch (userRole) {
             case "admin":
                 navigate("/admin/dashboard");
                 break;
             case "organizer":
-                navigate("/organizer/dashboard");
-                break;
             case "participant":
             default:
                 navigate("/");
@@ -43,15 +46,15 @@ export default function Register() {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
         if (data.password !== data.password_confirmation) {
-            toast.error("Passwords do not match")
-            passwordConfirmRef.current?.focus()
-            return
+            toast.error("Passwords do not match");
+            passwordConfirmRef.current?.focus();
+            return;
         }
 
-        setProcessing(true)
+        setProcessing(true);
 
         try {
             const response = await fetch(`${apiUrl}/register`, {
@@ -67,9 +70,9 @@ export default function Register() {
                     password_confirmation: data.password_confirmation,
                     role: data.role,
                 }),
-            })
+            });
 
-            const result = await response.json()
+            const result = await response.json();
 
             if (response.ok) {
                 // Use AuthContext login method
@@ -77,46 +80,45 @@ export default function Register() {
 
                 toast.success(result.message);
 
-                // Regular email/password users need to verify email
                 navigate("/verify-email");
             } else {
                 // Handle validation errors
                 if (result.errors) {
-                    const firstField = Object.keys(result.errors)[0]
-                    const firstError = result.errors[firstField][0]
-                    toast.error(firstError)
+                    const firstField = Object.keys(result.errors)[0];
+                    const firstError = result.errors[firstField][0];
+                    toast.error(firstError);
 
-                    if (firstField === "name") nameRef.current?.focus()
-                    if (firstField === "email") emailRef.current?.focus()
-                    if (firstField === "password") passwordRef.current?.focus()
-                    if (firstField === "password_confirmation") passwordConfirmRef.current?.focus()
+                    if (firstField === "name") nameRef.current?.focus();
+                    if (firstField === "email") emailRef.current?.focus();
+                    if (firstField === "password") passwordRef.current?.focus();
+                    if (firstField === "password_confirmation") passwordConfirmRef.current?.focus();
                 } else if (result.message) {
-                    toast.error(result.message)
+                    toast.error(result.message);
                 } else {
-                    toast.error("Registration failed. Please try again.")
+                    toast.error("Registration failed. Please try again.");
                 }
             }
         } catch (error) {
-            console.error("Registration error:", error)
-            toast.error("Network error. Please check your connection.")
+            console.error("Registration error:", error);
+            toast.error("Network error. Please check your connection.");
         } finally {
-            setProcessing(false)
+            setProcessing(false);
         }
-    }
+    };
 
     const handleInputChange = (field, value) => {
         setData((prev) => ({
             ...prev,
             [field]: value,
-        }))
-    }
+        }));
+    };
 
     const handleGoogleSuccess = async (credentialResponse) => {
         try {
             const response = await fetch(`${apiUrl}/auth/google/login`, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     credential: credentialResponse.credential,
@@ -129,22 +131,23 @@ export default function Register() {
                 // Use AuthContext login method
                 login(result.user, result.token);
 
-                toast.success('Registration successful!');
+                toast.success("Registration successful!");
 
-                // Google users are auto-verified, navigate based on role
-                const userRole = result.user?.role || 'participant';
-                navigateByRole(userRole);
+                const userRole = result.user?.role || "participant";
+                const userStatus = result.user?.status || "active";
+
+                navigateByRole(userRole, userStatus);
             } else {
-                toast.error(result.message || 'Google registration failed');
+                toast.error(result.message || "Google registration failed");
             }
         } catch (error) {
-            console.error('Error during Google registration:', error);
-            toast.error('An error occurred during Google registration');
+            console.error("Error during Google registration:", error);
+            toast.error("An error occurred during Google registration");
         }
     };
 
     const handleGoogleError = () => {
-        toast.error('Google registration failed');
+        toast.error("Google registration failed");
     };
 
     return (
@@ -164,7 +167,7 @@ export default function Register() {
                 </div>
 
                 <div className="space-y-4 px-6 pb-6">
-                    <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError}/>
+                    <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
 
                     {/* Divider */}
                     <div className="relative">
@@ -296,11 +299,7 @@ export default function Register() {
                             </div>
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="w-full btn-gradient"
-                        >
+                        <button type="submit" disabled={processing} className="w-full btn-gradient">
                             {processing ? "Creating account..." : "Create Account"}
                         </button>
 
@@ -318,5 +317,5 @@ export default function Register() {
                 </div>
             </div>
         </div>
-    )
+    );
 }

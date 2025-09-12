@@ -1,12 +1,12 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import {apiUrl} from "../services/http.jsx";
+import { createContext, useContext, useState, useEffect } from "react";
+import { apiUrl } from "../services/http.jsx";
 
 const AuthContext = createContext();
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
+        throw new Error("useAuth must be used within an AuthProvider");
     }
     return context;
 };
@@ -18,8 +18,8 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         // Initialize auth state from localStorage
-        const storedToken = localStorage.getItem('auth_token');
-        const storedUser = localStorage.getItem('user');
+        const storedToken = localStorage.getItem("auth_token");
+        const storedUser = localStorage.getItem("user");
 
         if (storedToken && storedUser) {
             setToken(storedToken);
@@ -31,16 +31,16 @@ export const AuthProvider = ({ children }) => {
     const login = (userData, authToken) => {
         setUser(userData);
         setToken(authToken);
-        localStorage.setItem('auth_token', authToken);
-        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem("auth_token", authToken);
+        localStorage.setItem("user", JSON.stringify(userData));
     };
 
     const logout = () => {
         setUser(null);
         setToken(null);
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('chat_session_id');
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("chat_session_id");
         // Optionally clear other user-specific data from localStorage
     };
 
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
             ...userData,
         };
         setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        localStorage.setItem("user", JSON.stringify(updatedUser));
     };
 
     const refreshUser = async () => {
@@ -60,8 +60,8 @@ export const AuthProvider = ({ children }) => {
         try {
             const res = await fetch(`${apiUrl}/user`, {
                 headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Accept": "application/json",
+                    Authorization: `Bearer ${token}`,
+                    Accept: "application/json",
                 },
             });
             if (res.ok) {
@@ -74,18 +74,28 @@ export const AuthProvider = ({ children }) => {
     };
 
     const isAuthenticated = !!token && !!user;
-    const isVerified = !!user?.email_verified_at;
+
+    // Check if user needs email verification (only for non-Google users)
+    const needsEmailVerification = user && !user.email_verified_at && !user.is_google_user;
+
+    // Check if user is pending approval (for organizers)
+    const isPendingApproval = user && user.role === "organizer" && user.status === "pending";
+
+    // Check if user account is banned
+    const isBanned = user && user.status === "banned";
 
     const value = {
         user,
         token,
         loading,
         isAuthenticated,
-        isVerified,
+        needsEmailVerification,
+        isPendingApproval,
+        isBanned,
         login,
         logout,
         updateUser,
-        refreshUser
+        refreshUser,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -2,9 +2,10 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export default function GuestRoute() {
-    const { isAuthenticated, isVerified, loading } = useAuth();
+    const { isAuthenticated, user, loading } = useAuth();
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    if (loading) return null;
+    if (user?.role === "admin") return <Navigate to="/admin/dashboard" />;
 
-    return isAuthenticated && isVerified ? <Navigate to="/" /> : <Outlet />;
+    return isAuthenticated ? <Navigate to="/" /> : <Outlet />;
 }

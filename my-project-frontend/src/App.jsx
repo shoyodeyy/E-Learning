@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import StudentRouter from "./routes/StudentRouter.jsx";
 import AdminRouter from "./routes/AdminRouter.jsx";
@@ -19,8 +19,12 @@ import EventDetailPage from "./pages/EventDetail.jsx";
 import Home from "./pages/Home.jsx";
 import GuestRoute from "./routes/GuestRoute.jsx";
 import Sitemap from "./pages/Sitemap.jsx";
+<<<<<<< HEAD
 import VerifyRoute from "./routes/VerifyRoute.jsx";
 import Gallery from "./pages/Gallery.jsx";
+=======
+import EmailVerificationRoute from "./routes/EmailVerificationRoute.jsx";
+>>>>>>> 540f91773170d77831f784dc6993f5c138a80c58
 
 function App() {
     return (
@@ -60,9 +64,18 @@ function App() {
                             <Route path="/user/reset-password" element={<ResetPassword />} />
 
                             <Route path="/about-us" element={<AboutUs />} />
+<<<<<<< HEAD
                             <Route path="/media-gallery" element={<Gallery />} />
 
                             {/* Protected email verification page */}
+=======
+
+                            <Route element={<EmailVerificationRoute />}>
+                                <Route path="/verify-email" element={<VerifyEmail />} />
+                                <Route path="/email-verification-result" element={<VerificationResult />} />
+                            </Route>
+
+>>>>>>> 540f91773170d77831f784dc6993f5c138a80c58
                             <Route path="/403" element={<Forbidden />} />
                             <Route path="/sitemap" element={<Sitemap />} />
                             <Route path="*" element={<NotFound />} />

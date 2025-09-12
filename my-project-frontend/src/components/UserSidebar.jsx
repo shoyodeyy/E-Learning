@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import {useState} from "react";
 import {Link, useLocation} from "react-router-dom";
 import {ChevronLeft, ChevronRight, LayoutDashboard, User, Book, LogOut} from "lucide-react";
+=======
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { ChevronLeft, ChevronRight, LayoutDashboard, User, Book, LogOut } from "lucide-react";
+>>>>>>> 540f91773170d77831f784dc6993f5c138a80c58
 
 export default function UserSidebar({mobile = false}) {
     const location = useLocation();
@@ -21,6 +27,8 @@ export default function UserSidebar({mobile = false}) {
         icon: Book
         },
     ];
+
+    useEffect(() => window.scrollTo(0, 0), []);
 
     const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 

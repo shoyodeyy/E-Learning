@@ -2,6 +2,8 @@
 
 namespace Database\Seeders\MediaGallery;
 
+use App\Models\Event;
+use App\Models\MediaGallery;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -405,8 +407,6 @@ class MediaGalleryTableSeeder extends Seeder
             ],],
             33 => [
                 [
-                    'media_id' => 33,
-                    'event_id' => 'E032',
                     'file_type' => 'image',
                     'file_url' => 'my-project-backend/public/images/MediaGallery/30-realestate.jpg',
                     'file_name' => 'proptech_vietnam_2025.png',
@@ -427,13 +427,13 @@ class MediaGalleryTableSeeder extends Seeder
             if ($event) {
                 foreach ($items as $item) {
                     MediaGallery::create([
-                        'event_id' => $event->id,
+                        'event_id' => $event->event_id, // sửa từ $event->id
                         'file_type' => $item['file_type'],
                         'file_url' => $item['file_url'],
                         'file_name' => $item['file_name'],
                         'caption' => $item['caption'],
                         'department' => $event->category ?? null,
-                        'event_year' => date('Y', strtotime($event->start_at)),
+                        'event_year' => $item['event_year'] ?? date('Y', strtotime($event->start_at)),
                         'is_featured' => 1,
                         'file_size' => 3000,
                         'uploaded_by' => 1,

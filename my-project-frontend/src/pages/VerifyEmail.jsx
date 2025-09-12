@@ -28,6 +28,7 @@ export default function VerifyEmail() {
                     if (data.verified) {
                         await refreshUser();
                         toast.success("Email verified successfully!");
+                        navigateByRole(data.role, data.status);
                     }
                 }
             } catch (err) {
@@ -44,6 +45,12 @@ export default function VerifyEmail() {
             navigate("/login");
             return;
         }
+
+        if (user.email_verified_at || user.is_google_user) {
+            const userStatus = user.status || "active";
+            navigateByRole(user.role, userStatus);
+            return;
+        }
     }, [user]);
 
     useEffect(() => {
@@ -55,6 +62,26 @@ export default function VerifyEmail() {
         }
         return () => clearInterval(interval);
     }, [countdown]);
+
+    const navigateByRole = (role, status) => {
+        if (status === "pending" && role === "organizer") {
+            navigate("/organizer/pending-approval");
+            return;
+        }
+
+        switch (role) {
+            case "admin":
+                navigate("/admin/dashboard");
+                break;
+            case "organizer":
+                navigate("/organizer/dashboard");
+                break;
+            case "participant":
+            default:
+                navigate("/");
+                break;
+        }
+    };
 
     const handleResendEmail = async () => {
         if (countdown > 0) return;
@@ -149,7 +176,7 @@ export default function VerifyEmail() {
                         <button
                             onClick={handleResendEmail}
                             disabled={resending || countdown > 0}
-                            className="cursor-pointer w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             {resending ? "Sending..." : countdown > 0 ? `Resend in ${countdown}s` : "Resend Verification Email"}
                         </button>
@@ -169,13 +196,13 @@ export default function VerifyEmail() {
                         <div className="flex space-x-3">
                             <button
                                 onClick={handleLogout}
-                                className="cursor-pointer flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg text-sm font-medium transition-colors"
+                                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg text-sm font-medium transition-colors"
                             >
                                 Sign Out
                             </button>
                             <button
                                 onClick={() => window.location.reload()}
-                                className="cursor-pointer flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-sm font-medium transition-colors"
+                                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-sm font-medium transition-colors"
                             >
                                 I've Verified
                             </button>

@@ -1,38 +1,33 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { getProfile, updateProfile } from "../../api/profileApi.js";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { updateProfile } from "../../api/profileApi.js";
+import ConfirmDialog from "../../components/ConfirmDialog.jsx";
 
-export default function PublicProfile() {
-    const [user, setUser] = useState(null);
+export default function EditProfile() {
+    const { user, updateUser } = useAuth();
+    const [confirmOpen, setConfirmOpen] = useState(false);
     const [formData, setFormData] = useState({});
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
-        getProfile()
-            .then((u) => {
-                setUser(u);
-                setFormData({
-                    name: u?.name || "",
-                    email: u?.email || "",
-                    gender: u?.gender || "",
-                    profile: u?.profile || "",
-                    address: u?.address || "",
-                    phone: u?.phone || "",
-                    avatar: null,
-                    department: u?.department || "",
-                    enrollment_no: u?.enrollment_no || "",
-                });
-            })
-            .catch(() => toast.error("Failed to load profile ❌"));
-    }, []);
+        if (user) {
+            setFormData({
+                name: user.name || "",
+                email: user.email || "",
+                phone: user.phone || "",
+                address: user.address || "",
+                gender: user.gender || "",
+                profile: user.profile || "",
+                department: user.department || "",
+                enrollment_no: user.enrollment_no || "",
+            });
+        }
+    }, [user]);
 
     if (!user) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                Loading...
-            </div>
-        );
+        return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     }
 
     const handleInputChange = (e) => {
@@ -44,14 +39,13 @@ export default function PublicProfile() {
             [name]: fieldValue,
         }));
 
-        setErrors((prev) => {
-            if (prev[name]) {
+        if (errors[name]) {
+            setErrors((prev) => {
                 const newErrors = { ...prev };
                 delete newErrors[name];
                 return newErrors;
-            }
-            return prev;
-        });
+            });
+        }
     };
 
     const validate = () => {
@@ -68,11 +62,14 @@ export default function PublicProfile() {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (!validate()) return;
-        if (!window.confirm("Do you want to update your profile?")) return;
+        setConfirmOpen(true); // chỉ mở confirm dialog, không gọi API
+    };
 
+    const handleConfirm = async () => {
+        setConfirmOpen(false);
         setProcessing(true);
         try {
             const data = new FormData();
@@ -83,15 +80,34 @@ export default function PublicProfile() {
             });
 
             const result = await updateProfile(data);
-            setUser(result.user);
+            updateUser(result.user);
             toast.success(result.message || "Profile updated successfully ✅");
             setErrors({});
         } catch (error) {
-            console.error("Profile update error:", error);
-            toast.error("Update failed ❌");
+            console.error(error);
+
+            if (error.response) {
+                const { status, data } = error.response;
+                if (status === 422 && data.errors) {
+                    setErrors(data.errors);
+                    Object.values(data.errors).forEach((msgs) => toast.error(msgs[0]));
+                } else if (data.message) {
+                    toast.error(data.message);
+                } else if (data.error) {
+                    toast.error(data.error);
+                } else {
+                    toast.error("Update failed ❌");
+                }
+            } else {
+                toast.error("Network error ❌");
+            }
         } finally {
             setProcessing(false);
         }
+    };
+
+    const handleCancel = () => {
+        setConfirmOpen(false);
     };
 
     return (
@@ -99,11 +115,7 @@ export default function PublicProfile() {
             <main className="max-w-6xl mx-auto px-4">
                 <h1 className="text-2xl font-bold mb-6">Edit Profile</h1>
 
-                <form
-                    onSubmit={handleSubmit}
-                    encType="multipart/form-data"
-                    className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                >
+                <form onSubmit={handleSubmit} encType="multipart/form-data" className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Personal Information */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                         <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
@@ -131,9 +143,7 @@ export default function PublicProfile() {
                                     errors.name ? "border-red-500" : "border-gray-300"
                                 }`}
                             />
-                            {errors.name && (
-                                <p className="text-red-500 text-sm">{errors.name}</p>
-                            )}
+                            {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                         </div>
 
                         {/* Gender */}
@@ -152,9 +162,7 @@ export default function PublicProfile() {
                                 <option value="female">Female</option>
                                 <option value="other">Other</option>
                             </select>
-                            {errors.gender && (
-                                <p className="text-red-500 text-sm">{errors.gender}</p>
-                            )}
+                            {errors.gender && <p className="text-red-500 text-sm">{errors.gender}</p>}
                         </div>
 
                         {/* About Me */}
@@ -165,7 +173,7 @@ export default function PublicProfile() {
                                 value={formData.profile}
                                 onChange={handleInputChange}
                                 rows="4"
-                                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 border-gray-300 bg-white"
                             />
                         </div>
                     </div>
@@ -190,7 +198,7 @@ export default function PublicProfile() {
                         <div className="mb-4">
                             <label className="block text-sm font-medium mb-1">Phone</label>
                             <input
-                                type="text"
+                                type="number"
                                 name="phone"
                                 value={formData.phone}
                                 onChange={handleInputChange}
@@ -198,9 +206,7 @@ export default function PublicProfile() {
                                     errors.phone ? "border-red-500" : "border-gray-300"
                                 }`}
                             />
-                            {errors.phone && (
-                                <p className="text-red-500 text-sm">{errors.phone}</p>
-                            )}
+                            {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
                         </div>
 
                         {/* Address */}
@@ -215,10 +221,29 @@ export default function PublicProfile() {
                                     errors.address ? "border-red-500" : "border-gray-300"
                                 }`}
                             />
-                            {errors.address && (
-                                <p className="text-red-500 text-sm">{errors.address}</p>
-                            )}
+                            {errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
                         </div>
+
+                        {["participant"].includes(user?.role) && (
+                            <div className="hidden sm:block">
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className={`w-full btn-gradient mt-6 cursor-pointer ${
+                                        processing ? "bg-purple-300 text-white cursor-not-allowed" : "bg-purple-600 text-white hover:bg-purple-700"
+                                    }`}
+                                >
+                                    {processing ? "Saving..." : "Save Changes"}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="w-full mt-4 px-5 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 cursor-pointer"
+                                    onClick={() => window.history.back()}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Organizational Details */}
@@ -235,10 +260,8 @@ export default function PublicProfile() {
                                     value={formData.department}
                                     onChange={handleInputChange}
                                     readOnly={user?.role === "organizer"}
-                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                                        user?.role === "organizer"
-                                            ? "bg-gray-100 text-gray-600 cursor-not-allowed"
-                                            : "border-gray-300"
+                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 border-gray-300 ${
+                                        user?.role === "organizer" ? "bg-gray-100 text-gray-600 cursor-not-allowed" : "bg-white"
                                     }`}
                                 />
                             </div>
@@ -252,10 +275,8 @@ export default function PublicProfile() {
                                     value={formData.enrollment_no}
                                     onChange={handleInputChange}
                                     readOnly={user?.role === "organizer"}
-                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                                        user?.role === "organizer"
-                                            ? "bg-gray-100 text-gray-600 cursor-not-allowed"
-                                            : "border-gray-300"
+                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 border-gray-300 ${
+                                        user?.role === "organizer" ? "bg-gray-100 text-gray-600 cursor-not-allowed" : "bg-white"
                                     }`}
                                 />
                             </div>
@@ -263,22 +284,24 @@ export default function PublicProfile() {
                     )}
 
                     {/* Actions */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center items-start space-y-4">
+                    <div
+                        className={`${
+                            ["participant"].includes(user?.role) ? "block sm:hidden" : ""
+                        } bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center items-start space-y-4`}
+                    >
                         <h2 className="text-lg font-semibold">Actions</h2>
                         <button
                             type="submit"
                             disabled={processing}
-                            className={`w-full px-5 py-2 rounded-lg font-medium transition cursor-pointer ${
-                                processing
-                                    ? "bg-purple-300 text-white cursor-not-allowed"
-                                    : "bg-purple-600 text-white hover:bg-purple-700"
+                            className={`w-full btn-gradient cursor-pointer ${
+                                processing ? "bg-purple-300 text-white cursor-not-allowed" : "bg-purple-600 text-white hover:bg-purple-700"
                             }`}
                         >
                             {processing ? "Saving..." : "Save Changes"}
                         </button>
                         <button
                             type="button"
-                            className="w-full px-5 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 cursor-pointer"
+                            className="w-full mt-1 md:mt-4 px-5 py-2 rounded-lg border text-gray-700 hover:bg-gray-100 cursor-pointer"
                             onClick={() => window.history.back()}
                         >
                             Cancel
@@ -286,6 +309,8 @@ export default function PublicProfile() {
                     </div>
                 </form>
             </main>
+
+            <ConfirmDialog open={confirmOpen} message="Do you want to update your profile?" onConfirm={handleConfirm} onCancel={handleCancel} />
         </div>
     );
 }
