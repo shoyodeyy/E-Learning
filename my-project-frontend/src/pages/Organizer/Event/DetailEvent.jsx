@@ -147,7 +147,7 @@ export default function DetailEvent() {
                         {/* Action Button */}
                         <div className="flex items-center justify-end pt-6 border-t border-gray-200">
                             <button
-                                onClick={() => navigate('/organizer/manage-events')}
+                                onClick={() => navigate(-1)}
                                 type="button"
                                 className="px-6 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
                             >

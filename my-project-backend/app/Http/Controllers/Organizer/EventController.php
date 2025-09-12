@@ -34,6 +34,25 @@ class EventController extends Controller
         return new EventResource($event);
     }
 
+    public function showWithQuantity($quantity)
+    {
+        $quantity = (int) $quantity;
+
+        if ($quantity <= 0) {
+            return response()->json([
+                'message' => 'Quantity must be a positive integer.'
+            ], 400);
+        }
+
+        $events = Event::with(['organizer', 'approvedByAdmin'])
+            ->orderBy('start_at', 'desc')
+            ->take($quantity)
+            ->get();
+
+        return EventResource::collection($events);
+    }
+
+
     public function store(Request $request)
     {
         $data = $request->validate([

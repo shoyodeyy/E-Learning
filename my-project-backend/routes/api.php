@@ -34,6 +34,7 @@ Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 //Route::apiResource('/events', EventController::class);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
+Route::get('/events/quantity/{quantity}', [EventController::class, 'showWithQuantity']);
 
 // Creation and modifications require auth; see authenticated group below
 // Route::post('/events', [EventController::class, 'store']);
@@ -44,12 +45,11 @@ Route::get('/events/{id}', [EventController::class, 'show']);
 // Calendar routes are protected (only for authenticated users)
 
 // Event routes
-Route::post('/events', [EventController::class, 'store']);
-Route::put('/events/{id}', [EventController::class, 'update']);
-Route::delete('/events/{id}', [EventController::class, 'destroy']);
+//Route::post('/events', [EventController::class, 'store']);
+//Route::put('/events/{id}', [EventController::class, 'update']);
+//Route::delete('/events/{id}', [EventController::class, 'destroy']);
 
-
-Route::apiResource('/events', EventController::class);
+//Route::apiResource('/events', EventController::class);
 
 
 // Password reset routes
@@ -118,9 +118,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // Feedback
-        Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);
-        Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
-        Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
+    Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);
+    Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
+    Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
 });
 
 

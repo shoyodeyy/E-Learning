@@ -3,7 +3,7 @@ import { Search, Plus, Edit, Trash2, Eye, Settings, Calendar, Users } from "luci
 import { Link, useNavigate } from "react-router-dom";
 import { apiUrl } from "../../../services/http.jsx";
 import axios from "axios";
-import {useAuth} from "../../../context/AuthContext.jsx";
+import { useAuth } from "../../../context/AuthContext.jsx";
 
 // Event Card Component
 function EventCard({ event, onDelete }) {
