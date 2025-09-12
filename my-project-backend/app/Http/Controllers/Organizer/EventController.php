@@ -37,6 +37,18 @@ class EventController extends Controller
         return EventResource::collection($events);
     }
 
+    public function show($id) {
+        $event = Event::with(['organizer', 'approvedByAdmin'])->where('event_id', $id)->firstOrFail();
+
+        if (!$event) {
+            return response()->json([
+                'message' => 'Event not found'
+            ], 404);
+        }
+        
+        return new EventResource($event);
+    }
+
     public function showWithQuantity($quantity)
     {
         $quantity = (int) $quantity;

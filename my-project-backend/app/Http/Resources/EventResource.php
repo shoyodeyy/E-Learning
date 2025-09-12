@@ -22,6 +22,7 @@ class EventResource extends JsonResource
             'category'             => $this->category,
             'start_at'             => $this->start_at,
             'duration_minutes'     => $this->duration_minutes,
+            'end_at'               => $this->end_at,
             'venue'                => $this->venue,
             'organizerId'          => new UserResource($this->whenLoaded('organizer')),
             'approvedBy'           => new UserResource($this->whenLoaded('approvedByAdmin')),

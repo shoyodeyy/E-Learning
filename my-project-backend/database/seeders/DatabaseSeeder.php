@@ -2,14 +2,9 @@
 
 namespace Database\Seeders;
 
-
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Database\Seeders\Event\EventsTableSeeder;
 use Database\Seeders\MediaGallery\MediaGalleryTableSeeder;
-use Database\Seeders\User\UserSeeder;
 use Database\Seeders\User\UsersTableSeeder;
 use Illuminate\Database\Seeder;
 

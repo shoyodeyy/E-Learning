@@ -24,7 +24,7 @@ class EventsTableSeeder extends Seeder
                 'maxParticipants' => 1000,
                 'registrationDeadline' => '2025-09-09 23:59:59',
                 'bannerImage' => '/storage/images/MediaGallery/1-Techwiz.jpg',
-                'status' => 'approved',
+                'status' => 'completed',
             ],
             [
 
@@ -39,7 +39,7 @@ class EventsTableSeeder extends Seeder
                 'maxParticipants' => 2000,
                 'registrationDeadline' => '2025-09-13 12:00:00',
                 'bannerImage' => '/storage/images/MediaGallery/2-Dangkimonhoc.jpg',
-                'status' => 'approved',
+                'status' => 'completed',
             ],
             [
 

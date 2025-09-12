@@ -49,4 +49,11 @@ class Event extends Model
     {
         return Carbon::parse($this->start_at)->addMinutes($this->duration_minutes);
     }
+
+    public function participants()
+    {
+        return $this->belongsToMany(User::class, 'event_participants', 'event_id', 'user_id')
+            ->withPivot(['role', 'registration_status', 'registered_at'])
+            ->withTimestamps();
+    }
 }

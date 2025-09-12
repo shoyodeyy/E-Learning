@@ -9,7 +9,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\Chatbot\ChatController;
-use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\Feedback\FeedbackController;
 use App\Http\Controllers\Organizer\EventController;
 use App\Http\Controllers\Student\ProfileController;
 use App\Services\AIClientWithFallback;
@@ -21,7 +21,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 
-//Route::apiResource('/events', EventController::class);
+// Public event routes
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
 Route::get('/events/quantity/{quantity}', [EventController::class, 'showWithQuantity']);
@@ -83,20 +83,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/events/{id}/calendar', [CalendarController::class, 'getCalendarLinks']);
     Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
 
-
-    // Feedback
+    // Feedback routes - UPDATED WITH NEW LOGIC
     Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);
     Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
     Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
 });
-
-Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
-Route::post('/user/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
-Route::post('/user/verify-reset-token', [ResetPasswordController::class, 'verifyToken']);
-
-Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
-    ->middleware(['signed', 'throttle:6,1'])
-    ->name('verification.verify');
 
 // ===================== ADMIN ROUTES =====================
 
@@ -115,7 +106,3 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::post('/organizer/{id}/approve', [UserController::class, 'approveOrganizer']);
     Route::get('/organizers', [UserController::class, 'getOrganizers']);
 });
-
-//Route::middleware(['auth:sanctum', 'role:participant'])->group(function () {
-//    Route::post('media/save-selected', [MediaController::class, 'saveSelected']);
-//});
