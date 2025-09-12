@@ -60,13 +60,14 @@ class EventController extends Controller
             $file = $request->file('bannerImage');
             $fileName = $event->event_id . '.' . $file->getClientOriginalExtension();
 
+            // Lưu vào thư mục images/MediaGallery
             $path = $file->storeAs(
-                'events/banners',
+                'images/MediaGallery',
                 $fileName,
                 'public'
             );
 
-            $event->bannerImage = asset('storage/' . $path);
+            $event->bannerImage = '/storage/' . $path;
             $event->save();
         }
 
@@ -78,6 +79,14 @@ class EventController extends Controller
     public function update(Request $request, $id)
     {
         $event = Event::findOrFail($id);
+        
+        // Kiểm tra authentication trước
+        if (!auth()->check()) {
+            return response()->json([
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
+        
         $user = auth()->user();
 
         // Debug log để xem chi tiết khi lỗi 403
@@ -96,9 +105,10 @@ class EventController extends Controller
         }
 
         // check role (chỉ admin hoặc chính organizer mới được sửa)
-        // 👉 Lưu ý: phải đồng bộ với store(), nếu store lưu organizerId = user_id thì check user_id,
-        // nếu store lưu organizerId = id thì check id.
-        if (!$user->hasRole('admin') && $user->user_id !== $event->organizerId) {
+        // Kiểm tra hasRole method có tồn tại không
+        $isAdmin = method_exists($user, 'hasRole') ? $user->hasRole('admin') : ($user->role === 'admin');
+        
+        if (!$isAdmin && $user->user_id !== $event->organizerId) {
             return response()->json([
                 'message' => 'You can only update your own events'
             ], 403);
@@ -129,7 +139,8 @@ class EventController extends Controller
         if ($request->hasFile('bannerImage')) {
             // xoá file cũ nếu tồn tại
             if ($event->bannerImage) {
-                $oldPath = str_replace(asset('storage/'), '', $event->bannerImage);
+                // Loại bỏ '/storage/' từ đường dẫn để có đường dẫn thật trong storage
+                $oldPath = str_replace('/storage/', '', $event->bannerImage);
                 if (Storage::disk('public')->exists($oldPath)) {
                     Storage::disk('public')->delete($oldPath);
                 }
@@ -138,19 +149,20 @@ class EventController extends Controller
             $file = $request->file('bannerImage');
             $fileName = $event->event_id . '.' . $file->getClientOriginalExtension();
 
+            // Sử dụng cùng thư mục với store() - images/MediaGallery
             $path = $file->storeAs(
-                'events/banners',
+                'images/MediaGallery',
                 $fileName,
                 'public'
             );
 
-            $event->bannerImage = asset('storage/' . $path);
+            $event->bannerImage = '/storage/' . $path;
         }
 
         $event->save();
 
         // Nếu organizer sửa event đã được duyệt → reset lại pending để chờ duyệt lại
-        if (!$user->hasRole('admin') && $originalStatus === 'approved' && $event->wasChanged()) {
+        if (!$isAdmin && $originalStatus === 'approved' && $event->wasChanged()) {
             $event->update([
                 'status' => 'pending_update',
                 'approvedBy' => null
@@ -160,7 +172,7 @@ class EventController extends Controller
         }
 
         // Nếu organizer sửa event đã được duyệt và đang pending_update
-        if (!$user->hasRole('admin') && $originalStatus === 'pending_update' && $event->wasChanged()) {
+        if (!$isAdmin && $originalStatus === 'pending_update' && $event->wasChanged()) {
             $event->update([
                 'status' => 'pending_update',
                 'approvedBy' => null
@@ -170,7 +182,7 @@ class EventController extends Controller
         }
 
         // Nếu organizer sửa event chưa được duyệt
-        if (!$user->hasRole('admin') && $originalStatus === 'pending_create' && $event->wasChanged()) {
+        if (!$isAdmin && $originalStatus === 'pending_create' && $event->wasChanged()) {
             $event->update([
                 'status' => 'pending_create',
                 'approvedBy' => null
@@ -180,7 +192,7 @@ class EventController extends Controller
         }
 
         // Nếu organizer sửa event đang đc pending_delete
-        if (!$user->hasRole('admin') && $originalStatus === 'pending_delete' && $event->wasChanged()) {
+        if (!$isAdmin && $originalStatus === 'pending_delete' && $event->wasChanged()) {
             return response()->json([
                 'message' => 'You can not update the event in pending_delete status'
             ], 403);
@@ -197,17 +209,35 @@ class EventController extends Controller
     public function destroy(Request $request, $id)
     {
         $event = Event::findOrFail($id);
+        
+        // Kiểm tra authentication trước
+        if (!auth()->check()) {
+            return response()->json([
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
+        
         $user = auth()->user();
 
         // check status
-        if (!$user->hasRole('admin') && $event->status === 'completed' ) {
+        $isAdmin = method_exists($user, 'hasRole') ? $user->hasRole('admin') : ($user->role === 'admin');
+        
+        if (!$isAdmin && $event->status === 'completed') {
             return response()->json([
                 'message' => 'Completed events cannot be deleted.'
             ], 403);
         }
 
         // check role
-        if ($user->hasRole('admin')) {
+        if ($isAdmin) {
+            // Xóa file banner nếu có
+            if ($event->bannerImage) {
+                $filePath = str_replace('/storage/', '', $event->bannerImage);
+                if (Storage::disk('public')->exists($filePath)) {
+                    Storage::disk('public')->delete($filePath);
+                }
+            }
+            
             $event->delete();
 
             return response()->json([
@@ -222,6 +252,14 @@ class EventController extends Controller
         }
 
         if ($event->status === 'pending_create') {
+            // Xóa file banner nếu có
+            if ($event->bannerImage) {
+                $filePath = str_replace('/storage/', '', $event->bannerImage);
+                if (Storage::disk('public')->exists($filePath)) {
+                    Storage::disk('public')->delete($filePath);
+                }
+            }
+            
             $event->delete();
 
             return response()->json([

@@ -24,6 +24,8 @@ export default function UpdateEventForm() {
         bannerImage: null
     });
 
+    const [currentBannerUrl, setCurrentBannerUrl] = useState(""); // Lưu URL ảnh hiện tại
+
     const categories = [
         'Cultural Event',
         'Technical Fests',
@@ -61,8 +63,17 @@ export default function UpdateEventForm() {
                     registrationDeadline: event.registrationDeadline
                         ? event.registrationDeadline.replace(" ", "T").slice(0, 16)
                         : "",
-                    bannerImage: event.bannerImage || null
+                    bannerImage: null // Không set file cũ, chỉ để hiển thị
                 });
+
+                // Set URL ảnh hiện tại để hiển thị
+                if (event.bannerImage) {
+                    // Nếu bannerImage đã có http thì dùng luôn, không thì thêm domain
+                    const imageUrl = event.bannerImage.startsWith('http') 
+                        ? event.bannerImage 
+                        : `http://localhost:8000/${event.bannerImage}`;
+                    setCurrentBannerUrl(imageUrl);
+                }
             } catch (error) {
                 console.log("Failed to fetch event: ", error);
             } finally {
@@ -106,6 +117,20 @@ export default function UpdateEventForm() {
                 ...prev,
                 bannerImage: files[0]
             }));
+        }
+    };
+
+    // Helper function để lấy URL hiển thị ảnh
+    const getImageDisplayUrl = () => {
+        if (formData.bannerImage instanceof File) {
+            // Ảnh mới được chọn
+            return URL.createObjectURL(formData.bannerImage);
+        } else if (currentBannerUrl) {
+            // Ảnh cũ từ database
+            return currentBannerUrl;
+        } else {
+            // Ảnh mặc định
+            return "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=300&fit=crop";
         }
     };
 
@@ -182,21 +207,6 @@ export default function UpdateEventForm() {
             }
         }
 
-        // Banner Image
-        // if (!formData.bannerImage) {
-        //     newErrors.bannerImage = 'Banner image is required.';
-        //     isValid = false;
-        // } else {
-        //     const allowedExtensions = ['jpeg', 'png', 'jpg', 'gif', 'svg'];
-        //     const fileName = formData.bannerImage.name || '';
-        //     const fileExt = fileName.split('.').pop().toLowerCase();
-        //
-        //     if (!allowedExtensions.includes(fileExt)) {
-        //         newErrors.bannerImage = 'Banner image must be a jpeg, jpg, png, gif, or svg file.';
-        //         isValid = false;
-        //     }
-        // }
-
         setErrors(newErrors);
         return isValid;
     };
@@ -253,6 +263,7 @@ export default function UpdateEventForm() {
             setLoading(false);
         }
     };
+    console.log("Token in UpdateEventForm:", token);
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
@@ -287,59 +298,41 @@ export default function UpdateEventForm() {
                                     onDragLeave={handleDragLeave}
                                     onDrop={handleDrop}
                                 >
-                                    {formData.bannerImage ? (
-                                        <div className="space-y-2">
-                                            <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-                                                <img
-                                                    src={
-                                                        formData.bannerImage instanceof File
-                                                            ? URL.createObjectURL(formData.bannerImage)
-                                                            : formData.bannerImage
-                                                    }
-                                                    alt="Event banner"
-                                                    className="w-full h-full object-cover rounded-lg"
-                                                />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-2">Drag 'n' drop a file here, or click to select</p>
-                                                <p className="text-xs text-gray-500">Max file size: 5MB</p>
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleFileSelect}
-                                                    className="hidden"
-                                                    id="file-upload"
-                                                />
-                                                <label
-                                                    htmlFor="file-upload"
-                                                    className="inline-block mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
-                                                >
-                                                    Change Image
-                                                </label>
-                                            </div>
+                                    <div className="space-y-2">
+                                        <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                                            <img
+                                                src={getImageDisplayUrl()}
+                                                alt="Event banner"
+                                                className="w-full h-full object-cover rounded-lg"
+                                                onError={(e) => {
+                                                    // Fallback nếu ảnh không load được
+                                                    e.target.src = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=300&fit=crop";
+                                                }}
+                                            />
                                         </div>
-                                    ) : (
-                                        <div className="space-y-4">
-                                            <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-                                                <img
-                                                    src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=300&fit=crop"
-                                                    alt="Current event banner"
-                                                    className="w-full h-full object-cover rounded-lg"
-                                                />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-2">Drag 'n' drop a file here, or click to select</p>
-                                                <p className="text-xs text-gray-500">Max file size: 5MB</p>
-                                                <input type="file" accept="image/*" onChange={handleFileSelect} className="hidden" id="file-upload" />
-                                                <label
-                                                    htmlFor="file-upload"
-                                                    className="inline-block mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
-                                                >
-                                                    Choose File
-                                                </label>
-                                            </div>
+                                        <div>
+                                            <p className="text-sm text-gray-600 mb-2">
+                                                {formData.bannerImage instanceof File 
+                                                    ? "New image selected" 
+                                                    : "Current image (drag 'n' drop or click to change)"
+                                                }
+                                            </p>
+                                            <p className="text-xs text-gray-500">Max file size: 2MB</p>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleFileSelect}
+                                                className="hidden"
+                                                id="file-upload"
+                                            />
+                                            <label
+                                                htmlFor="file-upload"
+                                                className="inline-block mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
+                                            >
+                                                {formData.bannerImage instanceof File ? "Change Image" : "Upload New Image"}
+                                            </label>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             </div>
 

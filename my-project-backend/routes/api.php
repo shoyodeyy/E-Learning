@@ -25,10 +25,6 @@ Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
 
-// Calendar routes are protected (only for authenticated users)
-
-Route::apiResource('/events', EventController::class);
-
 // Password reset routes
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
 Route::post('/user/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');

@@ -55,7 +55,7 @@ export default function DetailEvent() {
                             </label>
                             <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
                                 <img
-                                    src={event.bannerImage}
+                                    src={`http://localhost:8000${event.bannerImage}`}
                                     alt="Event banner"
                                     className="w-full h-full object-cover rounded-lg"
                                 />

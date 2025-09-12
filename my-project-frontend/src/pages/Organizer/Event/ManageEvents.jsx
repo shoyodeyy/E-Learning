@@ -193,8 +193,6 @@ export default function ManageEventsLayout() {
         }
     }
 
-    console.log(events);
-
     return (
         <div className="min-h-screen bg-gray-50 flex">
             {/* Main Content */}
