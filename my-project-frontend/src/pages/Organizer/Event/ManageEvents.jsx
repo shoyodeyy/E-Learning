@@ -11,7 +11,7 @@ function EventCard({ event, onDelete }) {
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-200">
             {/* Event Image */}
             <div className="relative">
-                <img src={event.bannerImage} alt={event.title} className="w-full h-48 object-cover" />
+                <img src={`http://localhost:8000${event.bannerImage}`} alt={event.title} className="w-full h-48 object-cover" />
                 <div className="absolute top-3 left-3">
                     <span className={`px-2 py-1 text-xs font-medium text-white rounded ${event.statusColor}`}>{event.status}</span>
                 </div>
@@ -35,10 +35,7 @@ function EventCard({ event, onDelete }) {
                         >
                             <Edit size={16} />
                         </Link>
-                        <button
-                            onClick={onDelete}
-                            className="cursor-pointer p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                        >
+                        <button onClick={onDelete} className="cursor-pointer p-2 text-gray-400 hover:text-gray-600 transition-colors">
                             <Trash2 size={16} />
                         </button>
                         <Link
@@ -109,7 +106,7 @@ function Pagination({ pagination, setCurrentPage }) {
 
             {/* Display page number */}
             {pagination.links.map((link, index) => {
-                if (link.label === '&laquo; Previous' || link.label === 'Next &raquo;') {
+                if (link.label === "&laquo; Previous" || link.label === "Next &raquo;") {
                     return null;
                 }
 
@@ -117,7 +114,9 @@ function Pagination({ pagination, setCurrentPage }) {
                     <button
                         key={index}
                         onClick={() => handlePageChange(link.label)}
-                        className={`cursor-pointer w-8 h-8 rounded text-sm font-medium ${link.active ? "bg-purple-600 text-white" : "text-gray-600 hover:text-gray-900"}`}
+                        className={`cursor-pointer w-8 h-8 rounded text-sm font-medium ${
+                            link.active ? "bg-purple-600 text-white" : "text-gray-600 hover:text-gray-900"
+                        }`}
                         disabled={link.active}
                     >
                         {link.label}
@@ -144,7 +143,7 @@ export default function ManageEventsLayout() {
 
     const { token } = useAuth();
 
-    const [ events, setEvents ] = useState([]);
+    const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [pagination, setPagination] = useState({});
@@ -165,7 +164,7 @@ export default function ManageEventsLayout() {
 
     useEffect(() => {
         fetchEvents(currentPage);
-        window.scrollTo({ top: 0, behavior: "smooth"});
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }, [currentPage]);
 
     async function handleDelete(eventId) {
@@ -175,8 +174,8 @@ export default function ManageEventsLayout() {
         try {
             await axios.delete(`${apiUrl}/events/${eventId}`, {
                 headers: {
-                    ...(token ? { Authorization: `Bearer ${token}` } : {})
-                }
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
             });
 
             alert("Event deleted successfully!");
@@ -193,6 +192,8 @@ export default function ManageEventsLayout() {
             }
         }
     }
+
+    console.log(events);
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
@@ -238,18 +239,11 @@ export default function ManageEventsLayout() {
                                     event.venue.toLowerCase().includes(searchQuery.toLowerCase())
                             )
                             .map((event) => (
-                                <EventCard
-                                    key={event.eventId}
-                                    event={event}
-                                    onDelete={() => handleDelete(event.eventId)}
-                                />
+                                <EventCard key={event.eventId} event={event} onDelete={() => handleDelete(event.eventId)} />
                             ))}
                     </div>
 
-                    <Pagination
-                        pagination={pagination}
-                        setCurrentPage={setCurrentPage}
-                    />
+                    <Pagination pagination={pagination} setCurrentPage={setCurrentPage} />
                 </main>
             </div>
         </div>

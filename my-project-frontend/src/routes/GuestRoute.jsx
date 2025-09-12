@@ -1,23 +1,11 @@
 import { Navigate, Outlet } from "react-router-dom";
-
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export default function GuestRoute() {
-    const { isAuthenticated, loading, user } = useAuth();
+    const { isAuthenticated, user, loading } = useAuth();
 
     if (loading) return null;
+    if (user?.role === "admin") return <Navigate to="/admin/dashboard" />;
 
-    if (isAuthenticated) {
-        switch (user?.role) {
-            case "admin":
-                return <Navigate to="/admin/dashboard" replace />;
-            case "organizer":
-                return <Navigate to="/organizer/dashboard" replace />;
-            case "participant":
-            default:
-                return <Navigate to="/" replace />;
-        }
-    }
-
-    return <Outlet />;
+    return isAuthenticated ? <Navigate to="/" /> : <Outlet />;
 }

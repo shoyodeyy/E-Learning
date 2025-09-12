@@ -17,40 +17,24 @@ use App\Http\Controllers\CalendarController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
-// Public routes
-
-
-// Auth
-
-// Public routes
-
-
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
-
 
 //Route::apiResource('/events', EventController::class);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
 Route::get('/events/quantity/{quantity}', [EventController::class, 'showWithQuantity']);
 
-// Creation and modifications require auth; see authenticated group below
-// Route::post('/events', [EventController::class, 'store']);
-// Route::put('/events/{id}', [EventController::class, 'update']);
-// Route::delete('/events/{id}', [EventController::class, 'destroy']);
-
-
 // Calendar routes are protected (only for authenticated users)
 
+Route::apiResource('/events', EventController::class);
 // Event routes
 //Route::post('/events', [EventController::class, 'store']);
 //Route::put('/events/{id}', [EventController::class, 'update']);
 //Route::delete('/events/{id}', [EventController::class, 'destroy']);
 
 //Route::apiResource('/events', EventController::class);
-
 
 // Password reset routes
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
@@ -77,20 +61,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', fn(Request $request) => $request->user());
     Route::post('/logout', [AuthController::class, 'logout']);
 
-
     // Email verification routes
-
-    // Email verification
-
-    // Email verification routes
-
     Route::post('/email/verification-notification', [VerificationController::class, 'send'])
         ->middleware(['throttle:6,1'])
         ->name('verification.send');
     Route::post('/email/resend', [VerificationController::class, 'resend'])
         ->middleware(['throttle:6,1']);
     Route::get('/email/verify-status', [VerificationController::class, 'status']);
-
 
     // Profile routes
     Route::prefix('profile')->group(function () {
@@ -123,8 +100,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
 });
 
-
-
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
 Route::post('/user/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 Route::post('/user/verify-reset-token', [ResetPasswordController::class, 'verifyToken']);
@@ -147,6 +122,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/{id}/ban', [UserController::class, 'ban']);
     Route::post('/users/{id}/unban', [UserController::class, 'unban']);
+    Route::post('/organizer/{id}/approve', [UserController::class, 'approveOrganizer']);
+    Route::get('/organizers', [UserController::class, 'getOrganizers']);
 });
 
 //Route::middleware(['auth:sanctum', 'role:participant'])->group(function () {

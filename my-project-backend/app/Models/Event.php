@@ -30,7 +30,12 @@ class Event extends Model
         'updated_at'
     ];
 
-    // relationship
+    // relationship with MediaGallery
+    public function mediaGallery()
+    {
+        return $this->hasMany(MediaGallery::class, 'event_id', 'event_id');
+    }
+
     public function organizer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'organizerId', 'user_id');

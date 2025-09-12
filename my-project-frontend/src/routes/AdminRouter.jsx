@@ -8,6 +8,7 @@ import Overview from "../pages/Admin/Overview.jsx";
 
 import EventList from "../pages/Admin/Events/EventList.jsx"
 import ApprovalEvent from "../pages/Admin/components/ApprovalEvent.jsx";
+import Approvals from "../pages/Admin/Approvals.jsx";
 
 export default function AdminRouter() {
     return (
@@ -20,10 +21,11 @@ export default function AdminRouter() {
                     {/*Event List*/}
                     <Route path="events" element={<EventList />}/>
 
-                    <Route path="approval" element={<ApprovalEvent />} />
+                    <Route path="approval/event" element={<ApprovalEvent />} />
 
                     {/* User */}
                     <Route path="user" element={<UserList />} />
+                    <Route path="approval/organizer" element={<Approvals />} />
 
                     {/* Change password */}
                     <Route path="change-password" element={<ChangePassword />} />
