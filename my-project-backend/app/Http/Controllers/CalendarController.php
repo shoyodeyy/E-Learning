@@ -27,7 +27,7 @@ class CalendarController extends Controller
 
         return response()->json([
             "google_url" => $googleUrl,
-            "ics_url" => url("/api/events/{$event->id}/calendar/ics")
+            "ics_url" => url("/api/events/{$event->event_id}/calendar/ics")
         ]);
     }
 
@@ -42,7 +42,7 @@ class CalendarController extends Controller
 
         $ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//EventSphere//Calendar//EN\r\n";
         $ics .= "BEGIN:VEVENT\r\n";
-        $ics .= "UID:event-" . $event->id . "@eventsphere.com\r\n";
+        $ics .= "UID:event-" . $event->event_id . "@eventsphere.com\r\n";
         $ics .= "DTSTAMP:" . gmdate('Ymd\THis\Z') . "\r\n";
         $ics .= "DTSTART:$start\r\n";
         $ics .= "SUMMARY:" . addslashes($event->title) . "\r\n";
@@ -52,6 +52,6 @@ class CalendarController extends Controller
 
         return response($ics)
             ->header('Content-Type', 'text/calendar')
-            ->header('Content-Disposition', "attachment; filename=event-{$event->id}.ics");
+            ->header('Content-Disposition', "attachment; filename=event-{$event->event_id}.ics");
     }
 }

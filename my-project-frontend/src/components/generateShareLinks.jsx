@@ -1,7 +1,9 @@
 // utils/shareLinks.js
 export function generateShareLinks(event, baseUrl) {
-  const eventUrl = `${baseUrl}/events/${event.id}`;
-  const message = `🎉 ${event.title}\n📅 ${event.date} at ${event.venue}\n\n👉 Register here: ${eventUrl}`;
+  const eventUrl = `${baseUrl}/event/${event?.id}`;
+  const when = event?.date ? `${event.date}` : '';
+  const where = event?.venue || event?.location || '';
+  const message = `🎉 ${event?.title || 'Event'}\n${when ? `📅 ${when}` : ''} ${where ? `at ${where}` : ''}\n\n👉 View details: ${eventUrl}`.trim();
 
   return {
     facebook: {

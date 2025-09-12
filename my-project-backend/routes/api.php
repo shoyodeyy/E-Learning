@@ -36,10 +36,19 @@ Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
 
+// Creation and modifications require auth; see authenticated group below
+// Route::post('/events', [EventController::class, 'store']);
+// Route::put('/events/{id}', [EventController::class, 'update']);
+// Route::delete('/events/{id}', [EventController::class, 'destroy']);
+
+
+// Calendar routes are protected (only for authenticated users)
+
 // Event routes
 Route::post('/events', [EventController::class, 'store']);
 Route::put('/events/{id}', [EventController::class, 'update']);
 Route::delete('/events/{id}', [EventController::class, 'destroy']);
+
 
 Route::apiResource('/events', EventController::class);
 
@@ -91,6 +100,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/', [ProfileController::class, 'update']);
     });
 
+    // Event routes
+    Route::post('/events', [EventController::class, 'store']);
+    Route::put('/events/{id}', [EventController::class, 'update']);
+    Route::delete('/events/{id}', [EventController::class, 'destroy']);
+
     // Chatbot routes
     Route::get('/chat/{sessionId}/history', [ChatController::class, 'history']);
     Route::get('/chat/sessions', [ChatController::class, 'sessions']);
@@ -98,6 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Change password
     Route::post('/user/change-password', [AuthController::class, 'changePassword']);
+
     // Calendar routes
     Route::get('/events/{id}/calendar', [CalendarController::class, 'getCalendarLinks']);
     Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
@@ -111,6 +126,13 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'role:organizer'])->group(function () {
     Route::get('/events/{eventId}/registrations', [EventRegistrationController::class, 'listByEvent']);
     Route::post('/registrations/{id}/attendance', [EventRegistrationController::class, 'markAttendance']);
+
+
+    // Calendar routes (protected)
+    Route::get('/events/{id}/calendar', [CalendarController::class, 'getCalendarLinks']);
+    Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
+
+
 
     // Feedback
         Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);

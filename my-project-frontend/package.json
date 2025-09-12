@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"lt --port 5173 --subdomain shareEvents\"",
+    "dev": "concurrently -n \"vite,cf\" -c \"#93c5fd,#00AAEB\" \"vite --host\" \"npx --yes cloudflared tunnel --url http://localhost:5173 --no-autoupdate\"",
+    "dev:local": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
