@@ -37,6 +37,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role ?? 'participant',
+            'status' => $request->role === 'organizer' ? 'pending' : 'active',
         ]);
 
         // Send email verification
@@ -45,7 +46,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user->only(['user_id', 'name', 'email', 'role', 'email_verified_at']),
+            'user' => $user->only(['user_id', 'name', 'email', 'role', 'email_verified_at', 'status']),
             'token' => $token,
             'message' => 'Registration successful! Please check your email to verify your account.',
             'email_verification_required' => true,
@@ -106,6 +107,7 @@ class AuthController extends Controller
                 'is_google_user' => $user->isGoogleUser(),
                 'needs_email_verification' => $user->needsEmailVerification(),
                 'has_password' => $user->has_password,
+                'status' => $user->status
             ],
             'token' => $token,
             'email_verified' => $user->hasVerifiedEmail(),

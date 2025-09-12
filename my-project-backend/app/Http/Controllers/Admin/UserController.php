@@ -10,27 +10,51 @@ use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
+    /**
+     * Lấy danh sách user (student + instructor) có search & paginate
+     */
     public function index(Request $request)
     {
-        $perPage = $request->get('per_page', 100);
-        return User::whereIn('role', ['student', 'instructor'])
-            ->orderBy('id')
-            ->paginate($perPage, ['*'], 'page', $request->get('page', 1));
-    }
+        $query = User::query()->whereIn('role', ['participant', 'organizer']);
 
-    public function approve($id)
-    {
-        $user = User::findOrFail($id);
-
-        if ($user->role !== 'organizer') {
-            return response()->json(['message' => 'Only organizers can be approved.'], 400);
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%");
+            });
         }
 
-        $user->update(['is_approved' => true]);
+        if ($request->filled('role') && $request->role !== 'all') {
+            $query->where('role', $request->role);
+        }
 
-        return response()->json(['message' => 'Organizer approved successfully.']);
+        if ($request->filled('status') && $request->status !== 'all') {
+            if ($request->status === 'banned') {
+                $query->whereNotNull('banned_until');
+            } elseif ($request->status === 'active') {
+                $query->whereNull('banned_until');
+            }
+        }
+
+        $sortField = $request->get('sortField', 'user_id');
+        $sortDirection = $request->get('sortDirection', 'asc');
+        $allowedSortFields = ['user_id', 'name', 'email', 'role', 'created_at'];
+
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'user_id';
+        }
+
+        $query->orderBy($sortField, $sortDirection);
+
+        $users = $query->paginate(20);
+
+        return response()->json($users);
     }
 
+    /**
+     * Ban user trong 1 năm + gửi email
+     */
     public function ban(Request $request, $id)
     {
         $request->validate([
@@ -38,23 +62,45 @@ class UserController extends Controller
         ]);
 
         $user = User::findOrFail($id);
-        $user->banned_until = now()->addYears(1);
-        $user->ban_reason = $request->reason;
-        $user->save();
+        $user->update([
+            'ban_until' => now()->addYear(),
+            'ban_reason'   => $request->reason,
+            'status' => "banned"
+        ]);
 
-        // Gửi email cho user
         Mail::to($user->email)->send(new UserBannedMail($user, $request->reason));
 
         return response()->json(['message' => 'User banned successfully.']);
     }
 
+    /**
+     * Gỡ ban user
+     */
     public function unban($id)
     {
         $user = User::findOrFail($id);
-        $user->banned_until = null;
-        $user->ban_reason = null;
-        $user->save();
+        $user->update([
+            'ban_until' => null,
+            'ban_reason'   => null,
+            'status' => "active"
+        ]);
 
         return response()->json(['message' => 'User unbanned successfully.']);
+    }
+
+    public function approveOrganizer(Request $request, $id)
+    {
+        $user = User::where('role', 'organizer')->findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|in:active,banned,pending',
+        ]);
+
+        $user->update(['status' => $request->status]);
+
+        return response()->json([
+            'message' => "Organizer status updated to {$request->status}.",
+            'user' => $user,
+        ]);
     }
 }

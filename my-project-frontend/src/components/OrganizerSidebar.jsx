@@ -1,17 +1,23 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { toast } from "react-toastify";
+
+import { useAuth } from "../context/AuthContext";
 
 export default function OrganizerSidebar({ mobile = false }) {
     const location = useLocation();
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const { user, refreshUser } = useAuth();
 
     const menuItems = [
         { id: "dashboard", link: "/organizer/dashboard", label: "Dashboard", icon: "📊" },
-        { id: "manage", link: "/organizer/manage-events", label: "Manage Events", icon: "👤" },
+        { id: "profile", link: "/organizer/profile", label: "Profile", icon: "👤" },
+        { id: "manage", link: "/organizer/manage-events", label: "Manage Events", icon: "🎢", requiresActive: true },
     ];
 
     const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+    const userStatus = user.status;
 
     // 👉 Mobile Bottom Navigation
     if (mobile) {
@@ -27,6 +33,13 @@ export default function OrganizerSidebar({ mobile = false }) {
                                 flex flex-col items-center text-xs font-medium flex-1 py-1
                                 ${isActive ? "text-purple-600" : "text-gray-500 hover:text-purple-600"}
                             `}
+                            onClick={async (e) => {
+                                await refreshUser();
+                                if (item.requiresActive && userStatus !== "active") {
+                                    e.preventDefault();
+                                    toast.error("Your account is pending approval by admin.");
+                                }
+                            }}
                         >
                             <span className="text-xl">{item.icon}</span>
                             <span>{item.label}</span>
@@ -60,6 +73,13 @@ export default function OrganizerSidebar({ mobile = false }) {
                         const isActive = location.pathname === item.link;
                         return (
                             <Link
+                                onClick={async (e) => {
+                                    await refreshUser();
+                                    if (item.requiresActive && userStatus !== "active") {
+                                        e.preventDefault();
+                                        toast.error("Your account is pending approval by admin.");
+                                    }
+                                }}
                                 key={item.id}
                                 to={item.link}
                                 className={`
