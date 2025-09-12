@@ -50,7 +50,6 @@ export default function UserList() {
         }
     };
 
-
     useEffect(() => {
         fetchUsers(page);
     }, [page, searchTerm, roleFilter, statusFilter, sortField, sortDirection]);
@@ -123,15 +122,13 @@ export default function UserList() {
 
     const handleBan = async () => {
         if (!banUser) return;
-        console.log("ban", banUser);
-        
         setIsProcessingBan(true);
         try {
             const response = await api.post(`/users/${banUser.user_id}/ban`, { reason });
 
             if (response.status >= 200 && response.status < 300) {
-                setUsers(users.map((u) => (u.user_id === banUser.user_id ? { ...u, banned_until: "9999-12-31", ban_reason: reason } : u)));
                 toast.success(`Banned ${banUser.name} successfully!`);
+                fetchUsers(page);
             } else {
                 toast.error("Failed to ban user");
             }
@@ -148,8 +145,8 @@ export default function UserList() {
         if (!window.confirm("Are you sure you want to unban this user?")) return;
         try {
             await api.post(`/users/${id}/unban`);
-            setUsers(users.map((u) => (u.user_id === id ? { ...u, banned_until: null, ban_reason: null } : u)));
             toast.success("User unbanned successfully!");
+            fetchUsers(page);
         } catch {
             toast.error("Failed to unban user");
         }
@@ -161,9 +158,6 @@ export default function UserList() {
         }
         return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 text-blue-600" /> : <ArrowDown className="w-4 h-4 text-blue-600" />;
     };
-
-    console.log("user", users);
-    
 
     return (
         <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
@@ -214,8 +208,8 @@ export default function UserList() {
                                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                                     >
                                         <option value="all">All Roles</option>
-                                        <option value="participant">Student</option>
-                                        <option value="organizer">Instructor</option>
+                                        <option value="participant">Participant</option>
+                                        <option value="organizer">Organizer</option>
                                     </select>
                                 </div>
 
@@ -229,6 +223,7 @@ export default function UserList() {
                                     >
                                         <option value="all">All Status</option>
                                         <option value="active">Active</option>
+                                        <option value="pending">Pending</option>
                                         <option value="banned">Banned</option>
                                     </select>
                                 </div>
@@ -345,7 +340,7 @@ export default function UserList() {
                                                 index % 2 === 0 ? "bg-white" : "bg-gray-50/50"
                                             }`}
                                         >
-                                            <td className="px-6 py-4 text-sm font-medium text-gray-900">#{u.id}</td>
+                                            <td className="px-6 py-4 text-sm font-medium text-gray-900">#{u.user_id}</td>
                                             <td className="px-6 py-4">
                                                 <div className="font-medium text-gray-900">{u.name}</div>
                                             </td>
@@ -361,9 +356,13 @@ export default function UserList() {
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-600">{new Date(u.created_at).toLocaleDateString("vi-VN")}</td>
                                             <td className="px-6 py-4 text-center">
-                                                {u.status ? (
+                                                {u.status === "banned" ? (
                                                     <span className="inline-flex px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                                         Banned
+                                                    </span>
+                                                ) : u.status === "pending" ? (
+                                                    <span className="inline-flex px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                        Pending
                                                     </span>
                                                 ) : (
                                                     <span className="inline-flex px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -372,9 +371,9 @@ export default function UserList() {
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                {u.status ? (
+                                                {u.status !== "active" ? (
                                                     <button
-                                                        onClick={() => handleUnban(u.id)}
+                                                        onClick={() => handleUnban(u.user_id)}
                                                         className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-green-700 hover:text-green-900 hover:bg-green-50 rounded-lg transition-colors duration-200"
                                                     >
                                                         <Undo className="w-4 h-4" /> Unban
@@ -403,7 +402,7 @@ export default function UserList() {
                                     <div className="flex justify-between items-start mb-3">
                                         <div>
                                             <h3 className="font-semibold text-gray-900 text-lg">{u.name}</h3>
-                                            <p className="text-gray-600 text-sm">#{u.id}</p>
+                                            <p className="text-gray-600 text-sm">#{u.user_id}</p>
                                         </div>
                                         <div className="flex flex-col items-end gap-2">
                                             {u.banned_until ? (

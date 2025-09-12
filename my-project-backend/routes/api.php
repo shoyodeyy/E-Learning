@@ -25,19 +25,7 @@ Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
 
-// Creation and modifications require auth; see authenticated group below
-// Route::post('/events', [EventController::class, 'store']);
-// Route::put('/events/{id}', [EventController::class, 'update']);
-// Route::delete('/events/{id}', [EventController::class, 'destroy']);
-
-
 // Calendar routes are protected (only for authenticated users)
-
-// Event routes
-Route::post('/events', [EventController::class, 'store']);
-Route::put('/events/{id}', [EventController::class, 'update']);
-Route::delete('/events/{id}', [EventController::class, 'destroy']);
-
 
 Route::apiResource('/events', EventController::class);
 
@@ -129,6 +117,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::post('/users/{id}/ban', [UserController::class, 'ban']);
     Route::post('/users/{id}/unban', [UserController::class, 'unban']);
     Route::post('/organizer/{id}/approve', [UserController::class, 'approveOrganizer']);
+    Route::get('/organizers', [UserController::class, 'getOrganizers']);
 });
 
 //Route::middleware(['auth:sanctum', 'role:participant'])->group(function () {
