@@ -13,8 +13,6 @@ async function fetchFeaturedEvents() {
 
         const filteredFeaturedEvents = (res.data.data || []).filter(event => [
                 "approved",
-                "pending_update",
-                "pending_delete"
             ].includes(event.status)
         );
 
@@ -159,7 +157,7 @@ const EventCard = ({ event }) => {
         <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 min-h-[450px] flex-col justify-between">
             <div className="relative overflow-hidden">
                 <img
-                    src={event.bannerImage || "/placeholder.svg"}
+                    src={event.bannerImage ? `http://localhost:8000${event.bannerImage}` : "/placeholder.svg"}
                     alt={event.title}
                     className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                 />

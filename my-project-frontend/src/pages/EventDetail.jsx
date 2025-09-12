@@ -413,7 +413,11 @@ const EventDetailPage = () => {
                 {/* Hero Section */}
                 <div className="relative">
                     <div className="h-96 overflow-hidden">
-                        <img src={events.bannerImage} alt={events.title} className="w-full h-full object-cover" />
+                        <img
+                            src={events.bannerImage ? `http://localhost:8000${events.bannerImage}` : "/placeholder.svg"}
+                            alt={events.title}
+                            className="w-full h-full object-cover"
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                     </div>
 
