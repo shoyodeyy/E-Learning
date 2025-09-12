@@ -229,7 +229,8 @@ export default function Header() {
                             <div className="mt-6 pt-6 border-t border-gray-200 space-y-1">
                                 <button
                                     onClick={() => {
-                                        navigate("/user/profile");
+                                        if (user.role === "participant") navigate("/user/profile");
+                                        else if (user.role === "organizer") navigate("/organizer/profile");
                                         setMobileMenuOpen(false);
                                     }}
                                     className="cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors duration-200"
@@ -239,7 +240,8 @@ export default function Header() {
                                 </button>
                                 <button
                                     onClick={() => {
-                                        navigate("/user/dashboard");
+                                        if (user.role === "participant") navigate("/user/dashboard");
+                                        else if (user.role === "organizer") navigate("/organizer/dashboard");
                                         setMobileMenuOpen(false);
                                     }}
                                     className=" cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors duration-200"

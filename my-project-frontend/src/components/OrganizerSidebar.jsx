@@ -8,7 +8,8 @@ export default function OrganizerSidebar({ mobile = false }) {
 
     const menuItems = [
         { id: "dashboard", link: "/organizer/dashboard", label: "Dashboard", icon: "📊" },
-        { id: "manage", link: "/organizer/manage-events", label: "Manage Events", icon: "👤" },
+        { id: "profile", link: "/organizer/profile", label: "Profile", icon: "👤" },
+        { id: "manage", link: "/organizer/manage-events", label: "Manage Events", icon: "🎢" },
     ];
 
     const toggleSidebar = () => setIsCollapsed(!isCollapsed);

@@ -9,54 +9,45 @@ export default function Profile() {
     const { user } = useAuth();
 
     const handleEditProfile = () => {
-        navigate("/user/edit-profile");
+        if (user.role === "participant") navigate("/user/edit-profile");
+        else if (user.role === "organizer") navigate("/organizer/edit-profile");
     };
 
     const handleChangePassword = () => {
-        navigate("/user/change-password")
+        if (user.role === "participant") navigate("/user/change-password");
+        else if (user.role === "organizer") navigate("/organizer/change-password");
     };
 
     return (
         <div className="min-h-screen bg-gray-50">
-
             <div className="max-w-6xl mx-auto py-8">
                 {/* Page Header */}
                 <div className="mb-8">
-                    <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
-                        Participant Profile
-                    </h1>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Participant Profile</h1>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                     {/* Personal Information */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h2 className="text-xl font-bold text-gray-900 mb-6">
-                            Personal Information
-                        </h2>
+                        <h2 className="text-xl font-bold text-gray-900 mb-6">Personal Information</h2>
 
                         <div className="flex items-start space-x-4 mb-6">
                             <Avatar size={80} />
 
                             <div className="flex-1">
                                 <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-600 mb-1">
-                                        Name
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-600 mb-1">Name</label>
                                     <p className="text-gray-900 font-medium">{user.name}</p>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-600 mb-1">
-                                        Gender
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-600 mb-1">Gender</label>
                                     <p className="text-gray-900">{user.gender}</p>
                                 </div>
                             </div>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-2">
-                                About Me
-                            </label>
+                            <label className="block text-sm font-medium text-gray-600 mb-2">About Me</label>
                             <p className="text-gray-700 text-sm leading-relaxed">{user.profile}</p>
                         </div>
                     </div>
@@ -67,23 +58,17 @@ export default function Profile() {
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-600 mb-1">
-                                    Email
-                                </label>
+                                <label className="block text-sm font-medium text-gray-600 mb-1">Email</label>
                                 <p className="text-gray-900">{user.email}</p>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-600 mb-1">
-                                    Phone
-                                </label>
+                                <label className="block text-sm font-medium text-gray-600 mb-1">Phone</label>
                                 <p className="text-gray-900">{user.phone}</p>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-600 mb-1">
-                                    Address
-                                </label>
+                                <label className="block text-sm font-medium text-gray-600 mb-1">Address</label>
                                 <p className="text-gray-900">{user.address}</p>
                             </div>
                         </div>
@@ -95,16 +80,12 @@ export default function Profile() {
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-600 mb-1">
-                                        Department
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-600 mb-1">Department</label>
                                     <p className="text-gray-900">{user.department || "-"}</p>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-600 mb-1">
-                                        Enrollment Number
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-600 mb-1">Enrollment Number</label>
                                     <p className="text-blue-600 font-medium">{user.enrollment_no || "-"}</p>
                                 </div>
                             </div>
