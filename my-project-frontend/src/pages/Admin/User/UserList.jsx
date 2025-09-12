@@ -25,7 +25,7 @@ export default function UserList() {
     const fetchUsers = async (pageNum = 1) => {
         setLoading(true);
         try {
-            const res = await api.get(`/admin/users`, {
+            const res = await api.get(`/users`, {
                 params: {
                     page: pageNum,
                     search: searchTerm,
@@ -123,12 +123,14 @@ export default function UserList() {
 
     const handleBan = async () => {
         if (!banUser) return;
+        console.log("ban", banUser);
+        
         setIsProcessingBan(true);
         try {
-            const response = await api.post(`/users/${banUser.id}/ban`, { reason });
+            const response = await api.post(`/users/${banUser.user_id}/ban`, { reason });
 
             if (response.status >= 200 && response.status < 300) {
-                setUsers(users.map((u) => (u.id === banUser.id ? { ...u, banned_until: "9999-12-31", ban_reason: reason } : u)));
+                setUsers(users.map((u) => (u.user_id === banUser.user_id ? { ...u, banned_until: "9999-12-31", ban_reason: reason } : u)));
                 toast.success(`Banned ${banUser.name} successfully!`);
             } else {
                 toast.error("Failed to ban user");
@@ -146,7 +148,7 @@ export default function UserList() {
         if (!window.confirm("Are you sure you want to unban this user?")) return;
         try {
             await api.post(`/users/${id}/unban`);
-            setUsers(users.map((u) => (u.id === id ? { ...u, banned_until: null, ban_reason: null } : u)));
+            setUsers(users.map((u) => (u.user_id === id ? { ...u, banned_until: null, ban_reason: null } : u)));
             toast.success("User unbanned successfully!");
         } catch {
             toast.error("Failed to unban user");
@@ -159,6 +161,9 @@ export default function UserList() {
         }
         return sortDirection === "asc" ? <ArrowUp className="w-4 h-4 text-blue-600" /> : <ArrowDown className="w-4 h-4 text-blue-600" />;
     };
+
+    console.log("user", users);
+    
 
     return (
         <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
@@ -189,7 +194,7 @@ export default function UserList() {
                     {/* Filter Toggle Button */}
                     <button
                         onClick={() => setShowFilters(!showFilters)}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200 text-gray-700 font-medium"
+                        className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200 text-gray-700 font-medium"
                     >
                         <Filter className="w-4 h-4" />
                         Filters & Sorting
@@ -209,8 +214,8 @@ export default function UserList() {
                                         className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                                     >
                                         <option value="all">All Roles</option>
-                                        <option value="student">Student</option>
-                                        <option value="instructor">Instructor</option>
+                                        <option value="participant">Student</option>
+                                        <option value="organizer">Instructor</option>
                                     </select>
                                 </div>
 
@@ -262,7 +267,7 @@ export default function UserList() {
                             <div className="mt-4 flex justify-end">
                                 <button
                                     onClick={clearFilters}
-                                    className="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-colors duration-200 font-medium"
+                                    className="cursor-pointer px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-colors duration-200 font-medium"
                                 >
                                     Clear All Filters
                                 </button>
@@ -291,7 +296,7 @@ export default function UserList() {
                                         <th className="px-6 py-4 text-left">
                                             <button
                                                 onClick={() => handleSort("id")}
-                                                className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                                                className="cursor-pointer flex items-center gap-2 hover:text-blue-600 transition-colors"
                                             >
                                                 ID <SortIcon field="id" />
                                             </button>
@@ -299,7 +304,7 @@ export default function UserList() {
                                         <th className="px-6 py-4 text-left">
                                             <button
                                                 onClick={() => handleSort("name")}
-                                                className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                                                className="cursor-pointer flex items-center gap-2 hover:text-blue-600 transition-colors"
                                             >
                                                 Name <SortIcon field="name" />
                                             </button>
@@ -307,7 +312,7 @@ export default function UserList() {
                                         <th className="px-6 py-4 text-left">
                                             <button
                                                 onClick={() => handleSort("email")}
-                                                className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                                                className="cursor-pointer flex items-center gap-2 hover:text-blue-600 transition-colors"
                                             >
                                                 Email <SortIcon field="email" />
                                             </button>
@@ -315,7 +320,7 @@ export default function UserList() {
                                         <th className="px-6 py-4 text-left">
                                             <button
                                                 onClick={() => handleSort("role")}
-                                                className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                                                className="cursor-pointer flex items-center gap-2 hover:text-blue-600 transition-colors"
                                             >
                                                 Role <SortIcon field="role" />
                                             </button>
@@ -323,7 +328,7 @@ export default function UserList() {
                                         <th className="px-6 py-4 text-left">
                                             <button
                                                 onClick={() => handleSort("created_at")}
-                                                className="flex items-center gap-2 hover:text-blue-600 transition-colors"
+                                                className="cursor-pointer flex items-center gap-2 hover:text-blue-600 transition-colors"
                                             >
                                                 Created <SortIcon field="created_at" />
                                             </button>
@@ -335,7 +340,7 @@ export default function UserList() {
                                 <tbody className="bg-white divide-y divide-gray-100">
                                     {filteredUsers.map((u, index) => (
                                         <tr
-                                            key={u.id}
+                                            key={u.user_id}
                                             className={`hover:bg-blue-50 transition-colors duration-150 ${
                                                 index % 2 === 0 ? "bg-white" : "bg-gray-50/50"
                                             }`}
@@ -356,7 +361,7 @@ export default function UserList() {
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-600">{new Date(u.created_at).toLocaleDateString("vi-VN")}</td>
                                             <td className="px-6 py-4 text-center">
-                                                {u.banned_until ? (
+                                                {u.status ? (
                                                     <span className="inline-flex px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                                         Banned
                                                     </span>
@@ -367,17 +372,17 @@ export default function UserList() {
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                {u.banned_until ? (
+                                                {u.status ? (
                                                     <button
                                                         onClick={() => handleUnban(u.id)}
-                                                        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-green-700 hover:text-green-900 hover:bg-green-50 rounded-lg transition-colors duration-200"
+                                                        className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-green-700 hover:text-green-900 hover:bg-green-50 rounded-lg transition-colors duration-200"
                                                     >
                                                         <Undo className="w-4 h-4" /> Unban
                                                     </button>
                                                 ) : (
                                                     <button
                                                         onClick={() => setBanUser(u)}
-                                                        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-700 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                                                        className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-700 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors duration-200"
                                                     >
                                                         <Ban className="w-4 h-4" /> Ban
                                                     </button>
@@ -392,7 +397,7 @@ export default function UserList() {
                         <div className="md:hidden space-y-4">
                             {filteredUsers.map((u) => (
                                 <div
-                                    key={u.id}
+                                    key={u.user_id}
                                     className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200"
                                 >
                                     <div className="flex justify-between items-start mb-3">
@@ -431,14 +436,14 @@ export default function UserList() {
                                         {u.banned_until ? (
                                             <button
                                                 onClick={() => handleUnban(u.id)}
-                                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-700 hover:text-green-900 hover:bg-green-50 rounded-lg transition-colors duration-200"
+                                                className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-700 hover:text-green-900 hover:bg-green-50 rounded-lg transition-colors duration-200"
                                             >
                                                 <Undo className="w-4 h-4" /> Unban
                                             </button>
                                         ) : (
                                             <button
                                                 onClick={() => setBanUser(u)}
-                                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                                                className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-700 hover:text-red-900 hover:bg-red-50 rounded-lg transition-colors duration-200"
                                             >
                                                 <Ban className="w-4 h-4" /> Ban
                                             </button>
@@ -453,7 +458,7 @@ export default function UserList() {
                                 <button
                                     disabled={meta.current_page === 1}
                                     onClick={() => setPage((prev) => prev - 1)}
-                                    className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 font-medium text-gray-700"
+                                    className="cursor-pointer px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 font-medium text-gray-700"
                                 >
                                     Previous
                                 </button>
@@ -466,7 +471,7 @@ export default function UserList() {
                                 <button
                                     disabled={meta.current_page === meta.last_page}
                                     onClick={() => setPage((prev) => prev + 1)}
-                                    className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 font-medium text-gray-700"
+                                    className="cursor-pointer px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 font-medium text-gray-700"
                                 >
                                     Next
                                 </button>
@@ -504,14 +509,14 @@ export default function UserList() {
                                                 setReason("");
                                             }}
                                             disabled={isProcessingBan}
-                                            className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="cursor-pointer px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             Cancel
                                         </button>
                                         <button
                                             onClick={handleBan}
                                             disabled={isProcessingBan || !reason.trim()}
-                                            className="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                            className="cursor-pointer px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                         >
                                             {isProcessingBan ? (
                                                 <>

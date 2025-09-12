@@ -127,7 +127,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/{id}/ban', [UserController::class, 'ban']);
     Route::post('/users/{id}/unban', [UserController::class, 'unban']);
-    Route::post('/admin/organizer/{id}/approve', [UserController::class, 'approveOrganizer']);
+    Route::post('/organizer/{id}/approve', [UserController::class, 'approveOrganizer']);
 });
 
 //Route::middleware(['auth:sanctum', 'role:participant'])->group(function () {

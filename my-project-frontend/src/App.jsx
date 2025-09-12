@@ -26,8 +26,6 @@ function App() {
         <BrowserRouter>
             <AuthProvider>
                 <div className="flex flex-col min-h-screen">
-                    {/* Header */}
-
                     {/* Main */}
                     <main className="flex-grow">
                         <Routes>

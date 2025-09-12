@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -210,88 +211,92 @@
         }
     </style>
 </head>
+
 <body>
-<div class="email-container">
-    <!-- Header with Logo -->
-    <div class="header">
-        <img src="{{ $message->embed(public_path('images/logo.webp')) }}" alt="FPT Polytechnic" class="logo">
-    </div>
-
-    <!-- Main Content -->
-    <div class="content">
-        <div class="greeting">Hello {{ $user->name }},</div>
-
-        <div class="message">
-            We regret to inform you that your account has been suspended due to a violation of our terms of service.
+    <div class="email-container">
+        <!-- Header with Logo -->
+        <div class="header">
+            <img src="{{ $message->embed(public_path('images/logo.webp')) }}" alt="FPT Polytechnic" class="logo">
         </div>
 
-        <div class="ban-notice">
-            <div class="ban-notice-title">
-                <span class="ban-icon"></span>
-                Account Suspended
+        <!-- Main Content -->
+        <div class="content">
+            <div class="greeting">Hello {{ $user->name }},</div>
+
+            <div class="message">
+                We regret to inform you that your account has been suspended due to a violation of our terms of service.
             </div>
 
-            <div class="ban-details">
-                <div class="ban-detail-row">
-                    <span class="ban-detail-label">Account: </span>
-                    <span class="ban-detail-value">{{ $user->email }}</span>
+            <div class="ban-notice">
+                <div class="ban-notice-title">
+                    <span class="ban-icon"></span>
+                    Account Suspended
                 </div>
 
-                <div class="ban-detail-row">
-                    <span class="ban-detail-label">Suspended until: </span>
-                    <span class="ban-detail-value">
-                        @if($user->banned_until && $user->banned_until->format('Y') == '9999')
-                            Permanent
-                        @else
-                            {{ $user->banned_until->format('d/m/Y H:i') }}
-                        @endif
-                    </span>
+                <div class="ban-details">
+                    <div class="ban-detail-row">
+                        <span class="ban-detail-label">Account: </span>
+                        <span class="ban-detail-value">{{ $user->email }}</span>
+                    </div>
+
+                    <div class="ban-detail-row">
+                        <span class="ban-detail-label">Suspended until: </span>
+                        <span class="ban-detail-value">
+                            @if ($user->ban_until && $user->ban_until->format('Y') == '9999')
+                                Permanent
+                            @elseif($user->ban_until)
+                                {{ $user->ban_until->format('d/m/Y H:i') }}
+                            @else
+                                N/A
+                            @endif
+                        </span>
+                    </div>
+
+                    <div class="ban-detail-row">
+                        <span class="ban-detail-label">Reason:</span>
+                        <span class="ban-detail-value">
+                            <div class="reason-text">{{ $reason ?: 'Violation of terms of service' }}</div>
+                        </span>
+                    </div>
                 </div>
 
-                <div class="ban-detail-row">
-                    <span class="ban-detail-label">Reason:</span>
-                    <span class="ban-detail-value">
-                        <div class="reason-text">{{ $reason ?: 'Violation of terms of service' }}</div>
-                    </span>
+                <div style="font-size: 14px; margin-top: 15px;">
+                    During this period, you will not be able to access your account or use our services.
                 </div>
             </div>
 
-            <div style="font-size: 14px; margin-top: 15px;">
-                During this period, you will not be able to access your account or use our services.
+            <div class="support-section">
+                <div class="support-title">Need Help?</div>
+                <div style="font-size: 14px;">
+                    If you believe this suspension was made in error or if you have any questions,
+                    please contact our support team at
+                    <a href="mailto:support@fpt.edu.vn" class="support-link">support@fpt.edu.vn</a>
+                </div>
+                <div style="font-size: 12px; margin-top: 10px; color: #6c757d;">
+                    Please include your account email and this suspension notice in your message.
+                </div>
+            </div>
+
+            <div class="message">
+                We appreciate your understanding and look forward to resolving this matter.
+            </div>
+
+            <div class="signature">
+                <div>Best regards,</div>
+                <div class="signature-title">E-Learning Administration Team</div>
+                <div>FPT Polytechnic</div>
             </div>
         </div>
 
-        <div class="support-section">
-            <div class="support-title">Need Help?</div>
-            <div style="font-size: 14px;">
-                If you believe this suspension was made in error or if you have any questions,
-                please contact our support team at
-                <a href="mailto:support@fpt.edu.vn" class="support-link">support@fpt.edu.vn</a>
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-text">
+                This email was sent by FPT Polytechnic E-Learning Platform<br>
+                Hanoi, Vietnam
             </div>
-            <div style="font-size: 12px; margin-top: 10px; color: #6c757d;">
-                Please include your account email and this suspension notice in your message.
-            </div>
-        </div>
-
-        <div class="message">
-            We appreciate your understanding and look forward to resolving this matter.
-        </div>
-
-        <div class="signature">
-            <div>Best regards,</div>
-            <div class="signature-title">E-Learning Administration Team</div>
-            <div>FPT Polytechnic</div>
+            <img src="{{ $message->embed(public_path('images/udemy.png')) }}" alt="FPT Polytechnic" class="footer-logo">
         </div>
     </div>
-
-    <!-- Footer -->
-    <div class="footer">
-        <div class="footer-text">
-            This email was sent by FPT Polytechnic E-Learning Platform<br>
-            Hanoi, Vietnam
-        </div>
-        <img src="{{ $message->embed(public_path('images/udemy.png')) }}" alt="FPT Polytechnic" class="footer-logo">
-    </div>
-</div>
 </body>
+
 </html>

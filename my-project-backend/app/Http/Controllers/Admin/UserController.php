@@ -15,7 +15,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::query()->whereIn('role', ['student', 'instructor']);
+        $query = User::query()->whereIn('role', ['participant', 'organizer']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -37,12 +37,12 @@ class UserController extends Controller
             }
         }
 
-        $sortField = $request->get('sortField', 'id');
+        $sortField = $request->get('sortField', 'user_id');
         $sortDirection = $request->get('sortDirection', 'asc');
-        $allowedSortFields = ['id', 'name', 'email', 'role', 'created_at'];
+        $allowedSortFields = ['user_id', 'name', 'email', 'role', 'created_at'];
 
         if (!in_array($sortField, $allowedSortFields)) {
-            $sortField = 'id';
+            $sortField = 'user_id';
         }
 
         $query->orderBy($sortField, $sortDirection);
@@ -63,8 +63,9 @@ class UserController extends Controller
 
         $user = User::findOrFail($id);
         $user->update([
-            'banned_until' => now()->addYear(),
+            'ban_until' => now()->addYear(),
             'ban_reason'   => $request->reason,
+            'status' => "banned"
         ]);
 
         Mail::to($user->email)->send(new UserBannedMail($user, $request->reason));
@@ -79,8 +80,9 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->update([
-            'banned_until' => null,
+            'ban_until' => null,
             'ban_reason'   => null,
+            'status' => "active"
         ]);
 
         return response()->json(['message' => 'User unbanned successfully.']);
@@ -91,7 +93,7 @@ class UserController extends Controller
         $user = User::where('role', 'organizer')->findOrFail($id);
 
         $request->validate([
-            'status' => 'required|in:active,rejected',
+            'status' => 'required|in:active,banned,pending',
         ]);
 
         $user->update(['status' => $request->status]);
