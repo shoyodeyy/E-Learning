@@ -1,84 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, Plus, Edit, Trash2, Eye, Settings, Calendar, Users } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-
-// Mock data for events
-const mockEvents = [
-    {
-        id: 1,
-        title: "Annual Tech Summit 2024",
-        date: "July 20, 2024 • 9:00 AM - 5:00 PM",
-        location: "Convention Center, Cityville",
-        status: "Live",
-        statusColor: "bg-green-500",
-        slots: "75/100 Slots",
-        slotsColor: "bg-purple-500",
-        image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop",
-    },
-    {
-        id: 2,
-        title: "Summer Music Fest",
-        date: "August 12-14, 2024 • 6:00 PM - 11:00 PM",
-        location: "Central Park Grounds",
-        status: "Live",
-        statusColor: "bg-green-500",
-        slots: "20/300 Slots",
-        slotsColor: "bg-yellow-500",
-        image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=250&fit=crop",
-    },
-    {
-        id: 3,
-        title: "Creative Arts Workshop",
-        date: "September 5, 2024 • 10:00 AM - 3:00 PM",
-        location: "Art Studio Downtown",
-        status: "Pending Approval",
-        statusColor: "bg-orange-500",
-        slots: "10/10 Slots",
-        slotsColor: "bg-purple-500",
-        image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=250&fit=crop",
-    },
-    {
-        id: 4,
-        title: "Annual Charity Run",
-        date: "June 15, 2024 • 7:00 AM - 12:00 PM",
-        location: "Riverside Park",
-        status: "Completed",
-        statusColor: "bg-gray-500",
-        slots: "Full",
-        slotsColor: "bg-red-500",
-        image: "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?w=400&h=250&fit=crop",
-    },
-    {
-        id: 5,
-        title: "Gourmet Food Fair",
-        date: "October 1, 2024 • 11:00 AM - 7:00 PM",
-        location: "City Market Hall",
-        status: "Live",
-        statusColor: "bg-green-500",
-        slots: "5/200 Slots",
-        slotsColor: "bg-yellow-500",
-        image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=250&fit=crop",
-    },
-    {
-        id: 6,
-        title: "Future Innovators Hackathon",
-        date: "November 20-22, 2024 • 9:00 AM - 6:00 PM",
-        location: "Tech Hub Auditorium",
-        status: "Live",
-        statusColor: "bg-green-500",
-        slots: "15/50 Slots",
-        slotsColor: "bg-green-500",
-        image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=400&h=250&fit=crop",
-    },
-];
+import { apiUrl } from "../../../services/http.jsx";
+import axios from "axios";
+import {useAuth} from "../../../context/AuthContext.jsx";
 
 // Event Card Component
-function EventCard({ event }) {
+function EventCard({ event, onDelete }) {
     return (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-200">
             {/* Event Image */}
             <div className="relative">
-                <img src={event.image} alt={event.title} className="w-full h-48 object-cover" />
+                <img src={event.bannerImage} alt={event.title} className="w-full h-48 object-cover" />
                 <div className="absolute top-3 left-3">
                     <span className={`px-2 py-1 text-xs font-medium text-white rounded ${event.statusColor}`}>{event.status}</span>
                 </div>
@@ -94,47 +27,110 @@ function EventCard({ event }) {
                 <p className="text-sm text-gray-600 mb-4">{event.location}</p>
 
                 {/* Action Buttons */}
-                <div className="flex items-center space-x-2">
-                    <Link to={`/organizer/update-event/${event.id}`} className="cursor-pointer p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                        <Edit size={16} />
-                    </Link>
-                    <button className="cursor-pointer p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                        <Trash2 size={16} />
-                    </button>
-                    <button className="cursor-pointer flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm font-medium transition-colors">
-                        View Details
-                    </button>
-                </div>
+                {event.status !== "pending_delete" ? (
+                    <div className="flex items-center space-x-2">
+                        <Link
+                            to={`/organizer/update-event/${event.eventId}`}
+                            className="cursor-pointer p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            <Edit size={16} />
+                        </Link>
+                        <button
+                            onClick={onDelete}
+                            className="cursor-pointer p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                        <Link
+                            to={`/organizer/event-detail/${event.eventId}`}
+                            className="cursor-pointer flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm font-medium transition-colors text-center"
+                        >
+                            View Details
+                        </Link>
+                    </div>
+                ) : (
+                    <div className="flex items-center space-x-2">
+                        <Link
+                            to={`/organizer/update-event/${event.eventId}`}
+                            className={`p-2 text-gray-400 transition-colors ${
+                                event.status === "pending_delete"
+                                    ? "cursor-not-allowed opacity-50 pointer-events-none"
+                                    : "cursor-pointer hover:text-gray-600"
+                            }`}
+                        >
+                            <Edit size={16} />
+                        </Link>
+                        <button
+                            disabled={event.status === "pending_delete"}
+                            onClick={onDelete}
+                            className={`p-2 transition-colors ${
+                                event.status === "pending_delete"
+                                    ? "cursor-not-allowed opacity-50 text-gray-400"
+                                    : "cursor-pointer text-gray-400 hover:text-gray-600"
+                            }`}
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                        <Link
+                            to={`/organizer/event-detail/${event.eventId}`}
+                            className="cursor-pointer flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm font-medium transition-colors text-center"
+                        >
+                            View Details
+                        </Link>
+                    </div>
+                )}
             </div>
         </div>
     );
 }
 
 // Pagination Component
-function Pagination() {
-    const [currentPage, setCurrentPage] = useState(1);
-    const [searchQuery, setSearchQuery] = useState("");
+function Pagination({ pagination, setCurrentPage }) {
+    if (!pagination || !pagination.links || pagination.last_page <= 1) {
+        return null;
+    }
+
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= pagination.last_page) {
+            setCurrentPage(page);
+        }
+    };
 
     return (
         <div className="flex items-center justify-center space-x-2 mt-8">
+            {/* Preview button */}
             <button
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                onClick={() => handlePageChange(pagination.current_page - 1)}
                 className="cursor-pointer px-3 py-2 text-sm text-gray-600 hover:text-gray-900"
+                disabled={pagination.current_page === 1}
             >
                 ← Previous
             </button>
-            {[1, 2, 3].map((page) => (
-                <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`cursor-pointer w-8 h-8 rounded text-sm font-medium ${
-                        currentPage === page ? "bg-purple-600 text-white" : "text-gray-600 hover:text-gray-900"
-                    }`}
-                >
-                    {page}
-                </button>
-            ))}
-            <button onClick={() => setCurrentPage(Math.min(3, currentPage + 1))} className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900">
+
+            {/* Display page number */}
+            {pagination.links.map((link, index) => {
+                if (link.label === '&laquo; Previous' || link.label === 'Next &raquo;') {
+                    return null;
+                }
+
+                return (
+                    <button
+                        key={index}
+                        onClick={() => handlePageChange(link.label)}
+                        className={`cursor-pointer w-8 h-8 rounded text-sm font-medium ${link.active ? "bg-purple-600 text-white" : "text-gray-600 hover:text-gray-900"}`}
+                        disabled={link.active}
+                    >
+                        {link.label}
+                    </button>
+                );
+            })}
+
+            {/* Next button */}
+            <button
+                onClick={() => setCurrentPage(pagination.current_page + 1)}
+                className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900"
+                disabled={pagination.current_page === pagination.last_page}
+            >
                 Next →
             </button>
         </div>
@@ -145,6 +141,58 @@ function Pagination() {
 export default function ManageEventsLayout() {
     const [searchQuery, setSearchQuery] = useState("");
     const navigate = useNavigate();
+
+    const { token } = useAuth();
+
+    const [ events, setEvents ] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pagination, setPagination] = useState({});
+
+    async function fetchEvents(pageNum = 1) {
+        setLoading(true);
+
+        try {
+            const res = await axios.get(`${apiUrl}/events?page=${pageNum}`);
+            setEvents(res.data.data || []);
+            setPagination(res.data.meta);
+        } catch (error) {
+            console.error("Failed to fetch events:", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchEvents(currentPage);
+        window.scrollTo({ top: 0, behavior: "smooth"});
+    }, [currentPage]);
+
+    async function handleDelete(eventId) {
+        const confirmed = window.confirm("Are you sure you want to delete this event?");
+        if (!confirmed) return;
+
+        try {
+            await axios.delete(`${apiUrl}/events/${eventId}`, {
+                headers: {
+                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                }
+            });
+
+            alert("Event deleted successfully!");
+
+            // Refresh lại list sau khi xóa
+            fetchEvents(currentPage);
+        } catch (error) {
+            console.error("Failed to delete event:", error);
+
+            if (error.response) {
+                alert(error.response.data.message || "Failed to delete event.");
+            } else {
+                alert("Something went wrong.");
+            }
+        }
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
@@ -180,19 +228,28 @@ export default function ManageEventsLayout() {
                     </div>
 
                     {/* Event List */}
+                    {loading && <p>Loading events...</p>}
+                    {!loading && events.length === 0 && <p>No events found.</p>}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {mockEvents
+                        {events
                             .filter(
                                 (event) =>
                                     event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                    event.location.toLowerCase().includes(searchQuery.toLowerCase())
+                                    event.venue.toLowerCase().includes(searchQuery.toLowerCase())
                             )
                             .map((event) => (
-                                <EventCard key={event.id} event={event} />
+                                <EventCard
+                                    key={event.eventId}
+                                    event={event}
+                                    onDelete={() => handleDelete(event.eventId)}
+                                />
                             ))}
                     </div>
 
-                    <Pagination />
+                    <Pagination
+                        pagination={pagination}
+                        setCurrentPage={setCurrentPage}
+                    />
                 </main>
             </div>
         </div>

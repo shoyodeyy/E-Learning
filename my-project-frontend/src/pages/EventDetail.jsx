@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Calendar, Clock, MapPin, Users, Share2, Heart, CalendarPlus, User, Star, Send } from "lucide-react";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
 import Header from "../components/Header";
+import CalendarInegration from "../components/CalendarIntegration";
+import ShareEvent from "../components/ShareButton";
 
 // Mock data for the event detail
 const eventData = {
@@ -331,6 +333,8 @@ const renderStars = (rating) => {
 };
 
 const EventDetailPage = () => {
+    const { id } = useParams();
+    const eventId = Number(id) || eventData.id;
     const [activeTab, setActiveTab] = useState("overview");
     const [isFavorited, setIsFavorited] = useState(false);
 
@@ -439,10 +443,12 @@ const EventDetailPage = () => {
 
                             {/* Action Buttons */}
                             <div className="flex flex-wrap gap-4">
+                                <ShareEvent event={{ id: eventId, title: eventData.title, date: eventData.date, venue: eventData.location }}>
                                 <button className="cursor-pointer flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-lg border border-gray-200 transition-all duration-200">
                                     <Share2 className="w-5 h-5" />
                                     <span>Share Event</span>
                                 </button>
+                                </ShareEvent>
 
                                 <button
                                     onClick={() => setIsFavorited(!isFavorited)}
@@ -455,11 +461,8 @@ const EventDetailPage = () => {
                                     <Heart className={`w-5 h-5 ${isFavorited ? "fill-current" : ""}`} />
                                     <span>{isFavorited ? "Favorited" : "Add to Favorites"}</span>
                                 </button>
-
-                                <button className="cursor-pointer flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-lg border border-gray-200 transition-all duration-200">
-                                    <CalendarPlus className="w-5 h-5" />
-                                    <span>Add to Calendar</span>
-                                </button>
+                                {/* Calendar button (inline, always visible) */}
+                                <CalendarInegration eventId={eventId} variant="inline" />
                             </div>
 
                             {/* Navigation Tabs */}
