@@ -291,6 +291,7 @@ export default function Header() {
 
 // DropdownAvatar component
 function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
+    const { user } = useAuth();
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
     const timeoutRef = useRef(null);
@@ -317,7 +318,11 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
     };
 
     const goToDashboard = () => {
-        navigate("/user/dashboard");
+        if (user.role === "organizer") {
+            navigate("/organizer/dashboard");
+        } else if (user.role === "admin") {
+            navigate("/admin/dashboard");
+        } else navigate("/user/dashboard");
         setOpen(false);
     };
 
