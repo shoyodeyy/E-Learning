@@ -62,32 +62,10 @@ export default function EditProfile() {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (!validate()) return;
-        setConfirmOpen(true);
-
-        setProcessing(true);
-        try {
-            const data = new FormData();
-            Object.keys(formData).forEach((key) => {
-                if (formData[key] !== null && formData[key] !== "") {
-                    data.append(key, formData[key]);
-                }
-            });
-
-            const result = await updateProfile(data);
-
-            updateUser(result.user);
-
-            toast.success(result.message || "Profile updated successfully ✅");
-            setErrors({});
-        } catch (error) {
-            console.error(error);
-            toast.error("Update failed ❌");
-        } finally {
-            setProcessing(false);
-        }
+        setConfirmOpen(true); // chỉ mở confirm dialog, không gọi API
     };
 
     const handleConfirm = async () => {
@@ -106,31 +84,27 @@ export default function EditProfile() {
             toast.success(result.message || "Profile updated successfully ✅");
             setErrors({});
         } catch (error) {
-        console.error(error);
+            console.error(error);
 
-        if (error.response) {
-            const { status, data } = error.response;
-
-            if (status === 422 && data.errors) {
-                // Validation error
-                setErrors(data.errors);
-                // show toast each error
-                Object.values(data.errors).forEach((msgs) => {
-                    toast.error(msgs[0]); // $validated = $request->validate
-                });
-            } else if (data.message) {
-                //other error from backend
-                toast.error(data.message);
-            } else if (data.error) {
-                toast.error(data.error);
+            if (error.response) {
+                const { status, data } = error.response;
+                if (status === 422 && data.errors) {
+                    setErrors(data.errors);
+                    Object.values(data.errors).forEach((msgs) => toast.error(msgs[0]));
+                } else if (data.message) {
+                    toast.error(data.message);
+                } else if (data.error) {
+                    toast.error(data.error);
+                } else {
+                    toast.error("Update failed ❌");
+                }
             } else {
-                toast.error("Update failed ❌");
+                toast.error("Network error ❌");
             }
-        } else {
-            toast.error("Network error ❌");
+        } finally {
+            setProcessing(false);
         }
-    }
-};
+    };
 
     const handleCancel = () => {
         setConfirmOpen(false);
