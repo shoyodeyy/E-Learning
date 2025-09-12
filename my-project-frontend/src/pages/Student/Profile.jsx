@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Edit, Key } from "lucide-react";
 
@@ -15,7 +14,6 @@ export default function Profile() {
 
     const handleChangePassword = () => {
         navigate("/user/change-password")
-
     };
 
     return (
