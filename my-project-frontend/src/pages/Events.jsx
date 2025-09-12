@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search } from "lucide-react";
 import { apiUrl } from "../services/http.jsx";
@@ -100,32 +100,18 @@ import Header from "../components/Header.jsx";
 // ];
 
 const categories = [
-    'All categories',
-    'Cultural Event',
-    'Technical Fests',
-    'Sports Meets',
-    'Annual Day Functions',
-    'Workshops and Seminars',
-    'Intercollegiate Competitions',
+    "All categories",
+    "Cultural Event",
+    "Technical Fests",
+    "Sports Meets",
+    "Annual Day Functions",
+    "Workshops and Seminars",
+    "Intercollegiate Competitions",
 ];
 
-const departments = [
-    "All Departments",
-    "IT", "Marketing",
-    "Medical",
-    "Culture", "Management",
-    "Literature",
-    "Entrepreneurship",
-    "Security"
-];
+const departments = ["All Departments", "IT", "Marketing", "Medical", "Culture", "Management", "Literature", "Entrepreneurship", "Security"];
 
-const dates = [
-    "All Dates",
-    "This Month",
-    "Next Month",
-    "This Quarter",
-    "Next Quarter"
-];
+const dates = ["All Dates", "This Month", "Next Month", "This Quarter", "Next Quarter"];
 
 // Search and Filter Component
 const SearchAndFilter = ({
@@ -247,7 +233,7 @@ function Pagination({ pagination, setCurrentPage }) {
 
             {/* Display page number */}
             {pagination.links.map((link, index) => {
-                if (link.label === '&laquo; Previous' || link.label === 'Next &raquo;') {
+                if (link.label === "&laquo; Previous" || link.label === "Next &raquo;") {
                     return null;
                 }
 
@@ -255,7 +241,9 @@ function Pagination({ pagination, setCurrentPage }) {
                     <button
                         key={index}
                         onClick={() => handlePageChange(link.label)}
-                        className={`cursor-pointer w-8 h-8 rounded text-sm font-medium ${link.active ? "bg-purple-600 text-white" : "text-gray-600 hover:text-gray-900"}`}
+                        className={`cursor-pointer w-8 h-8 rounded text-sm font-medium ${
+                            link.active ? "bg-purple-600 text-white" : "text-gray-600 hover:text-gray-900"
+                        }`}
                         disabled={link.active}
                     >
                         {link.label}
@@ -338,38 +326,25 @@ const EventCard = ({ event }) => {
                         <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
                             <span className="text-purple-600 text-xs">📅</span>
                         </div>
-                        <span className="font-medium text-gray-700">
-                            {formatDate(event.start_at)}
-                        </span>
+                        <span className="font-medium text-gray-700">{formatDate(event.start_at)}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                         <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
                             <span className="text-purple-600 text-xs">🕒</span>
                         </div>
-                        <span className="font-medium text-gray-700">
-                            {formatTimeRange(event.start_at, event.duration_minutes)}
-                        </span>
+                        <span className="font-medium text-gray-700">{formatTimeRange(event.start_at, event.duration_minutes)}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                         <div className="w-5 h-5 bg-pink-100 rounded-full flex items-center justify-center">
-                            <span className="text-pink-600 text-xs">
-                                📍
-                            </span>
+                            <span className="text-pink-600 text-xs">📍</span>
                         </div>
-                        <span className="font-medium text-gray-700">
-                            {event.venue}
-                        </span>
+                        <span className="font-medium text-gray-700">{event.venue}</span>
                     </div>
                 </div>
 
-                <Link
-                    to={`/event/${event.eventId}`}
-                    onClick={() => window.screenTop(0, 0)}
-                    className="flex justify-center w-full btn-gradient"
-                >
+                <Link to={`/event/${event.eventId}`} onClick={() => window.screenTop(0, 0)} className="flex justify-center w-full btn-gradient">
                     View Details
                 </Link>
-
             </div>
         </div>
     );
@@ -382,7 +357,7 @@ export default function EventsPage() {
     const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
     const [selectedDate, setSelectedDate] = useState("All Dates");
 
-    const [ events, setEvents ] = useState([]);
+    const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [pagination, setPagination] = useState({});
@@ -393,10 +368,7 @@ export default function EventsPage() {
         try {
             const res = await axios.get(`${apiUrl}/events?page=${pageNum}`);
 
-            const filteredEvents = (res.data.data || []).filter(event => [
-                "approved",
-                ].includes(event.status)
-            );
+            const filteredEvents = (res.data.data || []).filter((event) => ["approved"].includes(event.status));
 
             setEvents(filteredEvents);
             setPagination(res.data.meta);
@@ -409,7 +381,7 @@ export default function EventsPage() {
 
     useEffect(() => {
         fetchEvents(currentPage);
-        window.scrollTo({ top: 0, behavior: "smooth"});
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }, [currentPage]);
 
     const handleResetFilters = () => {
@@ -465,7 +437,7 @@ export default function EventsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {filteredEvents.map((event, index) => (
                         <div
-                            key={event.id}
+                            key={event.eventId}
                             className="opacity-0 animate-fade-in"
                             style={{ animationDelay: `${index * 50}ms`, animationFillMode: "forwards" }}
                         >
@@ -480,9 +452,7 @@ export default function EventsPage() {
                             <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto">
                                 <span className="text-4xl">🔍</span>
                             </div>
-                            <div className="text-gray-500 text-xl font-medium">
-                                No events found matching your criteria.
-                            </div>
+                            <div className="text-gray-500 text-xl font-medium">No events found matching your criteria.</div>
                             <button
                                 onClick={handleResetFilters}
                                 className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
@@ -493,13 +463,10 @@ export default function EventsPage() {
                     </div>
                 )}
 
-                <Pagination
-                    pagination={pagination}
-                    setCurrentPage={setCurrentPage}
-                />
+                <Pagination pagination={pagination} setCurrentPage={setCurrentPage} />
             </main>
 
-            <style jsx>{`
+            <style jsx="true">{`
                 @keyframes fade-in {
                     from {
                         opacity: 0;
