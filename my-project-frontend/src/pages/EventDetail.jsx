@@ -1,13 +1,9 @@
-
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "../api/axios";
 import { toast } from "react-toastify";
 
-import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
-
-import { Calendar, Clock, MapPin, Users, Share2, Heart, CalendarPlus, User, Star, Send } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Share2, Heart, User, Star, Send } from "lucide-react";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
 import Header from "../components/Header";
