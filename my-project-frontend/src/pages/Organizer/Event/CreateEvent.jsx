@@ -10,6 +10,7 @@ export default function CreateEventForm() {
     const navigate = useNavigate();
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const [dragActive, setDragActive] = useState(false);
 
     const { token } = useAuth();
 
@@ -24,7 +25,6 @@ export default function CreateEventForm() {
 
     const [formData, setFormData] = useState({
         title: '',
-        // Set a valid default to satisfy backend `in:` rule
         category: 'Cultural Event',
         description: '',
         startAt: '',
@@ -50,67 +50,105 @@ export default function CreateEventForm() {
         }));
     }
 
-    // const validateForm = () => {
-    //     let newErrors = {};
-    //     let isValid = true;
-    //
-    //     if (!formData.title.trim()) {
-    //         newErrors.title = 'Title is required.';
-    //         isValid = false;
-    //     }
-    //
-    //     if (!formData.description.trim()) {
-    //         newErrors.description = 'Description is required.';
-    //         isValid = false;
-    //     }
-    //
-    //     if (!formData.category) {
-    //         newErrors.category = 'Category is required.';
-    //         isValid = false;
-    //     }
-    //
-    //     if (!formData.startAt) {
-    //         newErrors.startAt = 'Event date and time is required.';
-    //         isValid = false;
-    //     }
-    //
-    //     if (!formData.duration_minutes) {
-    //         newErrors.duration_minutes = 'Duration is required.';
-    //         isValid = false;
-    //     }
-    //
-    //     if (!formData.venue.trim()) {
-    //         newErrors.venue = 'Venue is required.';
-    //         isValid = false;
-    //     }
-    //
-    //     if (!formData.maxParticipants) {
-    //         newErrors.maxParticipants = 'Max participants is required.';
-    //         isValid = false;
-    //     }
-    //
-    //     if (!formData.registrationDeadline) {
-    //         newErrors.registrationDeadline = 'Registration deadline is required.';
-    //         isValid = false;
-    //     }
-    //
-    //     if (!formData.bannerImage) {
-    //         newErrors.bannerImage = 'Banner image is required.';
-    //         isValid = false;
-    //     }
-    //
-    //     setErrors(newErrors);
-    //     return isValid;
-    // };
+    const validateForm = () => {
+        let newErrors = {};
+        let isValid = true;
+
+        // Title
+        if (!formData.title.trim()) {
+            newErrors.title = 'Title is required.';
+            isValid = false;
+        }
+
+        // StartAt
+        if (!formData.startAt) {
+            newErrors.startAt = 'Event date and time is required.';
+            isValid = false;
+        } else {
+            const startAtDate = new Date(formData.startAt);
+
+            if (startAtDate <= new Date()) {
+                newErrors.startAt = 'Event date and time must be in the future.';
+                isValid = false;
+            }
+        }
+
+        // Duration
+        if (!formData.duration_minutes) {
+            newErrors.duration_minutes = 'Duration is required.';
+            isValid = false;
+        } else if (formData.duration_minutes <= 0) {
+            newErrors.duration_minutes = 'Duration must be greater than 0.';
+            isValid = false;
+        } else if (formData.duration_minutes > 1440) {
+            newErrors.duration_minutes = 'Duration cannot exceed 1440 minutes (24 hours).';
+            isValid = false;
+        }
+
+        // Venue
+        if (!formData.venue.trim()) {
+            newErrors.venue = 'Venue is required.';
+            isValid = false;
+        }
+
+        // Max Participants
+        if (!formData.maxParticipants) {
+            newErrors.maxParticipants = 'Max participants is required.';
+            isValid = false;
+        } else if (formData.maxParticipants <= 0) {
+            newErrors.maxParticipants = 'Max participants must be greater than 0.';
+            isValid = false;
+        } else if (formData.maxParticipants > 100000) {
+            newErrors.maxParticipants = 'Max participants cannot exceed 100000.';
+            isValid = false;
+        }
+
+        // Registration Deadline
+        if (!formData.registrationDeadline) {
+            newErrors.registrationDeadline = 'Registration deadline is required.';
+            isValid = false;
+        } else {
+            const regDeadline = new Date(formData.registrationDeadline);
+            const now = new Date();
+            const startAtDate = formData.startAt ? new Date(formData.startAt) : null;
+
+            if (regDeadline <= now) {
+                newErrors.registrationDeadline = 'Registration deadline must be in the future.';
+                isValid = false;
+            }
+            if (startAtDate && regDeadline >= startAtDate) {
+                newErrors.registrationDeadline = 'Registration deadline must be before the event date and time.';
+                isValid = false;
+            }
+        }
+
+        // Banner Image
+        if (!formData.bannerImage) {
+            newErrors.bannerImage = 'Banner image is required.';
+            isValid = false;
+        } else {
+            const allowedExtensions = ['jpeg', 'png', 'jpg', 'gif', 'svg'];
+            const fileName = formData.bannerImage.name || '';
+            const fileExt = fileName.split('.').pop().toLowerCase();
+
+            if (!allowedExtensions.includes(fileExt)) {
+                newErrors.bannerImage = 'Banner image must be a jpeg, jpg, png, gif, or svg file.';
+                isValid = false;
+            }
+        }
+
+        setErrors(newErrors);
+        return isValid;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-            // if (!validateForm()) {
-        //     setLoading(false);
-        //     return;
-        // }
+        if (!validateForm()) {
+            setLoading(false);
+            return;
+        }
 
         const startAtFormatted = formData.startAt.replace('T', ' ') + ':00';
         const registrationDeadlineFormatted = formData.registrationDeadline.replace('T', ' ') + ':00';
@@ -137,21 +175,54 @@ export default function CreateEventForm() {
             });
 
             toast.success('Event created successfully!');
-            navigate('/organizer/events?page=1');
+
+            navigate('/organizer/manage-events');
         } catch (error) {
             if (error.response && error.response.status === 422) {
                 const serverErrors = error.response.data.errors || {};
-                // Map backend snake_case keys to form field names when needed
+
                 const mapped = {
                     ...serverErrors,
-                    ...(serverErrors.start_at ? { startAt: serverErrors.start_at } : {}),
+                    ...(serverErrors.start_at ? {
+                        startAt: serverErrors.start_at
+                    } : {}),
                 };
+
                 setErrors(mapped);
             } else {
                 toast.error('Failed to create event.');
             }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setDragActive(true);
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        setDragActive(false);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setDragActive(false);
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            setFormData((prev) => ({ ...prev, bannerImage: files[0] }));
+        }
+    };
+
+    const handleFileSelect = (e) => {
+        const files = e.target.files;
+        if (files.length > 0) {
+            setFormData((prev) => ({
+                ...prev,
+                bannerImage: files[0]
+            }));
         }
     };
 
@@ -175,6 +246,76 @@ export default function CreateEventForm() {
                                 <p className="text-sm text-gray-600 mb-6">
                                     Update the details for your existing event. All fields are pre-filled with current data.
                                 </p>
+                            </div>
+
+                            {/* Banner Image */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Banner Image
+                                </label>
+                                <div
+                                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                                        dragActive ? "border-purple-400 bg-purple-50" : "border-gray-300 bg-gray-50"
+                                    }`}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                >
+                                    {formData.bannerImage ? (
+                                        <div className="space-y-2">
+                                            <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                                                <img
+                                                    src={
+                                                        formData.bannerImage instanceof File
+                                                            ? URL.createObjectURL(formData.bannerImage)
+                                                            : formData.bannerImage
+                                                    }
+                                                    alt="Event banner"
+                                                    className="w-full h-full object-cover rounded-lg"
+                                                />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-2">Drag 'n' drop a file here, or click to select</p>
+                                                <p className="text-xs text-gray-500">Max file size: 5MB</p>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleFileSelect}
+                                                    className="hidden"
+                                                    id="file-upload"
+                                                />
+                                                <label
+                                                    htmlFor="file-upload"
+                                                    className="inline-block mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
+                                                >
+                                                    Change Image
+                                                </label>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col space-y-3">
+                                            <input
+                                                type="file"
+                                                id="bannerImage"
+                                                name="bannerImage"
+                                                onChange={handleFileChange}
+                                                className="text-center file:mx-auto w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
+                                            />
+                                            <div>
+                                                <p className="text-sm text-gray-600 mb-2">Drag 'n' drop a file here, or click to select</p>
+                                                <p className="text-xs text-gray-500">Max file size: 5MB</p>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleFileSelect}
+                                                    className="hidden"
+                                                    id="file-upload"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                    {errors.bannerImage && <p className="text-red-500 text-xs mt-1">{errors.bannerImage}</p>}
+                                </div>
                             </div>
 
                             {/* Title */}
@@ -344,23 +485,6 @@ export default function CreateEventForm() {
                                     </div>
                                     {errors.registrationDeadline && <p className="text-red-500 text-xs mt-1">{errors.registrationDeadline}</p>}
                                 </div>
-                            </div>
-
-                            {/* Banner Image */}
-                            <div>
-                                <label
-                                    htmlFor="bannerImage"
-                                    className="block text-sm font-medium text-gray-700 mb-2">
-                                    Banner Image
-                                </label>
-                                <input
-                                    type="file"
-                                    id="bannerImage"
-                                    name="bannerImage"
-                                    onChange={handleFileChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
-                                />
-                                {errors.bannerImage && <p className="text-red-500 text-xs mt-1">{errors.bannerImage}</p>}
                             </div>
 
                             {/* Action Buttons */}

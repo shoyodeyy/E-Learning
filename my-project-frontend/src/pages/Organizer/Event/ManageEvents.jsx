@@ -3,9 +3,10 @@ import { Search, Plus, Edit, Trash2, Eye, Settings, Calendar, Users } from "luci
 import { Link, useNavigate } from "react-router-dom";
 import { apiUrl } from "../../../services/http.jsx";
 import axios from "axios";
+import {useAuth} from "../../../context/AuthContext.jsx";
 
 // Event Card Component
-function EventCard({ event }) {
+function EventCard({ event, onDelete }) {
     return (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-200">
             {/* Event Image */}
@@ -26,17 +27,58 @@ function EventCard({ event }) {
                 <p className="text-sm text-gray-600 mb-4">{event.location}</p>
 
                 {/* Action Buttons */}
-                <div className="flex items-center space-x-2">
-                    <Link to={`/organizer/update-event/${event.id}`} className="cursor-pointer p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                        <Edit size={16} />
-                    </Link>
-                    <button className="cursor-pointer p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                        <Trash2 size={16} />
-                    </button>
-                    <button className="cursor-pointer flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm font-medium transition-colors">
-                        View Details
-                    </button>
-                </div>
+                {event.status !== "pending_delete" ? (
+                    <div className="flex items-center space-x-2">
+                        <Link
+                            to={`/organizer/update-event/${event.eventId}`}
+                            className="cursor-pointer p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            <Edit size={16} />
+                        </Link>
+                        <button
+                            onClick={onDelete}
+                            className="cursor-pointer p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                        <Link
+                            to={`/organizer/event-detail/${event.eventId}`}
+                            className="cursor-pointer flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm font-medium transition-colors text-center"
+                        >
+                            View Details
+                        </Link>
+                    </div>
+                ) : (
+                    <div className="flex items-center space-x-2">
+                        <Link
+                            to={`/organizer/update-event/${event.eventId}`}
+                            className={`p-2 text-gray-400 transition-colors ${
+                                event.status === "pending_delete"
+                                    ? "cursor-not-allowed opacity-50 pointer-events-none"
+                                    : "cursor-pointer hover:text-gray-600"
+                            }`}
+                        >
+                            <Edit size={16} />
+                        </Link>
+                        <button
+                            disabled={event.status === "pending_delete"}
+                            onClick={onDelete}
+                            className={`p-2 transition-colors ${
+                                event.status === "pending_delete"
+                                    ? "cursor-not-allowed opacity-50 text-gray-400"
+                                    : "cursor-pointer text-gray-400 hover:text-gray-600"
+                            }`}
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                        <Link
+                            to={`/organizer/event-detail/${event.eventId}`}
+                            className="cursor-pointer flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm font-medium transition-colors text-center"
+                        >
+                            View Details
+                        </Link>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -100,6 +142,8 @@ export default function ManageEventsLayout() {
     const [searchQuery, setSearchQuery] = useState("");
     const navigate = useNavigate();
 
+    const { token } = useAuth();
+
     const [ events, setEvents ] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
@@ -121,7 +165,34 @@ export default function ManageEventsLayout() {
 
     useEffect(() => {
         fetchEvents(currentPage);
+        window.scrollTo({ top: 0, behavior: "smooth"});
     }, [currentPage]);
+
+    async function handleDelete(eventId) {
+        const confirmed = window.confirm("Are you sure you want to delete this event?");
+        if (!confirmed) return;
+
+        try {
+            await axios.delete(`${apiUrl}/events/${eventId}`, {
+                headers: {
+                    ...(token ? { Authorization: `Bearer ${token}` } : {})
+                }
+            });
+
+            alert("Event deleted successfully!");
+
+            // Refresh lại list sau khi xóa
+            fetchEvents(currentPage);
+        } catch (error) {
+            console.error("Failed to delete event:", error);
+
+            if (error.response) {
+                alert(error.response.data.message || "Failed to delete event.");
+            } else {
+                alert("Something went wrong.");
+            }
+        }
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
@@ -167,7 +238,11 @@ export default function ManageEventsLayout() {
                                     event.venue.toLowerCase().includes(searchQuery.toLowerCase())
                             )
                             .map((event) => (
-                                <EventCard key={event.eventId} event={event} />
+                                <EventCard
+                                    key={event.eventId}
+                                    event={event}
+                                    onDelete={() => handleDelete(event.eventId)}
+                                />
                             ))}
                     </div>
 
