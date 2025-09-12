@@ -7,6 +7,7 @@ import {
     ListTodo,
     ChevronLeft,
     ChevronRight,
+    UserRoundPen,
 } from "lucide-react"
 
 const AdminSidebar = ({
@@ -19,7 +20,7 @@ const AdminSidebar = ({
         { to: "dashboard", icon: <LayoutDashboard size={18} />, label: "Dashboard" },
         { to: "events", icon: <Sparkles size={18} />, label: "Events" },
         { to: "approval/event", icon: <ListTodo size={18} />, label: "Approvals Event" },
-        { to: "approval/organizer", icon: <ListTodo size={18} />, label: "Approvals Organizer" },
+        { to: "approval/organizer", icon: <UserRoundPen size={18} />, label: "Approvals Organizer" },
         { to: "user", icon: <User size={18} />, label: "User" },
         { to: "change-password", icon: <KeyRound size={18} />, label: "Change Password" },
     ]
