@@ -30,7 +30,7 @@ return new class extends Migration
             $table->integer('maxParticipants')->default(100);
             $table->dateTime('registrationDeadline');
             $table->string('bannerImage');
-            $table->enum('status', ['pending', 'approved', 'cancelled', 'completed'])->default('pending');
+            $table->enum('status', ['pending_create', 'pending_update', 'pending_delete', 'approved', 'completed'])->default('pending_create');
 
             // foreign key
             $table->foreign('organizerId')
