@@ -9,6 +9,7 @@ import EditProfile from "../pages/Student/EditProfile.jsx";
 import SeatLayout from "../pages/Organizer/Event/SeatLayout.jsx";
 import ChangePassword from "../pages/ChangePassword.jsx";
 import Gallery from "../pages/Gallery.jsx";
+import  FavoriteEvents from "../pages/Student/FavoriteEvents.jsx";
 
 export default function StudentRouter() {
     return (
@@ -18,6 +19,7 @@ export default function StudentRouter() {
                     <Route path="profile" element={<Profile />} />
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="registration" element={<MyRegistrations />} />
+                    <Route path="favorite" element={<FavoriteEvents />} />
 
                     <Route path="edit-profile" element={<EditProfile />} />
                     <Route path="change-password" element={<ChangePassword />} />

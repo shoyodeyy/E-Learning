@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Search } from "lucide-react";
+import {useState} from "react";
+import {Link} from "react-router-dom";
+import {Search} from "lucide-react";
 
 import Header from "../components/Header.jsx";
 
@@ -102,23 +102,25 @@ const dates = ["All Dates", "This Month", "Next Month", "This Quarter", "Next Qu
 
 // Search and Filter Component
 const SearchAndFilter = ({
-    searchTerm,
-    setSearchTerm,
-    selectedCategory,
-    setSelectedCategory,
-    selectedDepartment,
-    setSelectedDepartment,
-    selectedDate,
-    setSelectedDate,
-    onResetFilters,
-}) => {
+                             searchTerm,
+                             setSearchTerm,
+                             selectedCategory,
+                             setSelectedCategory,
+                             selectedDepartment,
+                             setSelectedDepartment,
+                             selectedDate,
+                             setSelectedDate,
+                             onResetFilters,
+                         }) => {
     return (
-        <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100 shadow-lg border-b border-purple-100 py-8 relative overflow-hidden">
+        <div
+            className="bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100 shadow-lg border-b border-purple-100 py-8 relative overflow-hidden">
             <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+                <div
+                    className="absolute -top-20 -right-20 w-40 h-40 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
                 <div
                     className="absolute -bottom-20 -left-20 w-40 h-40 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"
-                    style={{ animationDelay: "2s" }}
+                    style={{animationDelay: "2s"}}
                 ></div>
             </div>
 
@@ -129,7 +131,7 @@ const SearchAndFilter = ({
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                                 <div className="size-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                    <Search className="text-purple-600 size-5" />
+                                    <Search className="text-purple-600 size-5"/>
                                 </div>
                             </div>
                             <input
@@ -196,7 +198,7 @@ const SearchAndFilter = ({
 };
 
 // Event Card Component
-const EventCard = ({ event }) => {
+const EventCard = ({event}) => {
     const getAvailabilityColor = (available, total) => {
         const ratio = available / total;
         if (ratio <= 0.1) return "bg-red-500";
@@ -209,14 +211,16 @@ const EventCard = ({ event }) => {
     };
 
     return (
-        <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 min-h-[430px]">
+        <div
+            className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 min-h-[430px]">
             <div className="relative overflow-hidden">
                 <img
                     src={event.image || "/placeholder.svg"}
                     alt={event.title}
                     className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div
+                    className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute top-4 right-4">
                     <div
                         className={`px-3 py-1.5 rounded-full text-white text-sm font-semibold shadow-lg ${getAvailabilityColor(
@@ -284,7 +288,7 @@ export default function EventsPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-50 to-purple-50">
-            <Header />
+            <Header/>
 
             <SearchAndFilter
                 searchTerm={searchTerm}
@@ -306,10 +310,12 @@ export default function EventsPage() {
                         </div>
                         <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
                             Discover Amazing
-                            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"> Events</span>
+                            <span
+                                className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"> Events</span>
                         </h1>
                         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                            Showing <span className="font-semibold text-purple-600">{filteredEvents.length}</span> of{" "}
+                            Showing <span
+                            className="font-semibold text-purple-600">{filteredEvents.length}</span> of{" "}
                             <span className="font-semibold text-purple-600">{mockEvents.length}</span> events
                         </p>
                     </div>
@@ -320,9 +326,9 @@ export default function EventsPage() {
                         <div
                             key={event.id}
                             className="opacity-0 animate-fade-in"
-                            style={{ animationDelay: `${index * 50}ms`, animationFillMode: "forwards" }}
+                            style={{animationDelay: `${index * 50}ms`, animationFillMode: "forwards"}}
                         >
-                            <EventCard event={event} />
+                            <EventCard event={event}/>
                         </div>
                     ))}
                 </div>
@@ -330,10 +336,12 @@ export default function EventsPage() {
                 {filteredEvents.length === 0 && (
                     <div className="text-center py-20">
                         <div className="space-y-4">
-                            <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto">
+                            <div
+                                className="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto">
                                 <span className="text-4xl">🔍</span>
                             </div>
-                            <div className="text-gray-500 text-xl font-medium">No events found matching your criteria.</div>
+                            <div className="text-gray-500 text-xl font-medium">No events found matching your criteria.
+                            </div>
                             <button
                                 onClick={handleResetFilters}
                                 className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"

@@ -1,342 +1,255 @@
-import React, { useState, useEffect } from 'react';
-import {Search, Play, Facebook, Twitter, Instagram} from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from "react";
+import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 import Header from "../components/Header.jsx";
+import { Search } from "lucide-react";
+import {toast} from "react-toastify";
 
-// RandomBlob component from homepage
-function RandomBlob({ className, color }) {
-    const [target, setTarget] = useState({ x: 0, y: 0 });
+export default function Gallery() {
+    const { user } = useAuth();
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selected, setSelected] = useState({});
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setTarget({
-                x: Math.random() * 200 - 100,
-                y: Math.random() * 200 - 100,
-            });
-        }, 4000);
-        return () => clearInterval(interval);
-    }, []);
+    const [search, setSearch] = useState("");
+    const [category, setCategory] = useState("all");
+    const [page, setPage] = useState(1);
+    const [meta, setMeta] = useState({});
 
-    return (
-        <motion.div
-            animate={{ x: target.x, y: target.y }}
-            transition={{ duration: 1, ease: "linear" }}
-            className={`absolute w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-70 ${className}`}
-            style={{ backgroundColor: color }}
-        />
-    );
-}
+    const [department, setDepartment] = useState("all");
+    const [date, setDate] = useState("all");
 
-const EventSphereGallery = () => {
-    const [selectedCategory, setSelectedCategory] = useState('all');
-    const [selectedMedia, setSelectedMedia] = useState([]);
-    const [user, setUser] = useState([]);
-
-    useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-    }, []);
-
-    // Define categories with count
     const categories = [
-        { id: 'all', name: 'All', count: 8 },
-        { id: 'spring-arts', name: 'Spring Arts', count: 1 },
-        { id: 'tech-innovation', name: 'Tech Innovation', count: 1 },
-        { id: 'sports', name: 'Sports', count: 1 },
-        { id: 'academic', name: 'Academic', count: 1 },
-        { id: 'entertainment', name: 'Entertainment', count: 2 },
-        { id: 'community', name: 'Community', count: 2 }
+        "Cultural",
+        "Technical Fests",
+        "Sports Meets",
+        "Annual Day Functions",
+        "Workshops and Seminars",
+        "Intercollegiate Competitions",
     ];
 
-    const mediaItems = [
-        {
-            id: 1,
-            title: 'Campus Festivities 2024',
-            date: 'May 15, 2024',
-            category: 'spring-arts',
-            image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop',
-            type: 'image'
-        },
-        {
-            id: 2,
-            title: 'Robotics Challenge Highlight',
-            date: 'April 22, 2024',
-            category: 'tech-innovation',
-            image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&h=300&fit=crop',
-            type: 'video'
-        },
-        {
-            id: 3,
-            title: 'Student Art Showcase',
-            date: 'March 18, 2024',
-            category: 'spring-arts',
-            image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=300&fit=crop',
-            type: 'image'
-        },
-        {
-            id: 4,
-            title: 'Intramural Basketball Finals',
-            date: 'February 28, 2024',
-            category: 'sports',
-            image: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=400&h=300&fit=crop',
-            type: 'image'
-        },
-        {
-            id: 5,
-            title: 'Live Music Concert',
-            date: 'January 25, 2024',
-            category: 'entertainment',
-            image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop',
-            type: 'video'
-        },
-        {
-            id: 6,
-            title: 'Guest Lecture Series: Future Tech',
-            date: 'December 12, 2023',
-            category: 'academic',
-            image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop',
-            type: 'image'
-        },
-        {
-            id: 7,
-            title: 'Community Service Day',
-            date: 'November 30, 2023',
-            category: 'community',
-            image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&h=300&fit=crop',
-            type: 'image'
-        },
-        {
-            id: 8,
-            title: 'Annual Theater Production',
-            date: 'October 15, 2023',
-            category: 'entertainment',
-            image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=300&fit=crop',
-            type: 'video'
-        }
-    ];
+    useEffect(() => {
+        setLoading(true);
+        api.get("/public-events", {
+            params: { search, category, department, date, page },
+        })
+            .then((res) => {
+                const data = res.data.data || [];
+                setEvents(data);
+                setMeta({
+                    current_page: res.data.current_page,
+                    last_page: res.data.last_page,
+                });
+            })
+            .catch((err) => console.error("Error fetching events:", err))
+            .finally(() => setLoading(false));
+    }, [search, category, department, date, page]);
 
-    // Filter media items based on selected category
-    const filteredMedia = selectedCategory === 'all'
-        ? mediaItems
-        : mediaItems.filter(item => item.category === selectedCategory);
-
-    const toggleMediaSelection = (id) => {
-        setSelectedMedia(prev =>
-            prev.includes(id)
-                ? prev.filter(item => item !== id)
-                : [...prev, id]
-        );
+    const toggleSelect = (eventId) => {
+        setSelected((prev) => ({
+            ...prev,
+            [eventId]: !prev[eventId],
+        }));
     };
 
-    const handleSaveSelected = () => {
-        if (selectedMedia.length === 0) {
-            alert("Media chua dc chon!");
+    const saveFavorites = () => {
+        const selectedIds = Object.keys(selected).filter((id) => selected[id]);
+
+        if (selectedIds.length === 0) {
+            toast.error("⚠️ You haven’t selected any events!");
             return;
         }
-        alert("Media duoc chon: " + selectedMedia.join(", "));
+
+        api.post("/favorites", { events: selectedIds })
+            .then(() => {
+                toast.success("✅ Favorite events saved successfully!");
+                // Optionally reload favorites từ backend
+                api.get("/favorites").then((res) => {
+                    const favIds = res.data.map(f => f.event_id);
+                    const favMap = {};
+                    favIds.forEach(id => favMap[id] = true);
+                    setSelected(favMap);
+                });
+            })
+            .catch((err) => {
+                console.error("Error saving favorites:", err);
+                toast.error("❌ Failed to save favorites!");
+            });
     };
 
-    const MediaCard = ({ item, index }) => (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-purple-100"
-        >
-            {/* Media Thumbnail */}
-            <div className="relative overflow-hidden">
-                <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
-                />
+    const onResetFilters = () => {
+        setSearch("");
+        setCategory("all");
+        setDepartment("all");
+        setDate("all");
+        setPage(1);
+    };
 
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                {/* Video play button */}
-                {item.type === 'video' && (
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl">
-                            <Play className="w-8 h-8 text-purple-600 ml-1" />
-                        </div>
-                    </div>
-                )}
-
-                {/* Selection checkbox */}
-                {user?.role === "participant" && (
-                    <div className="absolute top-3 left-3">
-                        <input
-                            type="checkbox"
-                            checked={selectedMedia.includes(item.id)}
-                            onChange={() => toggleMediaSelection(item.id)}
-                            className="w-5 h-5 accent-purple-600"
-                        />
-                    </div>
-                )}
-
-                {/* Type badge */}
-                <div className="absolute top-4 right-4">
-                    <div className={`px-3 py-1.5 rounded-full text-white text-xs font-semibold shadow-lg ${
-                        item.type === 'video' ? 'bg-gradient-to-r from-red-500 to-pink-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'
-                    }`}>
-                        {item.type === 'video' ? '📹 Video' : '🖼️ Image'}
-                    </div>
-                </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-6 space-y-4">
-                <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-purple-600 transition-colors duration-200">
-                    {item.title}
-                </h3>
-
-                <div className="space-y-2 text-sm">
-                    <div className="flex items-center space-x-2 text-gray-600">
-                        <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
-                            <span className="text-purple-600 text-xs">📅</span>
-                        </div>
-                        <span className="font-medium">{item.date}</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-gray-600">
-                        <div className="w-5 h-5 bg-pink-100 rounded-full flex items-center justify-center">
-                            <span className="text-pink-600 text-xs">🏷️</span>
-                        </div>
-                        <span className="font-medium">{categories.find(cat => cat.id === item.category)?.name || item.category}</span>
-                    </div>
-                </div>
-            </div>
-        </motion.div>
-    );
+    if (loading) {
+        return <div className="p-6 text-center">Loading events...</div>;
+    }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-purple-50 via-pink-50 to-indigo-50">
+        <div className="p-6 bg-gradient-to-br from-pink-50 via-white to-purple-50 min-h-screen">
             <Header />
 
-            {/* Hero Section */}
-            <section className="bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100 py-16 relative overflow-hidden">
-                <div className="absolute inset-0 overflow-hidden">
-                    <RandomBlob className="-top-40 -right-40" color="#c084fc" />
-                    <RandomBlob className="-bottom-40 -left-40" color="#f9a8d4" />
-                    <RandomBlob className="top-40 left-40" color="#a5b4fc" />
-                </div>
+            <h1 className="text-3xl font-extrabold mb-6 text-center text-purple-700">
+                Discover Amazing <span className="text-pink-600">Events</span>
+            </h1>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="text-center space-y-6">
-                        <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg">
-                            <span className="text-sm font-semibold text-purple-600">📸 Media Gallery</span>
+            {/* 🔍 Search + Filters */}
+            <div className="shadow-lg border border-purple-100 rounded-xl p-6 mb-8 bg-gradient-to-br from-pink-50 via-white to-purple-50">
+                <div className="flex flex-col lg:flex-row gap-4 items-center justify-center">
+                    {/* Search Input */}
+                    <div className="flex-1 w-full lg:max-w-md">
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                                <div className="size-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <Search className="text-purple-600 size-5" />
+                                </div>
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Search by event title or keyword..."
+                                value={search}
+                                onChange={(e) => {
+                                    setPage(1);
+                                    setSearch(e.target.value);
+                                }}
+                                className="w-full pl-12 pr-4 py-3 bg-white border border-purple-200 rounded-xl
+                                    focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-md
+                                    transition-all duration-200 placeholder-gray-500"
+                            />
                         </div>
-
-                        <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-                            Explore Our
-                            <br />
-                            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Media Collection
-              </span>
-                        </h1>
-
-                        <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                            Discover amazing photos and videos from events across campus. Filter by category, event, date, or media type.
-                        </p>
-                    </div>
-                </div>
-            </section>
-
-            {/* Main Content */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                {/* Controls */}
-                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-purple-100 mb-12">
-                    {/* Category Tabs */}
-                    <div className="flex flex-wrap gap-3 justify-center mb-6">
-                        {categories.map((category) => (
-                            <button
-                                key={category.id}
-                                onClick={() => setSelectedCategory(category.id)}
-                                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
-                                    selectedCategory === category.id
-                                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-                                        : 'bg-white text-gray-600 hover:text-purple-600 border-2 border-purple-100 hover:border-purple-300'
-                                }`}
-                            >
-                                {category.name}
-                                <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
-                                    selectedCategory === category.id
-                                        ? 'bg-white/20 text-white'
-                                        : 'bg-purple-100 text-purple-600'
-                                }`}>
-                                    {category.count}
-                                </span>
-                            </button>
-                        ))}
                     </div>
 
-                    {/* Save Selected Button */}
-                    {user?.role === "participant" && selectedMedia.length > 0 && (
+                    {/* Department + Date + Reset */}
+                    <div className="flex flex-wrap gap-3 items-center">
+
+
                         <button
-                            onClick={handleSaveSelected}
-                            className="mb-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg"
+                            onClick={onResetFilters}
+                            className="cursor-pointer px-5 py-2 bg-white hover:bg-gray-50 text-purple-600 hover:text-purple-700 font-semibold rounded-lg shadow-sm border border-purple-200"
                         >
-                            💾 Save Selected Media
+                            Reset Filters
                         </button>
-                    )}
+                    </div>
                 </div>
 
-                {/* Media Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {filteredMedia.map((item, index) => (
-                        <MediaCard key={item.id} item={item} index={index} />
+                {/* Categories nằm ngang */}
+                <div className="flex flex-wrap justify-center gap-3 mt-6">
+                    {categories.map((c) => (
+                        <button
+                            key={c}
+                            onClick={() => {
+                                setPage(1);
+                                setCategory(c);
+                            }}
+                            className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition ${
+                                category === c
+                                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+                                    : "bg-white border border-purple-200 text-gray-700 hover:bg-purple-50"
+                            }`}
+                        >
+                            {c}
+                        </button>
                     ))}
                 </div>
+            </div>
 
-                {/* Empty State */}
-                {filteredMedia.length === 0 && (
-                    <div className="text-center py-16">
-                        <div className="text-gray-400 mb-4">
-                            <span className="text-6xl">📷</span>
-                        </div>
-                        <h3 className="text-xl font-semibold text-gray-600 mb-2">No media found</h3>
-                        <p className="text-gray-500">Try selecting a different category</p>
-                    </div>
-                )}
-
-                {/* Load More Button */}
-                {filteredMedia.length > 0 && (
-                    <div className="text-center mt-16">
-                        <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-                            Load More Media
-                        </button>
-                    </div>
-                )}
-            </main>
-
-            {/* Footer */}
-            <footer className="bg-white/80 backdrop-blur-sm border-t border-purple-100 mt-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="flex flex-col sm:flex-row justify-between items-center">
-                        <div className="flex space-x-6 mb-4 sm:mb-0">
-                            <a href="#" className="text-gray-600 hover:text-purple-600 font-medium transition-colors duration-200">About</a>
-                            <a href="#" className="text-gray-600 hover:text-purple-600 font-medium transition-colors duration-200">Resources</a>
-                            <a href="#" className="text-gray-600 hover:text-purple-600 font-medium transition-colors duration-200">Contact</a>
-                        </div>
-
-                        <div className="flex space-x-4">
-                            <a href="#" className="text-purple-400 hover:text-purple-600 transition-colors duration-200 p-2 bg-purple-50 rounded-lg hover:bg-purple-100">
-                                <Facebook className="w-5 h-5" />
-                            </a>
-                            <a href="#" className="text-purple-400 hover:text-purple-600 transition-colors duration-200 p-2 bg-purple-50 rounded-lg hover:bg-purple-100">
-                                <Twitter className="w-5 h-5" />
-                            </a>
-                            <a href="#" className="text-purple-400 hover:text-purple-600 transition-colors duration-200 p-2 bg-purple-50 rounded-lg hover:bg-purple-100">
-                                <Instagram className="w-5 h-5" />
-                            </a>
-                        </div>
-                    </div>
+            {/* Event Cards */}
+            {events.length === 0 ? (
+                <div className="text-center text-gray-500">
+                    No approved events available
                 </div>
-            </footer>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {events.map((event) => (
+                        <div
+                            key={event.event_id}
+                            className="bg-white rounded-xl shadow-md hover:shadow-xl transition flex flex-col"
+                        >
+                            <div className="relative">
+                                <img
+                                    src={`http://localhost:8000${event.bannerImage}` || "/default-thumbnail.jpg"}
+                                    alt={event.title}
+                                    className="w-full h-52 object-cover rounded-t-xl"
+                                />
+                                <span className="absolute top-3 left-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
+                                    {event.maxParticipants} Slots Available
+                                </span>
+                            </div>
+
+                            <div className="p-4 flex-1 flex flex-col">
+                                <h3 className="font-bold text-lg text-gray-800 mb-2">
+                                    {event.title}
+                                </h3>
+                                <p className="text-sm text-gray-600 line-clamp-3 mb-3">
+                                    {event.description}
+                                </p>
+                                <p className="text-xs text-gray-500 mb-1">
+                                    📅 {new Date(event.start_at).toLocaleDateString()} –{" "}
+                                    {event.duration_minutes} minutes
+                                </p>
+                                <p className="text-xs text-gray-500 mb-3">
+                                    📍 {event.venue}
+                                </p>
+
+                                <button className="mt-auto w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white text-sm font-semibold px-4 py-2 rounded-full shadow hover:from-pink-600 hover:to-purple-700">
+                                    View Details
+                                </button>
+
+                                {user?.role === "participant" && (
+                                    <label className="mt-2 flex items-center gap-2 text-sm text-gray-700">
+                                        <input
+                                            type="checkbox"
+                                            checked={selected[event.event_id] || false}
+                                            onChange={() => toggleSelect(event.event_id)}
+                                            className="w-4 h-4 text-purple-600"
+                                        />
+                                        Select event
+                                    </label>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Pagination */}
+            {meta.last_page > 1 && (
+                <div className="flex justify-center items-center gap-3 mt-10">
+                    <button
+                        onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                        disabled={page === 1}
+                        className="px-4 py-2 border rounded-full bg-white shadow hover:bg-gray-100 disabled:opacity-50"
+                    >
+                        Prev
+                    </button>
+                    <span className="text-sm font-medium text-gray-700">
+                        Page {meta.current_page} of {meta.last_page}
+                    </span>
+                    <button
+                        onClick={() => setPage((p) => Math.min(p + 1, meta.last_page))}
+                        disabled={page === meta.last_page}
+                        className="px-4 py-2 border rounded-full bg-white shadow hover:bg-gray-100 disabled:opacity-50"
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
+
+            {/* Save Favorites */}
+            {user?.role === "participant" && events.length > 0 && (
+                <div className="mt-10 text-center">
+                    <button
+                        onClick={saveFavorites}
+                        className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-full shadow hover:from-purple-700 hover:to-pink-700"
+                    >
+                        Save Selected
+                    </button>
+                </div>
+            )}
         </div>
     );
-};
-
-export default EventSphereGallery;
+}

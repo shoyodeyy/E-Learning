@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ChevronLeft, ChevronRight, LayoutDashboard, User, Book, LogOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, LayoutDashboard, User, Book, CircleStar } from "lucide-react";
 
 
 export default function UserSidebar({mobile = false}) {
@@ -22,6 +22,12 @@ export default function UserSidebar({mobile = false}) {
         label: "My Registrations",
         icon: Book
         },
+        {
+            id:"favorite",
+            link:"/user/favorite",
+            label: "Favorite Events",
+            icon: CircleStar
+        }
     ];
 
     useEffect(() => window.scrollTo(0, 0), []);

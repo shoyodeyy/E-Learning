@@ -15,7 +15,7 @@ import VerifyEmail from "./pages/VerifyEmail.jsx";
 import Footer from "./components/Footer.jsx";
 import AboutUs from "./pages/AboutUs.jsx";
 import EventsPage from "./pages/Events.jsx";
-import EventDetailPage from "./pages/EventDetail.jsx";
+import EventDetailPage from "./pages/EventDetail";
 import Home from "./pages/Home.jsx";
 import GuestRoute from "./routes/GuestRoute.jsx";
 import Sitemap from "./pages/Sitemap.jsx";
