@@ -9,15 +9,21 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\Student\FavoriteController;
 use App\Http\Controllers\Student\ProfileController;
 use App\Http\Controllers\Chatbot\ChatController;
 use App\Http\Controllers\Feedback\FeedbackController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\Student\PublicEventController;
 use App\Services\AIClientWithFallback;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+
+
 // ===================== PUBLIC ROUTES =====================
+
+Route::get('/public-events', [PublicEventController::class, 'index']);
 
 // Auth
 Route::post('/register', [AuthController::class, 'register']);
@@ -101,6 +107,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+
+    // Favorites
+    Route::get('/favorites', [FavoriteController::class, 'index']);
+    Route::post('/favorites', [FavoriteController::class, 'store']);
+    Route::delete('/favorites/{eventId}', [FavoriteController::class, 'destroy']);
 });
 
 // ===================== ADMIN ROUTES =====================
