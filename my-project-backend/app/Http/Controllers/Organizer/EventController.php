@@ -108,7 +108,7 @@ class EventController extends Controller
 
         if (in_array($event->status, ['completed'])) {
             return response()->json([
-                'message' => 'Cannot update completed or cancelled events'
+                'message' => 'Cannot update completed events'
             ], 403);
         }
 
@@ -136,8 +136,9 @@ class EventController extends Controller
         $message = 'Event updated successfully.';
         $originalStatus = $event->status;
 
-        // cập nhật các field trừ bannerImage
         $event->fill(collect($data)->except('bannerImage')->toArray());
+
+        $isDirty = $event->isDirty();
 
         if ($request->hasFile('bannerImage')) {
             if ($event->bannerImage) {
@@ -151,15 +152,16 @@ class EventController extends Controller
             $fileName = $event->event_id . '.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('events/banners', $fileName, 'public');
             $event->bannerImage = asset('storage/' . $path);
+
+            $isDirty = true;
         }
 
         $event->save();
 
-        // Xử lý notification cho từng trạng thái
         if (!$user->hasRole('admin')) {
             $admins = User::where('role', 'admin')->get();
 
-            if (in_array($originalStatus, ['approved', 'pending_update', 'pending_create']) && $event->wasChanged()) {
+            if (in_array($originalStatus, ['approved', 'pending_update', 'pending_create']) && $isDirty) {
                 $statusUpdateMap = [
                     'approved' => 'pending_update',
                     'pending_update' => 'pending_update',
@@ -181,7 +183,7 @@ class EventController extends Controller
                     $notification = Notification::create([
                         'user_id' => $admin->user_id,
                         'event_id' => $event->event_id,
-                        'message' => "Event {$event->title} has been updated by {$event->organizerId}",
+                        'message' => "Event {$event->title} has been updated by organizer {$event->organizerId}",
                         'type' => $typeMap[$originalStatus],
                         'is_read' => 0,
                     ]);
@@ -189,12 +191,12 @@ class EventController extends Controller
                     event(new \App\Events\NewNotification($notification));
                 }
 
-                $message = 'Event updated successfully. Status reset to pending for re-approval.';
+                $message = 'Update request sent. Waiting for admin approval.';
             }
 
-            if ($originalStatus === 'pending_delete' && $event->wasChanged()) {
+            if ($originalStatus === 'pending_delete' && $isDirty) {
                 return response()->json([
-                    'message' => 'You can not update the event in pending_delete status'
+                    'message' => 'You cannot update the event while it is in pending_delete status'
                 ], 403);
             }
         }
@@ -207,65 +209,70 @@ class EventController extends Controller
         ]);
     }
 
-    public function destroy(Request $request, $id)
+
+    public function destroy($id)
     {
         $event = Event::findOrFail($id);
         $user = auth()->user();
 
-        if (!$user->hasRole('admin') && $event->status === 'completed') {
-            return response()->json([
-                'message' => 'Completed events cannot be deleted.'
-            ], 403);
-        }
-
-        if ($user->hasRole('admin')) {
-            $event->delete();
-            return response()->json([
-                'message' => 'Event deleted successfully (by admin).'
-            ], 200);
-        }
-
-        if ($user->user_id !== $event->organizerId) {
+        if (!$user->hasRole('admin') && $user->user_id !== $event->organizerId) {
             return response()->json([
                 'message' => 'You can only delete your own events'
             ], 403);
         }
 
-        if ($event->status === 'pending_create') {
-            $event->delete();
-            return response()->json([
-                'message' => 'Event deleted successfully (pending create).'
-            ], 200);
-        }
-
-        if (in_array($event->status, ['approved', 'pending_update'])) {
-            $event->update([
-                'status' => 'pending_delete',
-                'approvedBy' => null
-            ]);
-
-            // Gửi notification cho admin
-            $admins = User::where('role', 'admin')->get();
-            foreach ($admins as $admin) {
-                $notification = Notification::create([
-                    'user_id' => $admin->user_id,
-                    'event_id' => $event->event_id,
-                    'message' => "Event deletion requested for {$event->title} by {$user->user_id}",
-                    'type' => 'event_pending_delete',
-                    'is_read' => 0,
-                ]);
-
-                event(new \App\Events\NewNotification($notification));
+        if (!$user->hasRole('admin')) {
+            if ($event->status === 'completed') {
+                return response()->json([
+                    'message' => 'Cannot delete completed events'
+                ], 403);
             }
 
-            return response()->json([
-                'message' => 'Event deletion request sent. Waiting for admin approval.'
-            ], 200);
+            if ($event->status === 'pending_create') {
+                $event->delete();
+                return response()->json([
+                    'message' => 'Event deleted successfully (not yet approved)'
+                ]);
+            }
+
+            if (in_array($event->status, ['approved', 'pending_update'])) {
+                $event->update([
+                    'status' => 'pending_delete',
+                    'approvedBy' => null,
+                ]);
+
+                $admins = User::where('role', 'admin')->get();
+
+                foreach ($admins as $admin) {
+                    $notification = Notification::create([
+                        'user_id' => $admin->user_id,
+                        'event_id' => $event->event_id,
+                        'message' => "Organizer {$event->organizerId} requested deletion of event {$event->title}",
+                        'type' => 'event_pending_delete',
+                        'is_read' => 0,
+                    ]);
+
+                    event(new \App\Events\NewNotification($notification));
+                }
+
+                return response()->json([
+                    'message' => 'Delete request sent. Waiting for admin approval.'
+                ], 200);
+            }
+
+            if ($event->status === 'pending_delete') {
+                return response()->json([
+                    'message' => 'Event is already waiting for admin delete approval'
+                ], 403);
+            }
         }
 
-        return response()->json([
-            'message' => 'Invalid action for current event status.'
-        ], 400);
+        if ($user->hasRole('admin')) {
+            $event->delete();
+            return response()->json([
+                'message' => 'Event deleted by admin successfully.'
+            ]);
+        }
     }
 
 
@@ -275,36 +282,42 @@ class EventController extends Controller
         $user = auth()->user();
 
         if (!$user->hasRole('admin')) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return response()->json([
+                'message' => 'Only admins can approve events'
+            ], 403);
         }
 
-        if (!in_array($event->status, ['pending_create', 'pending_update', 'pending_delete'])) {
-            return response()->json(['message' => 'This event is not pending approval.'], 403);
+        switch ($event->status) {
+            case 'pending_create':
+                $event->update([
+                    'status' => 'approved',
+                    'approvedBy' => $user->user_id,
+                ]);
+                $message = "Event {$event->title} has been approved (creation).";
+                break;
+
+            case 'pending_update':
+                $event->update([
+                    'status' => 'approved',
+                    'approvedBy' => $user->user_id,
+                ]);
+                $message = "Event {$event->title} has been approved (update).";
+                break;
+
+            case 'pending_delete':
+                $event->delete();
+                $message = "Event {$event->title} has been deleted after admin approval.";
+                break;
+
+            default:
+                return response()->json([
+                    'message' => 'This event is not pending approval'
+                ], 400);
         }
-
-        if ($event->status === 'pending_delete') {
-            $event->delete();
-            return response()->json(['message' => 'Event deleted successfully!']);
-        }
-
-        $event->update([
-            'status' => 'approved',
-            'approvedBy' => $user->user_id,
-        ]);
-
-        // Gửi notification cho organizer
-        $notification = Notification::create([
-            'user_id' => $event->organizerId,
-            'event_id' => $event->event_id,
-            'message' => "Your event {$event->title} has been approved by admin",
-            'type' => 'event_approved',
-            'is_read' => 0,
-        ]);
-        event(new \App\Events\NewNotification($notification));
 
         return response()->json([
-            'message' => 'Event approved successfully!',
-            'data' => new EventResource($event)
+            'message' => $message,
+            'data' => $event->status === 'pending_delete' ? null : new EventResource($event)
         ]);
     }
 
@@ -315,30 +328,42 @@ class EventController extends Controller
         $user = auth()->user();
 
         if (!$user->hasRole('admin')) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            return response()->json([
+                'message' => 'Only admins can reject events'
+            ], 403);
         }
 
-        if (!in_array($event->status, ['pending_create', 'pending_update'])) {
-            return response()->json(['message' => 'This event is not pending rejection.'], 400);
+        switch ($event->status) {
+            case 'pending_create':
+                $event->update([
+                    'status' => 'rejected_create',
+                    'approvedBy' => null,
+                ]);
+                $message = "Event {$event->title} creation has been rejected. Organizer needs to update and resubmit.";
+                break;
+
+            case 'pending_update':
+                $event->update([
+                    'status' => 'approved',
+                ]);
+                $message = "Event {$event->title} update has been rejected.";
+                break;
+
+            case 'pending_delete':
+                $event->update([
+                    'status' => 'approved',
+                ]);
+                $message = "Event {$event->title} deletion has been rejected.";
+                break;
+
+            default:
+                return response()->json([
+                    'message' => 'This event is not pending approval'
+                ], 400);
         }
-
-        $event->update([
-            'status' => 'rejected',
-            'approvedBy' => $user->user_id,
-        ]);
-
-        // Gửi notification cho organizer
-        $notification = Notification::create([
-            'user_id' => $event->organizerId,
-            'event_id' => $event->event_id,
-            'message' => "Your event {$event->title} has been rejected by admin",
-            'type' => 'event_rejected',
-            'is_read' => 0,
-        ]);
-        event(new \App\Events\NewNotification($notification));
 
         return response()->json([
-            'message' => 'Event rejected successfully!',
+            'message' => $message,
             'data' => new EventResource($event)
         ]);
     }
