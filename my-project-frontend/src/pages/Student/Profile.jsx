@@ -49,7 +49,11 @@ export default function Profile() {
             <div className="max-w-6xl mx-auto py-8">
                 {/* Page Header */}
                 <div className="mb-8">
-                    <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Participant Profile</h1>
+
+                    <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
+                        {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ""} Profile
+                    </h1>
+
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
@@ -66,8 +70,13 @@ export default function Profile() {
                                     <p className="text-gray-900 font-medium">{user.name}</p>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-600 mb-1">Gender</label>
-                                    <p className="text-gray-900">{user.gender}</p>
+
+                                    <label className="block text-sm font-medium text-gray-600 mb-1">
+                                        Gender
+                                    </label>
+                                    <p className="text-gray-900">
+                                        {user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : ""}
+                                    </p>
                                 </div>
                             </div>
                         </div>

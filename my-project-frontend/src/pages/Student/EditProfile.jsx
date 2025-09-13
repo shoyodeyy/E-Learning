@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { updateProfile } from "../../api/profileApi.js";
 import ConfirmDialog from "../../components/ConfirmDialog.jsx";
+import {useNavigate} from "react-router-dom";
 
 export default function EditProfile() {
     const { user, updateUser } = useAuth();
@@ -10,9 +11,16 @@ export default function EditProfile() {
     const [formData, setFormData] = useState({});
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (user) {
+            let enrollmentNo = user.enrollment_no || "";
+            // Chỉ lấy 6 chữ số cuối, bỏ prefix
+            if (["admin", "organizer"].includes(user.role) && enrollmentNo.length > 3) {
+                enrollmentNo = enrollmentNo.slice(-6);
+            }
+
             setFormData({
                 name: user.name || "",
                 email: user.email || "",
@@ -21,10 +29,11 @@ export default function EditProfile() {
                 gender: user.gender || "",
                 profile: user.profile || "",
                 department: user.department || "",
-                enrollment_no: user.enrollment_no || "",
+                enrollment_no: enrollmentNo,
             });
         }
     }, [user]);
+
 
     if (!user) {
         return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -58,8 +67,19 @@ export default function EditProfile() {
             newErrors.phone = "Phone must start with 0 or +84 and be 10–11 digits total";
         }
         if (!formData.gender?.trim()) newErrors.gender = "Gender is required";
+        if (["organizer", "admin"].includes(user?.role)) {
+            if (!formData.department?.trim()) {
+                newErrors.department = "Department is required";
+            }
+            if (!formData.enrollment_no?.trim()) {
+                newErrors.enrollment_no = "Enrollment Number is required";
+            } else if (!/^[0-9]{6}$/.test(formData.enrollment_no)) {
+                newErrors.enrollment_no = "Enrollment Number must be exactly 6 digits";
+            }
+        }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
+
     };
 
     const handleSubmit = (e) => {
@@ -73,9 +93,10 @@ export default function EditProfile() {
         setProcessing(true);
         try {
             const data = new FormData();
+
             Object.keys(formData).forEach((key) => {
                 if (formData[key] !== null && formData[key] !== "") {
-                    data.append(key, formData[key]);
+                        data.append(key, formData[key]);
                 }
             });
 
@@ -83,6 +104,9 @@ export default function EditProfile() {
             updateUser(result.user);
             toast.success(result.message || "Profile updated successfully ✅");
             setErrors({});
+
+            // navigate
+            navigate('/user/profile');
         } catch (error) {
             console.error(error);
 
@@ -122,6 +146,7 @@ export default function EditProfile() {
 
                         {/* Avatar */}
                         <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1">Avatar</label>
                             <input
                                 type="file"
                                 name="avatar"
@@ -189,7 +214,7 @@ export default function EditProfile() {
                                 type="email"
                                 name="email"
                                 value={formData.email}
-                                readOnly
+                                disabled
                                 className="w-full border rounded px-3 py-2 bg-gray-100 border-gray-300 text-gray-600 cursor-not-allowed"
                             />
                         </div>
@@ -254,31 +279,51 @@ export default function EditProfile() {
                             {/* Department */}
                             <div className="mb-4">
                                 <label className="block text-sm font-medium mb-1">Department</label>
-                                <input
-                                    type="text"
+                                <select
                                     name="department"
                                     value={formData.department}
                                     onChange={handleInputChange}
-                                    readOnly={user?.role === "organizer"}
-                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 border-gray-300 ${
-                                        user?.role === "organizer" ? "bg-gray-100 text-gray-600 cursor-not-allowed" : "bg-white"
+                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                                        errors.department ? "border-red-500" : "border-gray-300"
                                     }`}
-                                />
+                                >
+                                    <option value="">Select a department</option>
+                                    <option value="Computer Science">Computer Science</option>
+                                    <option value="Electrical Engineering">Electrical Engineering</option>
+                                    <option value="Mechanical Engineering">Mechanical Engineering</option>
+                                    <option value="Business Administration">Business Administration</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Finance and Accounting">Finance and Accounting</option>
+                                    <option value="Human Resources">Human Resources</option>
+                                    <option value="Event Management Office">Event Management Office</option>
+                                    <option value="Library and Information Center">Library and Information Center</option>
+
+                                </select>
+                                {errors.department && (
+                                    <p className="text-red-500 text-sm">{errors.department}</p>
+                                )}
                             </div>
 
                             {/* Enrollment Number */}
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Enrollment Number</label>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium mb-1">Enrollment Number  <span className="text-gray-400 text-xs ml-1">(Enter 6 digits)</span> </label>
                                 <input
-                                    type="text"
+                                    type="number"
                                     name="enrollment_no"
                                     value={formData.enrollment_no}
-                                    onChange={handleInputChange}
-                                    readOnly={user?.role === "organizer"}
-                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 border-gray-300 ${
-                                        user?.role === "organizer" ? "bg-gray-100 text-gray-600 cursor-not-allowed" : "bg-white"
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value.length <= 6) {
+                                            handleInputChange(e);
+                                        }
+                                    }}
+                                    className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                                        errors.enrollment_no ? "border-red-500" : "border-gray-300"
                                     }`}
                                 />
+                                {errors.enrollment_no && (
+                                    <p className="text-red-500 text-sm">{errors.enrollment_no}</p>
+                                )}
                             </div>
                         </div>
                     )}
