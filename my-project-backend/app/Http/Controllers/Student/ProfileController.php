@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
+use App\Models\User;
 
 class ProfileController extends Controller
 {
@@ -20,7 +21,6 @@ class ProfileController extends Controller
     public function update(Request $request): JsonResponse
     {
         try {
-
             $user = $request->user();
 
             // --- Validation rules ---
@@ -30,7 +30,7 @@ class ProfileController extends Controller
                 'phone'   => [
                     'nullable',
                     'regex:/^(0|\+84)[0-9]{9,10}$/',
-                    'unique:users,phone,' .  $user->user_id . ',user_id',
+                    'unique:users,phone,' . $user->user_id . ',user_id',
                 ],
                 'address' => 'nullable|string|max:255',
                 'gender'  => 'nullable|in:male,female,other',
@@ -40,9 +40,10 @@ class ProfileController extends Controller
 
             // --- Nếu user là admin hoặc organizer thì cho phép department & enrollment_no ---
             if (in_array($user->role, ['admin', 'organizer'])) {
-                $rules['department']    = 'nullable|string|max:100';
-                $rules['enrollment_no'] = 'nullable|string|max:50';
+                $rules['department'] = 'required|in:Computer Science,Electrical Engineering,Mechanical Engineering,Business Administration,Marketing,Finance and Accounting,Human Resources,Event Management Office,Library and Information Center';
+                $rules['enrollment_no'] = 'required|digits:6';
             }
+
 
             $validated = $request->validate($rules, [
                 'phone.regex'  => 'Phone number must start with 0 or +84 and contain 9–10 digits.',
@@ -50,6 +51,8 @@ class ProfileController extends Controller
                 'avatar.image' => 'The uploaded file must be an image.',
                 'avatar.mimes' => 'Allowed formats: jpg, jpeg, png, gif.',
                 'avatar.max'   => 'Avatar size must be less than 2MB.',
+                'enrollment_no.digits' => 'Enrollment number must be exactly 6 digits.',
+                'enrollment_no.unique' => 'Enrollment number is already in use.',
             ]);
 
             // --- Nếu user login bằng Google và chưa update thủ công ---
@@ -59,21 +62,41 @@ class ProfileController extends Controller
 
             // --- Xử lý avatar ---
             if ($request->hasFile('avatar')) {
-                // Xóa avatar cũ nếu có
                 if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
                     Storage::disk('public')->delete($user->avatar);
                 }
-
-                // Lưu avatar mới
                 $path = $request->file('avatar')->store('avatars', 'public');
                 $validated['avatar'] = $path;
             } else {
-                // Nếu không upload, loại bỏ avatar khỏi validated để tránh ghi null
                 unset($validated['avatar']);
+            }
+
+
+            if (in_array($user->role, ['admin', 'organizer']) && !empty($validated['enrollment_no'])) {
+                $prefix = $user->role === 'admin' ? 'ADM' : 'OR';
+                $fullEnrollmentNo = $prefix . $validated['enrollment_no'];
+
+
+                $exists = User::where('enrollment_no', $fullEnrollmentNo)
+                    ->where('user_id', '!=', $user->user_id)
+                    ->exists();
+
+                if ($exists) {
+                    return response()->json([
+                        'message' => 'Validation error',
+                        'errors'  => [
+                            'enrollment_no' => ['This enrollment number is already taken.'],
+                        ],
+                    ], 422);
+                }
+
+
+                $validated['enrollment_no'] = $fullEnrollmentNo;
             }
 
             // --- Update user ---
             $user->update($validated);
+            $user->refresh();
 
             return response()->json([
                 'message' => 'Profile updated successfully.',

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('password', 255)->nullable(); // nullable cho Google login
             $table->string('profile', 255)->nullable();
             $table->enum('role', ['participant', 'organizer', 'admin'])->default('participant');
-            $table->enum('status', ['active', 'banned'])->default('active');
+            $table->enum('status', ['active', 'pending', 'banned'])->default('active');
             $table->string('avatar', 255)->nullable();
             $table->string('google_id', 255)->nullable()->unique();
             $table->timestamp('ban_until')->nullable();

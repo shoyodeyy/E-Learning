@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Edit, Key } from "lucide-react";
 
@@ -15,7 +14,6 @@ export default function Profile() {
 
     const handleChangePassword = () => {
         navigate("/user/change-password")
-
     };
 
     return (
@@ -25,7 +23,7 @@ export default function Profile() {
                 {/* Page Header */}
                 <div className="mb-8">
                     <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
-                        Participant Profile
+                        {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ""} Profile
                     </h1>
                 </div>
 
@@ -50,7 +48,9 @@ export default function Profile() {
                                     <label className="block text-sm font-medium text-gray-600 mb-1">
                                         Gender
                                     </label>
-                                    <p className="text-gray-900">{user.gender}</p>
+                                    <p className="text-gray-900">
+                                        {user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : ""}
+                                    </p>
                                 </div>
                             </div>
                         </div>
