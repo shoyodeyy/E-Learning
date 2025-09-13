@@ -17,6 +17,8 @@ use App\Http\Controllers\CalendarController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Student\EventRegistrationController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Student\DashboardController;
+use App\Http\Controllers\Student\UserSavedMediaController;
 
 
 // Public routes
@@ -113,6 +115,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Change password
     Route::post('/user/change-password', [AuthController::class, 'changePassword']);
 
+    // Saved Media routes
+    Route::get('/saved-media', [UserSavedMediaController::class, 'list']);
+    Route::post('/saved-media', [UserSavedMediaController::class, 'save']);
+    Route::delete('/saved-media/{mediaId}', [UserSavedMediaController::class, 'unsave']);
+
     // Calendar routes
     Route::get('/events/{id}/calendar', [CalendarController::class, 'getCalendarLinks']);
     Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
@@ -122,7 +129,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/events/{eventId}/registration/status', [EventRegistrationController::class, 'status']);
     Route::get('/user/registrations', [EventRegistrationController::class, 'myRegistrations']);
 });
-//Organizer routes
+//Dashboard routes
+Route::middleware(['auth:sanctum', 'role:participant,organizer'])->group(function () {
+    //Dashboard routes
+    Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+    Route::get('/dashboard/recent-activities', [DashboardController::class, 'recentActivities']);
+    Route::get('/dashboard/upcoming-events', [DashboardController::class, 'upcomingEvents']);
+});
+
+//==================================Organizer routes======================================
 Route::middleware(['auth:sanctum', 'role:organizer'])->group(function () {
     Route::get('/events/{eventId}/registrations', [EventRegistrationController::class, 'listByEvent']);
     Route::post('/registrations/{id}/attendance', [EventRegistrationController::class, 'markAttendance']);

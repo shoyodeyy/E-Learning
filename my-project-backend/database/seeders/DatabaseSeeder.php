@@ -38,6 +38,7 @@ class DatabaseSeeder extends Seeder
             EventsTableSeeder::class,
             MediaGalleryTableSeeder::class,
             EventSeeder::class,
+            RegistrationsTableSeeder::class,
         ]);
 
     }
