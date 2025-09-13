@@ -12,13 +12,9 @@ class CalendarController extends Controller
     public function getCalendarLinks($id)
     {
         $event = Event::findOrFail($id);
-
-        // Treat DB times as local wall time of the event; do not shift by user timezone.
-        // We only use the numeric fields from event as-is.
         $startLocal = $event->start_at instanceof Carbon
             ? (clone $event->start_at)
             : Carbon::parse($event->start_at);
-        // Prefer model accessor end_at if available; otherwise derive from duration
         $endAttr = $event->getAttribute('end_at');
         if ($endAttr instanceof Carbon) {
             $endLocal = (clone $endAttr);
@@ -27,11 +23,14 @@ class CalendarController extends Controller
             $endLocal = (clone $startLocal)->addMinutes(max($duration, 1));
         }
 
-        // Use event-local wall time for Google Calendar (no timezone param)
         $startLocalStr = (clone $startLocal)->format('Ymd\THis');
         $endLocalStr = (clone $endLocal)->format('Ymd\THis');
 
         $description = $event->description ? strip_tags($event->description) : '';
+
+        $rawTitle = $event->title ?: ("event-" . $event->event_id);
+        $safeTitle = preg_replace('/[\x00-\x1F\x7F<>:\"\\\\\/\|\?\*]+/u', '_', $rawTitle);
+        $filename = trim($safeTitle) !== '' ? ($safeTitle . '.ics') : ("event-{$event->event_id}.ics");
 
         $googleUrl = "https://calendar.google.com/calendar/render?action=TEMPLATE"
             . "&text=" . urlencode($event->title)
@@ -42,7 +41,9 @@ class CalendarController extends Controller
 
         return response()->json([
             "google_url" => $googleUrl,
-            "ics_url" => url("/api/events/{$event->event_id}/calendar/ics")
+            "ics_url" => url("/api/events/{$event->event_id}/calendar/ics"),
+            "filename" => $filename,
+            "title" => $event->title,
         ]);
     }
 
@@ -50,7 +51,6 @@ class CalendarController extends Controller
     {
         $event = Event::findOrFail($id);
 
-        // Treat DB times as local wall time of the event; do not shift by user timezone.
         $startLocal = $event->start_at instanceof Carbon
             ? (clone $event->start_at)
             : Carbon::parse($event->start_at);
@@ -62,7 +62,6 @@ class CalendarController extends Controller
             $endLocal = (clone $startLocal)->addMinutes(max($duration, 1));
         }
 
-        // Use event-local wall time without TZ (floating) to keep exact numbers
         $dtstartLocal = (clone $startLocal)->format('Ymd\THis');
         $dtendLocal = (clone $endLocal)->format('Ymd\THis');
 
@@ -83,8 +82,13 @@ class CalendarController extends Controller
         $ics .= "LOCATION:" . addslashes($event->venue ?? '') . "\r\n";
         $ics .= "END:VEVENT\r\nEND:VCALENDAR\r\n";
 
+        // Use same safe filename logic here as well
+        $rawTitle = $event->title ?: ("event-" . $event->event_id);
+        $safeTitle = preg_replace('/[\x00-\x1F\x7F<>:\"\\\\\/\|\?\*]+/u', '_', $rawTitle);
+        $filename = trim($safeTitle) !== '' ? ($safeTitle . '.ics') : ("event-{$event->event_id}.ics");
+
         return response($ics)
-            ->header('Content-Type', 'text/calendar')
-            ->header('Content-Disposition', "attachment; filename=event-{$event->event_id}.ics");
+            ->header('Content-Type', 'text/calendar; charset=utf-8')
+            ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
     }
 }
