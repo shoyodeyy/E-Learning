@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Avatar from "./Avatar.jsx";
 import ConfirmDialog from "./ConfirmDialog.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import NotificationDropdown from "../pages/Admin/components/NotificationDropdown.jsx";
 
 export default function Header() {
     const location = useLocation();
@@ -21,7 +22,6 @@ export default function Header() {
         { path: "/media-gallery", label: "Media Gallery" },
     ];
 
-    // Close mobile menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
@@ -31,7 +31,7 @@ export default function Header() {
 
         if (mobileMenuOpen) {
             document.addEventListener("mousedown", handleClickOutside);
-            document.body.style.overflow = "hidden"; // Prevent body scroll when menu is open
+            document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "unset";
         }
@@ -42,7 +42,6 @@ export default function Header() {
         };
     }, [mobileMenuOpen]);
 
-    // Close mobile menu on route change
     useEffect(() => {
         setMobileMenuOpen(false);
     }, [location.pathname]);
@@ -76,7 +75,6 @@ export default function Header() {
                             </Link>
                         </div>
 
-                        {/* Desktop & Tablet Navigation */}
                         <nav className="hidden lg:flex space-x-8">
                             {navItems.map((item) => {
                                 const isActive = location.pathname === item.path || (item.path !== "/" && location.pathname.startsWith(item.path));
@@ -100,8 +98,9 @@ export default function Header() {
                             })}
                         </nav>
 
-                        {/* Desktop Auth Buttons / Avatar */}
                         <div className="hidden lg:flex items-center space-x-3 lg:space-x-4">
+                            {user && <NotificationDropdown />}
+
                             {!user ? (
                                 <>
                                     <Link
@@ -128,7 +127,6 @@ export default function Header() {
                             )}
                         </div>
 
-                        {/* Mobile Menu Button */}
                         <div className="flex items-center space-x-2 sm:hidden">
                             <button
                                 onClick={toggleMobileMenu}
@@ -139,7 +137,6 @@ export default function Header() {
                             </button>
                         </div>
 
-                        {/* Tablet Menu Button (for lg breakpoint) */}
                         <div className="hidden sm:flex lg:hidden items-center">
                             <button
                                 onClick={toggleMobileMenu}
@@ -152,13 +149,13 @@ export default function Header() {
                     </div>
                 </div>
             </header>
-            {/* Mobile/Tablet Overlay Menu */}
+
             <div
                 className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ${
                     mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
                 }`}
             >
-                {/* Backdrop */}
+
                 <div
                     className={`absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${
                         mobileMenuOpen ? "opacity-100" : "opacity-0"
@@ -166,14 +163,13 @@ export default function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                 />
 
-                {/* Menu Panel */}
                 <div
                     ref={mobileMenuRef}
                     className={`absolute top-0 right-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl transform transition-transform duration-300 ${
                         mobileMenuOpen ? "translate-x-0" : "translate-x-full"
                     }`}
                 >
-                    {/* Menu Header */}
+
                     <div className="flex items-center justify-between p-4 border-b border-gray-200">
                         <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
@@ -188,7 +184,7 @@ export default function Header() {
                         </button>
                     </div>
 
-                    {/* User Info (if logged in) */}
+
                     {user && (
                         <div className="px-4 py-4 border-b border-gray-200 bg-gray-50">
                             <div className="flex items-center space-x-3">
@@ -201,7 +197,6 @@ export default function Header() {
                         </div>
                     )}
 
-                    {/* Navigation Links */}
                     <div className="py-4">
                         <nav className="space-y-1">
                             {navItems.map((item) => {
@@ -224,7 +219,6 @@ export default function Header() {
                             })}
                         </nav>
 
-                        {/* User Actions */}
                         {user ? (
                             <div className="mt-6 pt-6 border-t border-gray-200 space-y-1">
                                 <button
@@ -293,7 +287,6 @@ export default function Header() {
     );
 }
 
-// DropdownAvatar component
 function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
     const { user } = useAuth();
     const [open, setOpen] = useState(false);
@@ -332,7 +325,6 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
         setOpen(false);
     };
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -351,7 +343,6 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
 
     return (
         <div className="relative" ref={dropdownRef} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-            {/* Avatar */}
             <div
                 className="flex items-center gap-2 cursor-pointer p-1 rounded-lg hover:bg-gray-100 transition-colors duration-200"
                 onClick={toggleClick}
@@ -360,7 +351,6 @@ function DropdownAvatar({ name, avatarUrl, fullName, email, onLogout }) {
                 <span>{name}</span>
             </div>
 
-            {/* Dropdown */}
             {open && (
                 <div className="absolute right-0 mt-2 w-64 rounded-lg bg-white border border-gray-200 shadow-lg z-50 transform transition-all duration-200">
                     <div className="px-4 py-3 border-b border-gray-200 flex items-center gap-3">
