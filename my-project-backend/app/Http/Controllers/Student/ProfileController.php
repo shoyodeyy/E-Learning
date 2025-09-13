@@ -52,6 +52,7 @@ class ProfileController extends Controller
                 'avatar.mimes' => 'Allowed formats: jpg, jpeg, png, gif.',
                 'avatar.max'   => 'Avatar size must be less than 2MB.',
                 'enrollment_no.digits' => 'Enrollment number must be exactly 6 digits.',
+                'enrollment_no.unique' => 'Enrollment number is already in use.',
             ]);
 
             // --- Nếu user login bằng Google và chưa update thủ công ---
@@ -82,9 +83,13 @@ class ProfileController extends Controller
 
                 if ($exists) {
                     return response()->json([
-                        'message' => 'This enrollment number is already taken.',
+                        'message' => 'Validation error',
+                        'errors'  => [
+                            'enrollment_no' => ['This enrollment number is already taken.'],
+                        ],
                     ], 422);
                 }
+
 
                 $validated['enrollment_no'] = $fullEnrollmentNo;
             }

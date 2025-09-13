@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { updateProfile } from "../../api/profileApi.js";
 import ConfirmDialog from "../../components/ConfirmDialog.jsx";
+import {useNavigate} from "react-router-dom";
 
 export default function EditProfile() {
     const { user, updateUser } = useAuth();
@@ -10,6 +11,7 @@ export default function EditProfile() {
     const [formData, setFormData] = useState({});
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (user) {
@@ -102,6 +104,9 @@ export default function EditProfile() {
             updateUser(result.user);
             toast.success(result.message || "Profile updated successfully ✅");
             setErrors({});
+
+            // navigate
+            navigate('/user/profile');
         } catch (error) {
             console.error(error);
 
@@ -141,6 +146,7 @@ export default function EditProfile() {
 
                         {/* Avatar */}
                         <div className="mb-4">
+                            <label className="block text-sm font-medium mb-1">Avatar</label>
                             <input
                                 type="file"
                                 name="avatar"
@@ -281,6 +287,7 @@ export default function EditProfile() {
                                         errors.department ? "border-red-500" : "border-gray-300"
                                     }`}
                                 >
+                                    <option value="">Select a department</option>
                                     <option value="Computer Science">Computer Science</option>
                                     <option value="Electrical Engineering">Electrical Engineering</option>
                                     <option value="Mechanical Engineering">Mechanical Engineering</option>
