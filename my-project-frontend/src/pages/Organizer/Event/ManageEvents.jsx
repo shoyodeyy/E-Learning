@@ -29,13 +29,8 @@ function getStatusStyle(status) {
 
 // Event Card Component
 function EventCard({ event, onDelete }) {
-    const navigate = useNavigate();
-
     return (
-        <div
-            onClick={() => navigate(`/organizer/event-detail/${event.eventId}`)}
-            className="cursor-pointer bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-        >
+        <div className="cursor-pointer bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
             {/* Event Image */}
             <div className="relative">
                 <img src={`http://localhost:8000${event.bannerImage}`} alt={event.title} className="w-full h-48 object-cover" />
