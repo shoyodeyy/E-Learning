@@ -13,36 +13,10 @@ import CalendarIntegration from "../components/CalendarIntegration";
 import ShareEvent from "../components/ShareButton";
 import { format, addMinutes } from "date-fns";
 import Avatar from "../components/Avatar.jsx";
+import api from "../api/axios.js";
+import {toast} from "react-toastify";
+import ConfirmDialog from "../components/ConfirmDialog.jsx";
 
-
-// Mock data for the event detail
-const eventData = {
-    id: 1,
-    title: "Global Tech Summit 2024: Innovate & Connect",
-    date: "October 26-28, 2024",
-    time: "9:00 AM - 5:00 PM",
-    location: "San Francisco Convention Center, CA",
-    price: 299,
-    currency: "$",
-    status: "Available",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop",
-    description:
-        "Join us for the most anticipated technology event of the year! The Global Tech Summit 2024 brings together industry leaders, innovators, and enthusiasts to explore the latest advancements in AI, cybersecurity, blockchain, and sustainable tech. Engage in thought-provoking keynotes, hands-on workshops, and unparalleled networking opportunities. Discover the future of technology and how it will shape our world.",
-    organizer: {
-        name: "EventSphere Organizers",
-        tagline: "Leading Event Management Solutions",
-        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&h=60&fit=crop&crop=face",
-    },
-    categories: ["Technology", "All Levels"],
-    totalSlots: 500,
-    availableSlots: 150,
-    agenda: [
-        "Day 1: Opening Keynote on AI's Future & Interactive Workshops",
-        "Day 2: Cybersecurity Challenges & Blockchain Innovations",
-        "Day 3: Sustainable Tech Solutions & Closing Remarks",
-        "Daily: Networking Lounges & Exhibition Hall Access",
-    ],
-};
 
 // Mock feedbacks
 const mockFeedbacks = [
@@ -341,29 +315,53 @@ const renderStars = (rating) => {
 };
 
 const EventDetailPage = () => {
-
     const { id } = useParams();
     const { user, token } = useAuth();
     const eventId = Number(id) || events.eventId;
 
-
+    const [availableSeats, setAvailableSeats] = useState(0);
 
     const [activeTab, setActiveTab] = useState("overview");
     const [isFavorited, setIsFavorited] = useState(false);
 
+    const [confirmOpen, setConfirmOpen] = useState(false);
 
     const [reg, setReg] = useState({ registered: false, status: null });
 
-    const handleCancelRegistration = async () => {
+    // const handleCancelRegistration = async () => {
+    //     const confirmed = window.confirm("Bạn có chắc chắn muốn hủy đăng ký sự kiện này?");
+    //     if (!confirmed) return;
+    //
+    //     try {
+    //         const res = await api.post(`/events/${eventId}/cancel`);
+    //         toast.success(res.data?.message || "Đã hủy đăng ký sự kiện");
+    //         setReg({ registered: false, status: 'cancelled' });
+    //     } catch (err) {
+    //         const msg = err.response?.data?.error || err.response?.data?.message || "Hủy đăng ký thất bại";
+    //         toast.error(msg);
+    //     }
+    // };
+
+    const handleCancelRegistration = () => {
+        setConfirmOpen(true); // mở dialog
+    };
+
+    const confirmCancel = async () => {
+        setConfirmOpen(false); // đóng dialog
+
         try {
             const res = await api.post(`/events/${eventId}/cancel`);
             toast.success(res.data?.message || "Đã hủy đăng ký sự kiện");
-            setReg({ registered: false, status: 'cancelled' });
+            setReg({ registered: false, status: "cancelled" });
         } catch (err) {
-            const msg = err.response?.data?.error || err.response?.data?.message || "Hủy đăng ký thất bại";
+            const msg =
+                err.response?.data?.error ||
+                err.response?.data?.message ||
+                "Hủy đăng ký thất bại";
             toast.error(msg);
         }
     };
+
 
     // Lấy trạng thái đăng ký của user cho event để hiện nút phù hợp
     useEffect(() => {
@@ -400,10 +398,24 @@ const EventDetailPage = () => {
         window.scrollTo({ top: 0, behavior: "smooth"});
     }, [id, token]);
 
+    useEffect(() => {
+        const fetchAvailableSeats = async () => {
+            try {
+                const res = await api.get(`/events/${id}/available-seats`);
+
+                setAvailableSeats(res.data.availableSeats);
+            } catch (error) {
+                console.error("Failed to fetch available seats: ", error);
+            }
+        };
+
+        fetchAvailableSeats();
+    }, [id]);
+
     if (loading) {
         return <p className="p-6 text-gray-600">Loading event details...</p>;
     }
-    if (!event) {
+    if (!events) {
         return <p className="p-6 text-red-500">Event not found.</p>;
     }
 
@@ -415,7 +427,6 @@ const EventDetailPage = () => {
         }
     };
 
-    // Lấy thời gian kết thúc dựa vào start_at + duration_minutes
     const formatTimeRange = (start_at, duration_minutes) => {
         try {
             const start = new Date(start_at);
@@ -423,6 +434,23 @@ const EventDetailPage = () => {
             return `${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
         } catch (error) {
             return start_at;
+        }
+    };
+
+    const formatDurationTime = (duration_minutes) => {
+        try {
+            const hours = Math.floor(duration_minutes / 60);
+            const minutes = duration_minutes % 60;
+
+            if (hours && minutes) {
+                return `${hours} ${hours > 1 ? "hours" : "hour"} ${minutes} ${minutes > 1 ? "minutes" : "minute"}`;
+            } else if (hours) {
+                return `${hours} ${hours > 1 ? "hours" : "hour"}`;
+            } else {
+                return `${minutes} ${minutes > 1 ? "minutes" : "minute"}`;
+            }
+        } catch (error) {
+            return `${duration_minutes} minutes`;
         }
     };
 
@@ -488,7 +516,9 @@ const EventDetailPage = () => {
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-500">Time</p>
-                                            <p className="font-semibold text-gray-900">{formatTimeRange(events.start_at, events.duration_minutes)}</p>
+                                            <p className="font-semibold text-gray-900">
+                                                {formatTimeRange(events.start_at, events.duration_minutes)}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -528,7 +558,7 @@ const EventDetailPage = () => {
 
                             {/* Action Buttons */}
                             <div className="flex flex-wrap gap-4">
-                                <ShareEvent event={{ id: eventId, title: eventData.title, date: eventData.date, venue: eventData.location }}>
+                                <ShareEvent event={{ id: eventId, title: events.title, date: events.date, venue: events.venue }}>
                                 <button className="cursor-pointer flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-lg border border-gray-200 transition-all duration-200">
                                     <Share2 className="w-5 h-5" />
                                     <span>Share Event</span>
@@ -576,20 +606,20 @@ const EventDetailPage = () => {
                                         <div className="space-y-6">
                                             <div>
                                                 <h3 className="text-xl font-bold text-gray-900 mb-4">About This Event</h3>
-                                                <p className="text-gray-700 leading-relaxed">{eventData.description}</p>
+                                                <p className="text-gray-700 leading-relaxed">{events.description}</p>
                                             </div>
 
-                                            <div>
-                                                <h3 className="text-xl font-bold text-gray-900 mb-4">Event Agenda</h3>
-                                                <div className="space-y-3">
-                                                    {eventData.agenda.map((item, index) => (
-                                                        <div key={index} className="flex items-start space-x-3">
-                                                            <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                            <p className="text-gray-700">{item}</p>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
+                                            {/*<div>*/}
+                                            {/*    <h3 className="text-xl font-bold text-gray-900 mb-4">Event Agenda</h3>*/}
+                                            {/*    <div className="space-y-3">*/}
+                                            {/*        {eventData.agenda.map((item, index) => (*/}
+                                            {/*            <div key={index} className="flex items-start space-x-3">*/}
+                                            {/*                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>*/}
+                                            {/*                <p className="text-gray-700">{item}</p>*/}
+                                            {/*            </div>*/}
+                                            {/*        ))}*/}
+                                            {/*    </div>*/}
+                                            {/*</div>*/}
                                         </div>
                                     )}
 
@@ -615,11 +645,10 @@ const EventDetailPage = () => {
                                     <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6">
                                         <h2 className="text-2xl font-bold mb-2">Event Registration</h2>
                                         <div className="flex items-baseline space-x-2">
-                                            <span className="text-4xl font-bold">
-                                                {eventData.currency}
-                                                {eventData.price}
+                                            <span className="text-3xl font-bold">
+                                                Free
                                             </span>
-                                            <span className="text-purple-100">/person</span>
+                                            <span className="text-purple-100">/person to receive certificate</span>
                                         </div>
                                     </div>
 
@@ -630,28 +659,36 @@ const EventDetailPage = () => {
                                             <div className="flex items-center space-x-2">
                                                 <div
                                                     className={`w-3 h-3 rounded-full ${getAvailabilityColor(
-                                                        eventData.availableSlots,
-                                                        eventData.totalSlots
+                                                        availableSeats,
+                                                        events.maxParticipants
                                                     )}`}
                                                 ></div>
-                                                <span className="text-sm font-medium text-gray-700">{eventData.status}</span>
+                                                <span className="text-sm font-medium text-gray-700">
+                                                    {availableSeats > 0 ? "Available" : "Unavailable"}
+                                                </span>
                                             </div>
                                             <div className="flex items-center space-x-2 text-gray-600">
                                                 <Users className="w-4 h-4" />
                                                 <span className="text-sm">
-                                                    {eventData.availableSlots} / {eventData.totalSlots} slots
+                                                    {availableSeats} / {events.maxParticipants} slots
                                                 </span>
                                             </div>
                                         </div>
 
                                         {/* Register Button */}
                                         {(!reg.registered || reg.status === 'cancelled') && (
-                                            <Link to={`/event/${eventId}/seat`} className="w-full inline-flex justify-center btn-gradient-l">
+                                            <Link
+                                                to={`/event/${eventId}/seat`}
+                                                className="w-full inline-flex justify-center btn-gradient-l"
+                                            >
                                                 Register Now
                                             </Link>
                                         )}
                                         {reg.registered && reg.status !== 'cancelled' && (
-                                            <button onClick={handleCancelRegistration} className="mt-3 w-full inline-flex justify-center items-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer">
+                                            <button
+                                                onClick={handleCancelRegistration}
+                                                className="mt-3 w-full inline-flex justify-center items-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer btn-gradient-l"
+                                            >
                                                 Cancel Registration
                                             </button>
                                         )}
@@ -662,7 +699,9 @@ const EventDetailPage = () => {
                                         <div className="border-t pt-6 space-y-4">
                                             <div className="flex items-center justify-between text-sm">
                                                 <span className="text-gray-600">Duration:</span>
-                                                <span className="font-medium">3 Days</span>
+                                                <span className="font-medium">
+                                                    {formatDurationTime(events.duration_minutes)}
+                                                </span>
                                             </div>
                                             <div className="flex items-center justify-between text-sm">
                                                 <span className="text-gray-600">Language:</span>
@@ -685,6 +724,14 @@ const EventDetailPage = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* ConfirmDialog phải được đặt ở ngoài, cùng cấp với các component chính */}
+                <ConfirmDialog
+                    open={confirmOpen}
+                    message="Bạn có chắc chắn muốn hủy đăng ký sự kiện này?"
+                    onConfirm={confirmCancel}
+                    onCancel={() => setConfirmOpen(false)}
+                />
             </div>
         </>
     );

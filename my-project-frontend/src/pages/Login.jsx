@@ -28,7 +28,7 @@ export default function Login() {
 
     const navigateByRole = (userRole, userStatus) => {
         if (userStatus === "banned") {
-            return; // Don't navigate if banned
+            return;
         }
 
         if (userStatus === "pending" && userRole === "organizer") {

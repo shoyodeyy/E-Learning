@@ -28,4 +28,9 @@ class Registration extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function seats()
+    {
+        return $this->hasMany(RegistrationSeat::class, 'registration_id');
+    }
 }
