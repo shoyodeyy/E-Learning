@@ -15,7 +15,7 @@ class UsersTableSeeder extends Seeder
                 'user_id' => 2,
                 'name' => 'Super Admin',
                 'email' => 'admin@example.com',
-                'password' => Hash::make('password'), // bcrypt
+                'password' => Hash::make('admin1234'), // bcrypt
                 'role' => 'admin',
                 'status' => 'active',
                 'created_at' => now(),
@@ -25,7 +25,7 @@ class UsersTableSeeder extends Seeder
                 'user_id' => 3,
                 'name' => 'Event Organizer',
                 'email' => 'organizer@example.com',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('organ1234'),
                 'role' => 'organizer',
                 'status' => 'active',
                 'created_at' => now(),
@@ -35,7 +35,7 @@ class UsersTableSeeder extends Seeder
                 'user_id' => 4,
                 'name' => 'John Participant',
                 'email' => 'participant@example.com',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('part1234'),
                 'role' => 'participant',
                 'status' => 'active',
                 'created_at' => now(),
