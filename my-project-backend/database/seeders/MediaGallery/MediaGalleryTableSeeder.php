@@ -16,7 +16,7 @@ class MediaGalleryTableSeeder extends Seeder
             1 => [
                 [
 
-                    'file_type' => 'image',
+                    'file_type' => 'images',
                     'file_url' => '/storage/images/MediaGallery/1-Techwiz.jpg',
                     'file_name' => 'techwiz6_opening.png',
                     'caption' => 'Techwiz 6 official opening ceremony banner',
@@ -29,7 +29,7 @@ class MediaGalleryTableSeeder extends Seeder
                 ],
             ], 2 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/2-Dangkimonhoc.jpg',
                 'file_name' => 'happybee_2025.png',
                 'caption' => 'Happy Bee Music Festival promotional banner',
@@ -41,7 +41,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],
             ], 3 => [[
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/3-Webinar.jpg',
                 'file_name' => 'freelancing_webinar.png',
                 'caption' => 'Official banner for the webinar series "Find Clients. Win Projects. Grow Fast."',
@@ -54,7 +54,7 @@ class MediaGalleryTableSeeder extends Seeder
             ],
             ], 4 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/4-.jpg',
                 'file_name' => 'oktoberfest_2025.png',
                 'caption' => 'Official Oktoberfest Saigon 2025 banner',
@@ -66,7 +66,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 5 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/5-business.jpg',
                 'file_name' => 'hcmc_business_summit_2025.png',
                 'caption' => 'Official banner of HCMC Business Summit 2025',
@@ -78,7 +78,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 6 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/6-hoc.jpg',
                 'file_name' => 'english_in_it.png',
                 'caption' => 'Seminar banner: Do You Need English to Study IT?',
@@ -90,7 +90,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 7 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/7-laptrinh.jpg',
                 'file_name' => 'facts_about_programming.png',
                 'caption' => 'Educational banner: Facts You Need to Know About Programming',
@@ -102,7 +102,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 8 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => 'u/storage/images/MediaGallery/8-sontung.jpg',
                 'file_name' => 'happybee15_sontung.png',
                 'caption' => 'Son Tung M-TP returns to Happy Bee 15 in Hanoi',
@@ -114,7 +114,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 9 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/9-Beaches.jpg',
                 'file_name' => 'beauty_of_beaches.png',
                 'caption' => 'Beauty of Beaches – A student project by FPT Aptech',
@@ -126,7 +126,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 10 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/10-thitrungket.jpg',
                 'file_name' => 'vietfuture2025.png',
                 'caption' => 'Vietfuture 2025 – Online Final Round Banner',
@@ -138,7 +138,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 11 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/11-congai.jpg',
                 'file_name' => 'women_in_it.png',
                 'caption' => 'Women in IT campaign banner',
@@ -150,7 +150,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 12 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/12-tuvan.jpg',
                 'file_name' => 'ats_fair_hanoi.png',
                 'caption' => 'ATS Study Abroad & Scholarship Festival 2025 - Hanoi',
@@ -163,7 +163,7 @@ class MediaGalleryTableSeeder extends Seeder
             ],
             ], 13 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/12-tuvan.jpg',
                 'file_name' => 'ats_fair_hcm.png',
                 'caption' => 'ATS Study Abroad & Scholarship Festival 2025 - Ho Chi Minh City',
@@ -176,7 +176,7 @@ class MediaGalleryTableSeeder extends Seeder
             ],
             ], 14 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/13-chillshop.jpg',
                 'file_name' => 'workshop_seashell_candles.png',
                 'caption' => 'Seashell Scented Candle Workshop at Nha Bon Lam',
@@ -189,7 +189,7 @@ class MediaGalleryTableSeeder extends Seeder
             ],
             ], 15 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/13-chillshop.jpg',
                 'file_name' => 'workshop_free_colors.png',
                 'caption' => 'Free Colors Painting Workshop at Nha Bon Lam',
@@ -201,7 +201,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 16 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/14-boosterday.jpg',
                 'file_name' => 'ielts_booster_day_hanoi.png',
                 'caption' => 'IELTS BOOSTER DAY 2025 - Hanoi official banner',
@@ -214,7 +214,7 @@ class MediaGalleryTableSeeder extends Seeder
             ],
             ], 17 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/14-boosterday.jpg',
                 'file_name' => 'ielts_booster_day_hcm.png',
                 'caption' => 'IELTS BOOSTER DAY 2025 - Ho Chi Minh City official banner',
@@ -226,7 +226,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 18 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/15-Thietkebupbe.jpg',
                 'file_name' => 'saigon_song_workshop.png',
                 'caption' => 'Saigon Sống Workshop 2025 official banner',
@@ -238,7 +238,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 19 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/16-polaris.jpg',
                 'file_name' => 'workshop_polaris.png',
                 'caption' => 'Workshop POLARIS official banner - Set The Way, Seize The Day',
@@ -250,7 +250,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 20 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/20-englishimprove.jpg',
                 'file_name' => 'us_study_abroad_webinar.png',
                 'caption' => 'U.S. Study Abroad Webinar - Early Decision & Early Action Strategies',
@@ -262,7 +262,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 21 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/18-camhoa.jpg',
                 'file_name' => 'whispering_petals.png',
                 'caption' => 'Whispering Petals – Flower Arrangement Workshop ',
@@ -274,7 +274,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 22 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/19-canon.jpg',
                 'file_name' => 'canon_roadshow.png',
                 'caption' => 'Canon Roadshow 2025 – Hands-on printing experience',
@@ -286,7 +286,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 23 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/19-canon.jpg',
                 'file_name' => 'canon_promotion.png',
                 'caption' => 'Special promotions and vouchers at Canon Roadshow 2025',
@@ -298,7 +298,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 24 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/21-developingfilm.jpg',
                 'file_name' => 'film_workshop.png',
                 'caption' => 'Black & White Film Developing Workshop – Saigon Film Photowalk',
@@ -310,7 +310,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 25 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/22-yourbusinessready.jpg',
                 'file_name' => 'forvis_mazars_workshop.png',
                 'caption' => 'Workshop on Decree 90/2025/NĐ-CP – Forvis Mazars Vietnam',
@@ -322,7 +322,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 26 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/23-keobong.jpg',
                 'file_name' => 'lg_cotton_candy.png',
                 'caption' => 'Another Saigon by LG - Cotton Candy Workshop',
@@ -334,7 +334,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 27 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/24-lightup.jpg',
                 'file_name' => 'lightup_your_taste.png',
                 'caption' => 'LightUp Your Taste – Food Lighting Festival 2025',
@@ -346,7 +346,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 28 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/25-swingdance.jpg',
                 'file_name' => 'xoaystudio_arnas.png',
                 'caption' => 'Special Workshop with Arnas Razgūnas – Xoay Studio Saigon 2025',
@@ -358,7 +358,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 29 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/26-leonui.jpg',
                 'file_name' => 'crescentwall_endurance.png',
                 'caption' => 'Climbing Endurance Workshop – Crescent Wall',
@@ -370,7 +370,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 30 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/27-asus.jpg',
                 'file_name' => 'asus_ai_workshop.png',
                 'caption' => 'AI Applications – Optimizing Learning with ASUS',
@@ -382,7 +382,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 31 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/28-chiong.jpg',
                 'file_name' => 'organic_vibes.png',
                 'caption' => 'Organic Vibes – Organic Agriculture Experience Fair at FPT University HCMC',
@@ -394,7 +394,7 @@ class MediaGalleryTableSeeder extends Seeder
                 'uploaded_on' => now(),
             ],], 32 => [[
 
-                'file_type' => 'image',
+                'file_type' => 'images',
                 'file_url' => '/storage/images/MediaGallery/29-robot.jpg',
                 'file_name' => 'fptu_ai_robotics_2025.png',
                 'caption' => 'FPTU AI & Robotics Challenge 2025 – National Technology Playground for High School Students',
@@ -407,7 +407,7 @@ class MediaGalleryTableSeeder extends Seeder
             ],],
             33 => [
                 [
-                    'file_type' => 'image',
+                    'file_type' => 'images',
                     'file_url' => '/storage/images/MediaGallery/30-realestate.jpg',
                     'file_name' => 'proptech_vietnam_2025.png',
                     'caption' => 'PropTech Vietnam Network – Exclusive Real Estate Investment Evening',

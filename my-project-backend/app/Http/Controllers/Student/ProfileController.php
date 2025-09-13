@@ -60,14 +60,14 @@ class ProfileController extends Controller
                 'address' => 'nullable|string|max:255',
                 'gender' => 'nullable|in:male,female,other',
                 'profile' => 'nullable|string',
-                'avatar' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+                'avatar' => 'nullable|images|mimes:jpg,jpeg,png,gif|max:2048',
                 'department' => 'required|string|in:' . implode(',', $this->departments),
             ];
 
             $validated = $request->validate($rules, [
                 'phone.regex' => 'Phone number must start with 0 or +84 and contain 9–10 digits.',
                 'phone.unique' => 'This phone number is already in use.',
-                'avatar.image' => 'The uploaded file must be an image.',
+                'avatar.images' => 'The uploaded file must be an images.',
                 'avatar.mimes' => 'Allowed formats: jpg, jpeg, png, gif.',
                 'avatar.max' => 'Avatar size must be less than 2MB.',
                 'department.in' => 'Selected department is invalid.',

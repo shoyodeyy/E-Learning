@@ -1,45 +1,50 @@
 <?php
 
+use App\Http\Controllers\Organizer\EventController;
 use App\Http\Controllers\Admin\UserAnalyticsController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
-use App\Http\Controllers\BrowseController;
-use App\Http\Controllers\Chatbot\ChatController;
-use App\Http\Controllers\FeedbackController;
-use App\Http\Controllers\Organizer\EventController;
 use App\Http\Controllers\Student\ProfileController;
-use App\Services\AIClientWithFallback;
+use App\Http\Controllers\Chatbot\ChatController;
+use App\Http\Controllers\Feedback\FeedbackController;
 use App\Http\Controllers\CalendarController;
+use App\Services\AIClientWithFallback;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+// ===================== PUBLIC ROUTES =====================
+
+// Auth
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 
-//Route::apiResource('/events', EventController::class);
+// Events (public view)
 Route::get('/events', [EventController::class, 'index']);
+
+// ⚠️ đặt route pending trước route show
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    Route::get('/events/pending', [EventController::class, 'pending']);
+});
+
 Route::get('/events/{id}', [EventController::class, 'show']);
 
-// Calendar routes are protected (only for authenticated users)
-
-Route::apiResource('/events', EventController::class);
-
-// Password reset routes
+// Password reset
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
 Route::post('/user/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 Route::post('/user/verify-reset-token', [ResetPasswordController::class, 'verifyToken']);
 
-// Email verification link
+// Email verification
 Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');
 
-// AI test route (local environment only)
+// AI test route (local only)
 if (app()->environment('local')) {
     Route::get('/test-ai-stream', function (Request $request, AIClientWithFallback $ai) {
         $messages = [
@@ -49,12 +54,13 @@ if (app()->environment('local')) {
     });
 }
 
-// Authenticated routes
+// ===================== AUTH ROUTES =====================
 Route::middleware('auth:sanctum')->group(function () {
+    // User info
     Route::get('/user', fn(Request $request) => $request->user());
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Email verification routes
+    // Email verification
     Route::post('/email/verification-notification', [VerificationController::class, 'send'])
         ->middleware(['throttle:6,1'])
         ->name('verification.send');
@@ -62,19 +68,28 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware(['throttle:6,1']);
     Route::get('/email/verify-status', [VerificationController::class, 'status']);
 
-    // Profile routes
+    // Profile
     Route::prefix('profile')->group(function () {
         Route::get('/', [ProfileController::class, 'show']);
         Route::post('/update', [ProfileController::class, 'update']);
         Route::put('/', [ProfileController::class, 'update']);
     });
 
-    // Event routes
+    // Events (organizer actions)
     Route::post('/events', [EventController::class, 'store']);
     Route::put('/events/{id}', [EventController::class, 'update']);
     Route::delete('/events/{id}', [EventController::class, 'destroy']);
 
-    // Chatbot routes
+    // Calendar
+    Route::get('/events/{id}/calendar', [CalendarController::class, 'getCalendarLinks']);
+    Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
+
+    // Feedback
+    Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);
+    Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
+    Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
+
+    // Chatbot
     Route::get('/chat/{sessionId}/history', [ChatController::class, 'history']);
     Route::get('/chat/sessions', [ChatController::class, 'sessions']);
     Route::post('/chat/stream', [ChatController::class, 'stream']);
@@ -82,28 +97,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Change password
     Route::post('/user/change-password', [AuthController::class, 'changePassword']);
 
-    // Calendar routes (protected)
-    Route::get('/events/{id}/calendar', [CalendarController::class, 'getCalendarLinks']);
-    Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
-
-
-    // Feedback
-        Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);
-        Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
-        Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
 });
 
-Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
-Route::post('/user/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
-Route::post('/user/verify-reset-token', [ResetPasswordController::class, 'verifyToken']);
-
-Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
-    ->middleware(['signed', 'throttle:6,1'])
-    ->name('verification.verify');
-
 // ===================== ADMIN ROUTES =====================
-
-// Admin routes
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     // Analytics
     Route::get('/analytics/users/stats', [UserAnalyticsController::class, 'getStats']);
@@ -112,14 +112,17 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/analytics/users/hourly', [UserAnalyticsController::class, 'getHourlyStats']);
 
     // Users
-    Route::post('/users/{id}/approve', [UserController::class, 'approve']);
     Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users/{id}/approve', [UserController::class, 'approve']);
     Route::post('/users/{id}/ban', [UserController::class, 'ban']);
     Route::post('/users/{id}/unban', [UserController::class, 'unban']);
+
+    // Organizers
     Route::post('/organizer/{id}/approve', [UserController::class, 'approveOrganizer']);
     Route::get('/organizers', [UserController::class, 'getOrganizers']);
+
+    // Approve / reject events
+    Route::post('/events/{id}/approve', [EventController::class, 'approve']);
+    Route::post('/events/{id}/reject', [EventController::class, 'reject']);
 });
 
-//Route::middleware(['auth:sanctum', 'role:participant'])->group(function () {
-//    Route::post('media/save-selected', [MediaController::class, 'saveSelected']);
-//});

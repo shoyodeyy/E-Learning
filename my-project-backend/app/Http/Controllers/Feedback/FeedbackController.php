@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Feedback;
 
+use App\Http\Controllers\Controller;
 use App\Models\Feedback;
 use App\Models\Event;
 use Illuminate\Http\Request;
