@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
                 'email_verified_at' => $createdDate,
                 'ban_reason' => null,
                 'ban_until' => null,
-                'department' => $faker->randomElement(['IT', 'Business', 'Design', 'Engineering']),
+                'department' =>  null,
                 'enrollment_no' => 'ORG' . str_pad($i + 1, 6, '0', STR_PAD_LEFT),
                 'created_at' => $createdDate,
                 'updated_at' => $createdDate,
