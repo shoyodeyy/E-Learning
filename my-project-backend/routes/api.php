@@ -83,11 +83,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // Calendar routes
     Route::get('/events/{id}/calendar', [CalendarController::class, 'getCalendarLinks']);
     Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
-    //registration routes
+
+    // registration routes
     Route::post('/events/{eventId}/register', [EventRegistrationController::class, 'register']);
     Route::post('/events/{eventId}/cancel', [EventRegistrationController::class, 'cancel']);
     Route::get('/events/{eventId}/registration/status', [EventRegistrationController::class, 'status']);
     Route::get('/user/registrations', [EventRegistrationController::class, 'myRegistrations']);
+    Route::get('/events/{eventId}/seats', [EventRegistrationController::class, 'seats']);
+    Route::get('/events/{id}/available-seats', [EventRegistrationController::class, 'availableSeats']);
+
 });
 //Organizer routes
 Route::middleware(['auth:sanctum', 'role:organizer'])->group(function () {

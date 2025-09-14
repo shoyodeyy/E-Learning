@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Models\Notification;
+use App\Models\RegistrationSeat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,12 @@ class EventRegistrationController extends Controller
         $user = Auth::user();
         $event = Event::findOrFail($eventId);
 
+        $seats = $request->input('seats', []); // mảng ghế client chọn
+
+        if (empty($seats)) {
+            return response()->json(['error' => 'No seats selected'], 400);
+        }
+
         if ($event->status !== 'approved') {
             return response()->json(['error' => 'Event not open for registration'], 400);
         }
@@ -26,7 +33,7 @@ class EventRegistrationController extends Controller
             return response()->json(['error' => 'Registration deadline passed'], 400);
         }
 
-        return DB::transaction(function () use ($event, $eventId, $user) {
+        return DB::transaction(function () use ($event, $eventId, $user, $seats) {
             $existing = Registration::where('event_id', $eventId)
                 ->where('user_id', $user->user_id)
                 ->lockForUpdate()
@@ -34,6 +41,21 @@ class EventRegistrationController extends Controller
 
             if ($existing && in_array($existing->status, ['confirmed', 'waitlist'])) {
                 return response()->json(['error' => 'You already registered'], 400);
+            }
+
+            // Check ghế có ai giữ chưa
+            $occupiedSeats = RegistrationSeat::whereHas('registration', function ($q) use ($eventId) {
+                $q->where('event_id', $eventId)->whereIn('status', ['confirmed', 'waitlist']);
+            })
+                ->whereIn('seat_number', $seats)
+                ->pluck('seat_number')
+                ->toArray();
+
+            if (!empty($occupiedSeats)) {
+                return response()->json([
+                    'error' => 'Some seats are already taken',
+                    'occupied' => $occupiedSeats
+                ], 400);
             }
 
             $confirmedCount = Registration::where('event_id', $eventId)
@@ -44,13 +66,10 @@ class EventRegistrationController extends Controller
             $status = $confirmedCount < $event->maxParticipants ? 'confirmed' : 'waitlist';
 
             if ($existing && $existing->status === 'cancelled') {
-                $existing->update([
-                    'status' => $status,
-                    // giữ nguyên registered_on hoặc cập nhật nếu cần:
-                    // 'registered_on' => now(),
-                ]);
+                $existing->update(['status' => $status]);
+                $registration = $existing;
             } else {
-                Registration::create([
+                $registration = Registration::create([
                     'event_id' => $eventId,
                     'user_id' => $user->user_id,
                     'status' => $status,
@@ -58,9 +77,15 @@ class EventRegistrationController extends Controller
                 ]);
             }
 
+            // Lưu seats
+            foreach ($seats as $seat) {
+                $registration->seats()->create(['seat_number' => $seat]);
+            }
+
             return response()->json([
                 'message' => $status === 'confirmed' ? 'Registration confirmed' : 'Added to waitlist',
-                'status' => $status
+                'status' => $status,
+                'seats'  => $seats
             ]);
         });
     }
@@ -79,6 +104,9 @@ class EventRegistrationController extends Controller
             // Nếu đã cancelled thì không cần làm gì thêm
             if ($registration->status !== 'cancelled') {
                 $registration->update(['status' => 'cancelled']);
+
+                // xóa ghế
+                $registration->seats()->delete();
 
                 // Đẩy người chờ sớm nhất lên confirmed nếu có
                 $next = Registration::where('event_id', $eventId)
@@ -168,4 +196,37 @@ class EventRegistrationController extends Controller
 
         return response()->json($data);
     }
+
+    // Lấy danh sách ghế đã được đăng ký cho 1 event
+    public function seats($eventId)
+    {
+        $occupied = RegistrationSeat::whereHas('registration', function ($q) use ($eventId) {
+            $q->where('event_id', $eventId)->whereIn('status', ['confirmed', 'waitlist']);
+        })
+            ->pluck('seat_number');
+
+        return response()->json([
+            'occupiedSeats' => $occupied
+        ]);
+    }
+
+    // Lấy số ghế trống cho 1 event
+    public function availableSeats($eventId)
+    {
+        $event = Event::findOrFail($eventId);
+
+        $occupiedCount = RegistrationSeat::whereHas('registration', function ($q) use ($eventId) {
+            $q->where('event_id', $eventId)->whereIn('status', ['confirmed', 'waitlist']);
+        })->count();
+
+        $available = max(0, $event->maxParticipants - $occupiedCount);
+
+        return response()->json([
+            'event_id' => $eventId,
+            'maxParticipants' => $event->maxParticipants,
+            'occupiedSeats' => $occupiedCount,
+            'availableSeats' => $available
+        ]);
+    }
+
 }
