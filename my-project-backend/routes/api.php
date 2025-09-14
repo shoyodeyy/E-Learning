@@ -18,6 +18,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Student\EventRegistrationController;
 use App\Http\Controllers\EventApprovalController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Student\DashboardController;
+use App\Http\Controllers\Student\UserSavedMediaController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -82,6 +84,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Change password
     Route::post('/user/change-password', [AuthController::class, 'changePassword']);
 
+    // Saved Media routes
+    Route::get('/saved-media', [UserSavedMediaController::class, 'list']);
+    Route::post('/saved-media', [UserSavedMediaController::class, 'save']);
+    Route::delete('/saved-media/{mediaId}', [UserSavedMediaController::class, 'unsave']);
+
     // Calendar routes
     Route::get('/events/{id}/calendar', [CalendarController::class, 'getCalendarLinks']);
     Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
@@ -98,19 +105,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
     Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
 });
-// Debug route (remove in production)
-Route::middleware(['auth:sanctum'])->get('/debug-auth', function(Request $request) {
-    $user = $request->user();
-    return response()->json([
-        'authenticated' => !!$user,
-        'user' => $user,
-        'role' => $user?->role,
-        'status' => $user?->status,
-        'user_id' => $user?->user_id
-    ]);
+//Dashboard routes
+Route::middleware(['auth:sanctum', 'role:participant,organizer'])->group(function () {
+    //Dashboard routes
+    Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+    Route::get('/dashboard/recent-activities', [DashboardController::class, 'recentActivities']);
+    Route::get('/dashboard/upcoming-events', [DashboardController::class, 'upcomingEvents']);
 });
 
-//Organizer routes
+//==================================Organizer routes======================================
 Route::middleware(['auth:sanctum', 'role:organizer'])->group(function () {
     Route::get('/organizer/events', [EventController::class, 'organizerEvents']);
     Route::get('/events/{eventId}/registrations', [EventRegistrationController::class, 'listByEvent']);
