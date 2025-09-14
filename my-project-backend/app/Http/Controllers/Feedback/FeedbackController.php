@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Feedback;
 
 use App\Models\Feedback;
 use App\Models\Event;
-use App\Models\EventParticipant;
+use App\Models\Registration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -21,13 +21,13 @@ class FeedbackController extends Controller
             return response()->json(['message' => 'Feedback is only available for completed events.'], 403);
         }
 
-        $isParticipant = EventParticipant::where([
+        $registration = Registration::where([
             'event_id' => $eventId,
-            'user_id' => $user->user_id,
-            'registration_status' => 'attended'
-        ])->exists();
+            'user_id' => $user->user_id
+        ])->first();
 
-        if (!$isParticipant) {
+        // Check if user is registered and attended
+        if (!$registration || !in_array($registration->status, ['confirmed', 'waitlist']) || !$registration->attendance_status) {
             return response()->json(['message' => 'You must be a registered participant with attended status to view feedback.'], 403);
         }
 
@@ -60,16 +60,16 @@ class FeedbackController extends Controller
             return response()->json(['message' => 'Feedback is only allowed for completed events.'], 403);
         }
 
-        $participant = EventParticipant::where([
+        $registration = Registration::where([
             'event_id' => $eventId,
             'user_id' => $user->user_id,
         ])->first();
 
-        if (!$participant) {
+        if (!$registration || !in_array($registration->status, ['confirmed', 'waitlist'])) {
             return response()->json(['message' => 'You must be a registered participant to submit feedback.'], 403);
         }
 
-        if ($participant->registration_status !== 'attended') {
+        if (!$registration->attendance_status) {
             return response()->json(['message' => 'You must have attended the event to submit feedback.'], 403);
         }
 
@@ -94,7 +94,7 @@ class FeedbackController extends Controller
         $feedback = Feedback::create([
             'event_id' => $eventId,
             'user_id' => $user->user_id,
-            'role' => $participant->role,
+            'role' => $user->role === 'organizer' ? 'organizer' : 'participant',
             'rating' => $validated['rating'],
             'comments' => $validated['comments'] ?? null,
             'submitted_on' => Carbon::now(),
@@ -119,16 +119,16 @@ class FeedbackController extends Controller
             return response()->json(['message' => 'Cannot edit feedback for non-completed events.'], 403);
         }
 
-        $participant = EventParticipant::where([
+        $registration = Registration::where([
             'event_id' => $feedback->event_id,
             'user_id' => $user->user_id,
         ])->first();
 
-        if (!$participant) {
+        if (!$registration || !in_array($registration->status, ['confirmed', 'waitlist'])) {
             return response()->json(['message' => 'You must be a registered participant to edit feedback.'], 403);
         }
 
-        if ($participant->registration_status !== 'attended') {
+        if (!$registration->attendance_status) {
             return response()->json(['message' => 'You must have attended the event to edit feedback.'], 403);
         }
 
@@ -165,12 +165,12 @@ class FeedbackController extends Controller
             return false;
         }
 
-        $participant = EventParticipant::where([
+        $registration = Registration::where([
             'event_id' => $event->event_id,
             'user_id' => $user->user_id,
         ])->first();
 
-        if (!$participant || $participant->registration_status !== 'attended') {
+        if (!$registration || !in_array($registration->status, ['confirmed', 'waitlist']) || !$registration->attendance_status) {
             return false;
         }
 

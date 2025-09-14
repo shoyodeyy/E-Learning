@@ -66,14 +66,18 @@ class EventRegistrationController extends Controller
             $status = $confirmedCount < $event->maxParticipants ? 'confirmed' : 'waitlist';
 
             if ($existing && $existing->status === 'cancelled') {
-                $existing->update(['status' => $status]);
+                $existing->update([
+                    'status' => $status,
+                    'registered_on' => $existing->registered_on ?: now()
+                ]);
                 $registration = $existing;
             } else {
                 $registration = Registration::create([
                     'event_id' => $eventId,
                     'user_id' => $user->user_id,
                     'status' => $status,
-                    'attendance_status' => false
+                    'attendance_status' => false,
+                    'registered_on' => now()
                 ]);
             }
 
@@ -127,7 +131,15 @@ class EventRegistrationController extends Controller
     // Organizer đánh dấu tham dự bằng checkbox
     public function markAttendance(Request $request, $registrationId)
     {
-        $registration = Registration::findOrFail($registrationId);
+        $user = Auth::user();
+        $registration = Registration::with('event')->findOrFail($registrationId);
+        
+        // Kiểm tra event có thuộc về organizer này không
+        if ($registration->event->organizerId !== $user->user_id) {
+            return response()->json([
+                'message' => 'You do not have permission to update attendance for this event'
+            ], 403);
+        }
 
         $registration->update([
             'attendance_status' => $request->boolean('attendance_status')
@@ -142,8 +154,27 @@ class EventRegistrationController extends Controller
     // Lấy danh sách người đăng ký event (cho Organizer)
     public function listByEvent($eventId)
     {
-        $registrations = Registration::with('user')
+        $user = Auth::user();
+        
+        // Kiểm tra event có tồn tại và thuộc về organizer này không
+        $event = Event::where('event_id', $eventId)
+            ->where('organizerId', $user->user_id)
+            ->first();
+            
+        if (!$event) {
+            return response()->json([
+                'message' => 'Event not found or you do not have permission to view this event',
+                'debug' => [
+                    'requested_id' => $eventId,
+                    'user_id' => $user->user_id,
+                    'user_role' => $user->role
+                ]
+            ], 404);
+        }
+
+        $registrations = Registration::with(['user', 'seats'])
             ->where('event_id', $eventId)
+            ->orderBy('registered_on', 'desc')
             ->get();
 
         return response()->json($registrations);
@@ -152,7 +183,15 @@ class EventRegistrationController extends Controller
     // Trạng thái đăng ký của user hiện tại cho 1 event
     public function status($eventId)
     {
-        $user = Auth::user();
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'registered' => false,
+                'status' => null,
+            ]);
+        }
+
         $registration = Registration::where('event_id', $eventId)
             ->where('user_id', $user->user_id)
             ->first();
@@ -228,5 +267,4 @@ class EventRegistrationController extends Controller
             'availableSeats' => $available
         ]);
     }
-
 }

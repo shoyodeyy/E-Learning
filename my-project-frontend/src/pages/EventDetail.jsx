@@ -1,22 +1,21 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-
-import { Calendar, Clock, MapPin, Users, Share2, Heart, CalendarPlus, User, Star, Send } from "lucide-react";
+import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
+import { Calendar, Clock, MapPin, Users, Share2, Heart, User, Star, Send } from "lucide-react";
 import axios from "axios";
 import { format, addMinutes } from "date-fns";
 import { toast } from "react-toastify";
 
 import { apiUrl } from "../services/http.jsx";
-import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext.jsx";
 import Header from "../components/Header";
 import CalendarIntegration from "../components/CalendarIntegration";
 import ShareEvent from "../components/ShareButton";
-import Avatar from "../components/Avatar.jsx";
 import api from "../api/axios.js";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
 
 const bannedWords = ["badword1", "badword2", "offensive", "xxx"];
+
 const containsBannedWords = (text) => {
     const lowerText = text.toLowerCase();
     return bannedWords.some((word) => lowerText.includes(word));
@@ -414,7 +413,7 @@ const FeedbackSection = ({ eventId, userRole, eventStatus }) => {
 const EventDetailPage = () => {
     const { id } = useParams();
     const { user, token } = useAuth();
-    const eventId = Number(id) || events.eventId;
+    const eventId = Number(id);
 
     const [availableSeats, setAvailableSeats] = useState(0);
 
@@ -426,33 +425,92 @@ const EventDetailPage = () => {
     const [reg, setReg] = useState({ registered: false, status: null });
 
     const handleCancelRegistration = () => {
-        setConfirmOpen(true); // mở dialog
+        setConfirmOpen(true);
     };
 
     const confirmCancel = async () => {
-        setConfirmOpen(false); // đóng dialog
+        setConfirmOpen(false);
 
         try {
             const res = await api.post(`/events/${eventId}/cancel`);
-            toast.success(res.data?.message || "Đã hủy đăng ký sự kiện");
-            setReg({ registered: false, status: "cancelled" });
+            toast.success(res.data?.message || "Registration cancelled successfully");
+
+            // Refresh both registration status and available seats
+            await Promise.all([fetchRegistrationStatus(), fetchAvailableSeats()]);
         } catch (err) {
-            const msg = err.response?.data?.error || err.response?.data?.message || "Hủy đăng ký thất bại";
+            console.error("Cancel registration error:", err);
+            const msg = err.response?.data?.error || err.response?.data?.message || "Failed to cancel registration";
             toast.error(msg);
         }
     };
 
-    // Lấy trạng thái đăng ký của user cho event để hiện nút phù hợp
+    const fetchAvailableSeats = async () => {
+        try {
+            const res = await api.get(`/events/${id}/available-seats`);
+            setAvailableSeats(res.data.availableSeats);
+        } catch (error) {
+            console.error("Failed to fetch available seats:", error);
+        }
+    };
+
+    // Function to fetch registration status
+    const fetchRegistrationStatus = async () => {
+        if (!eventId) return;
+
+        try {
+            const res = await api.get(`/events/${eventId}/registration/status`);
+            setReg(res.data);
+        } catch (e) {
+            console.error("Failed to fetch registration status:", e);
+            console.error("Error details:", e.response?.data);
+            setReg({ registered: false, status: null });
+        }
+    };
+
     useEffect(() => {
-        (async () => {
-            try {
-                const res = await api.get(`/events/${eventId}/registration/status`);
-                setReg(res.data);
-            } catch (e) {
-                // nếu chưa đăng nhập hoặc lỗi khác, ẩn nút hủy
-                setReg({ registered: false, status: null });
+        if (eventId) {
+            fetchRegistrationStatus();
+
+            let interval;
+            if (token) {
+                interval = setInterval(() => {
+                    if (!document.hidden) {
+                        fetchRegistrationStatus();
+                    }
+                }, 5000);
             }
-        })();
+
+            return () => {
+                if (interval) clearInterval(interval);
+            };
+        }
+    }, [eventId, token, user]); // Added user back to dependencies
+
+    // Refresh registration status when user comes back to this page
+    useEffect(() => {
+        const handleFocus = () => {
+            fetchRegistrationStatus();
+        };
+
+        const handleVisibilityChange = () => {
+            if (!document.hidden) {
+                fetchRegistrationStatus();
+            }
+        };
+
+        const handlePageShow = () => {
+            fetchRegistrationStatus();
+        };
+
+        window.addEventListener("focus", handleFocus);
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        window.addEventListener("pageshow", handlePageShow);
+
+        return () => {
+            window.removeEventListener("focus", handleFocus);
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+            window.removeEventListener("pageshow", handlePageShow);
+        };
     }, [eventId]);
 
     const [events, setEvents] = useState([]);
@@ -461,13 +519,11 @@ const EventDetailPage = () => {
     useEffect(() => {
         const fetchEvent = async () => {
             try {
-                const res = await axios.get(`${apiUrl}/events/${id}`, {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {},
-                });
+                const res = await api.get(`/events/${id}`);
 
                 setEvents(res.data.data);
             } catch (error) {
-                console.error("Failed to fetch event: ", error);
+                console.error("Failed to fetch event:", error);
             } finally {
                 setLoading(false);
             }
@@ -478,42 +534,36 @@ const EventDetailPage = () => {
     }, [id, token]);
 
     useEffect(() => {
-        const fetchAvailableSeats = async () => {
-            try {
-                const res = await api.get(`/events/${id}/available-seats`);
-
-                setAvailableSeats(res.data.availableSeats);
-            } catch (error) {
-                console.error("Failed to fetch available seats: ", error);
-            }
-        };
-
         fetchAvailableSeats();
     }, [id]);
 
     if (loading) {
-        return <p className="p-6 text-gray-600">Loading event details...</p>;
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <div className="flex flex-col items-center space-y-4">
+                    <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-gray-600">Loading event details...</p>
+                </div>
+            </div>
+        );
     }
     if (!events) {
         return <p className="p-6 text-red-500">Event not found.</p>;
     }
 
     const formatDate = (dateString) => {
-        try {
-            return format(new Date(dateString), "MMMM dd, yyyy");
-        } catch (error) {
-            return dateString;
-        }
+        if (!dateString) return "N/A";
+        const d = new Date(dateString);
+        if (isNaN(d)) return dateString;
+        return format(d, "MMMM dd, yyyy");
     };
 
     const formatTimeRange = (start_at, duration_minutes) => {
-        try {
-            const start = new Date(start_at);
-            const end = addMinutes(start, duration_minutes);
-            return `${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
-        } catch (error) {
-            return start_at;
-        }
+        if (!start_at || !duration_minutes) return "N/A";
+        const start = new Date(start_at);
+        if (isNaN(start)) return start_at;
+        const end = addMinutes(start, duration_minutes);
+        return `${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
     };
 
     const formatDurationTime = (duration_minutes) => {
@@ -529,6 +579,7 @@ const EventDetailPage = () => {
                 return `${minutes} ${minutes > 1 ? "minutes" : "minute"}`;
             }
         } catch (error) {
+            console.error("Failed to format duration time:", error);
             return `${duration_minutes} minutes`;
         }
     };
@@ -616,10 +667,17 @@ const EventDetailPage = () => {
                             {/* Organizer Info */}
                             <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
                                 <div className="flex items-center space-x-4">
-                                    <Avatar size={40} />
+                                    <img
+                                        src={
+                                            events.organizerId?.avatar_url ||
+                                            `https://ui-avatars.com/api/?name=${events.organizerId?.name || "Unknown"}&background=8b5cf6&color=ffffff`
+                                        }
+                                        alt={events.organizerId?.name || "Organizer"}
+                                        className="w-10 h-10 rounded-full object-cover"
+                                    />
                                     <div>
-                                        <h3 className="font-bold text-gray-900">{user?.name}</h3>
-                                        <p className="text-gray-600">{user?.profile}</p>
+                                        <h3 className="font-bold text-gray-900">{events.organizerId?.name || "Unknown Organizer"}</h3>
+                                        <p className="text-gray-600">{events.organizerId?.profile || "Event Organizer"}</p>
                                     </div>
                                 </div>
                             </div>
@@ -683,18 +741,6 @@ const EventDetailPage = () => {
                                                 <h3 className="text-xl font-bold text-gray-900 mb-4">About This Event</h3>
                                                 <p className="text-gray-700 leading-relaxed">{events.description}</p>
                                             </div>
-
-                                            {/*<div>*/}
-                                            {/*    <h3 className="text-xl font-bold text-gray-900 mb-4">Event Agenda</h3>*/}
-                                            {/*    <div className="space-y-3">*/}
-                                            {/*        {eventData.agenda.map((item, index) => (*/}
-                                            {/*            <div key={index} className="flex items-start space-x-3">*/}
-                                            {/*                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></div>*/}
-                                            {/*                <p className="text-gray-700">{item}</p>*/}
-                                            {/*            </div>*/}
-                                            {/*        ))}*/}
-                                            {/*    </div>*/}
-                                            {/*</div>*/}
                                         </div>
                                     )}
 
@@ -752,18 +798,23 @@ const EventDetailPage = () => {
                                         </div>
 
                                         {/* Register Button */}
-                                        {(!reg.registered || reg.status === "cancelled") && (
+                                        {!user ? (
+                                            <Link to="/login" className="w-full inline-flex justify-center btn-gradient-l">
+                                                Login to Register
+                                            </Link>
+                                        ) : !reg.registered || reg.status === "cancelled" || reg.status === null ? (
                                             <Link to={`/event/${eventId}/seat`} className="w-full inline-flex justify-center btn-gradient-l">
                                                 Register Now
                                             </Link>
-                                        )}
-                                        {reg.registered && reg.status !== "cancelled" && (
-                                            <button
-                                                onClick={handleCancelRegistration}
-                                                className="mt-3 w-full inline-flex justify-center items-center px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer btn-gradient-l"
-                                            >
-                                                Cancel Registration
-                                            </button>
+                                        ) : (
+                                            <div className="space-y-2 mb-2">
+                                                <button
+                                                    onClick={handleCancelRegistration}
+                                                    className="w-full inline-flex justify-center btn-gradient-l hover:!bg-red-600 bg-gradient-to-l !from-red-400 !to-red-500 hover:!from-red-600 hover:!to-red-600"
+                                                >
+                                                    Cancel Registration
+                                                </button>
+                                            </div>
                                         )}
 
                                         <p className="text-xs text-gray-500 text-center">Taxes and fees may apply.</p>
@@ -796,10 +847,9 @@ const EventDetailPage = () => {
                     </div>
                 </div>
 
-                {/* ConfirmDialog phải được đặt ở ngoài, cùng cấp với các component chính */}
                 <ConfirmDialog
                     open={confirmOpen}
-                    message="Bạn có chắc chắn muốn hủy đăng ký sự kiện này?"
+                    message="Are you sure you want to cancel your registration for this event??"
                     onConfirm={confirmCancel}
                     onCancel={() => setConfirmOpen(false)}
                 />

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { apiUrl } from "../services/http.jsx";
-
-import Header from "../components/Header";
 import { addMinutes, format } from "date-fns";
+
+import { apiUrl } from "../services/http.jsx";
+import Header from "../components/Header";
 
 async function fetchFeaturedEvents() {
     try {
@@ -45,6 +45,7 @@ function RandomBlob({ className, color }) {
 
 // Hero Section Component
 const HeroSection = () => {
+    const navigate = useNavigate();
     return (
         <section className="bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100 py-20 relative overflow-hidden">
             <div className="absolute inset-0 overflow-hidden">
@@ -74,9 +75,8 @@ const HeroSection = () => {
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <button className="btn-gradient-l">Explore Events</button>
-                            <button className="cursor-pointer bg-white/80 backdrop-blur-sm hover:bg-white text-purple-600 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border border-purple-200">
-                                Watch Demo
+                            <button onClick={() => navigate("/event")} className="btn-gradient-l">
+                                Explore Events
                             </button>
                         </div>
                     </div>
@@ -139,7 +139,7 @@ const EventCard = ({ event }) => {
     };
 
     return (
-        <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 min-h-[450px] flex-col justify-between">
+        <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 min-h-[500px] flex flex-col">
             <div className="relative overflow-hidden">
                 <img
                     src={event.bannerImage ? `http://localhost:8000${event.bannerImage}` : "/placeholder.svg"}
@@ -154,12 +154,12 @@ const EventCard = ({ event }) => {
                             event.totalSlots
                         )}`}
                     >
-                        {getAvailabilityText(event.maxParticipants, event.maxParticipants)}
+                        {getAvailabilityText(event.availableSlots, event.totalSlots)}
                     </div>
                 </div>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 flex-grow flex flex-col">
                 <h3 className="text-xl font-bold text-gray-900 line-clamp-2 group-hover:text-purple-600 transition-colors duration-200">
                     {event.title}
                 </h3>
@@ -185,16 +185,22 @@ const EventCard = ({ event }) => {
                     </div>
                 </div>
 
-                <Link to={`/event/${event.eventId}`} onClick={() => window.screenTop(0, 0)} className="flex justify-center w-full btn-gradient">
-                    View Details
-                </Link>
+                <div className="mt-auto pt-4">
+                    <Link
+                        to={`/event/${event.eventId}`}
+                        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                        className="flex justify-center w-full btn-gradient"
+                    >
+                        View Details
+                    </Link>
+                </div>
             </div>
         </div>
     );
 };
 
 // Featured Events Section Component
-const FeaturedEvents = ({ events }) => {
+const FeaturedEvents = ({ events, loading }) => {
     return (
         <section className="py-20 bg-gradient-to-b from-white to-purple-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -211,12 +217,18 @@ const FeaturedEvents = ({ events }) => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {events.map((event, index) => (
-                        <div key={event.eventId} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
-                            <EventCard key={event.eventId} event={event} />
+                <div className="min-h-[600px]">
+                    {loading ? (
+                        <LoadingSpinner />
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {events.map((event, index) => (
+                                <div key={event.eventId} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+                                    <EventCard key={event.eventId} event={event} />
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    )}
                 </div>
 
                 <div className="text-center mt-12">
@@ -226,6 +238,20 @@ const FeaturedEvents = ({ events }) => {
                 </div>
             </div>
         </section>
+    );
+};
+
+const LoadingSpinner = () => {
+    return (
+        <div className="flex items-center justify-center py-20">
+            <div className="relative">
+                <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+                <div
+                    className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-pink-400 rounded-full animate-spin"
+                    style={{ animationDirection: "reverse", animationDuration: "1.5s" }}
+                ></div>
+            </div>
+        </div>
     );
 };
 
@@ -279,7 +305,7 @@ export default function Home() {
                 {/* Main Content */}
                 <main>
                     <HeroSection />
-                    <FeaturedEvents events={featuredEvents} />
+                    <FeaturedEvents events={featuredEvents} loading={loadingFeatured} />
                 </main>
             </div>
         </div>

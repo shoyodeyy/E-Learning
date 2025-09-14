@@ -30,6 +30,22 @@ class EventResource extends JsonResource
             'registrationDeadline' => $this->registrationDeadline,
             'bannerImage'          => $this->bannerImage,
             'status'               => $this->status,
+            'status_display'       => $this->getStatusDisplay(),
+            'can_be_approved'      => $this->canBeApproved(),
+            'is_pending'           => $this->isPending(),
+            'is_approved'          => $this->isApproved(),
+            'is_rejected'          => $this->isRejected(),
+            'needs_approval'       => $this->needsApproval(),
+            'latest_approval'      => $this->whenLoaded('latestApproval', function() {
+                return $this->latestApproval ? [
+                    'approval_id' => $this->latestApproval->approval_id,
+                    'action_type' => $this->latestApproval->action_type,
+                    'approval_type' => $this->latestApproval->approval_type,
+                    'notes' => $this->latestApproval->notes,
+                    'approved_at' => $this->latestApproval->approved_at,
+                    'approver' => new UserResource($this->latestApproval->approver)
+                ] : null;
+            }),
             'created_at'           => $this->created_at,
             'updated_at'           => $this->updated_at,
         ];

@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { Search, Plus, Filter, Edit, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -30,77 +28,79 @@ function getStatusStyle(status) {
 // Event Card Component
 function EventCard({ event, onDelete }) {
     return (
-        <div className="cursor-pointer bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
             {/* Event Image */}
             <div className="relative">
-                <img src={`http://localhost:8000${event.bannerImage}`} alt={event.title} className="w-full h-48 object-cover" />
-                <div className="absolute top-3 left-3">
+                <img src={`http://localhost:8000${event.bannerImage}`} alt={event.title} className="w-full h-40 sm:h-48 object-cover" />
+                <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
                     {(() => {
                         const { text, color } = getStatusStyle(event.status);
-                        return <span className={`px-3 py-1 text-xs font-medium text-white rounded-full ${color} shadow-sm`}>{text}</span>;
+                        return <span className={`px-2 sm:px-3 py-1 text-xs font-medium text-white rounded-full ${color} shadow-sm`}>{text}</span>;
                     })()}
                 </div>
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
                     <span className={`px-2 py-1 text-xs font-medium text-white rounded shadow-sm ${event.slotsColor}`}>{event.slots}</span>
                 </div>
             </div>
 
             {/* Event Details */}
-            <div className="p-5">
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-1 text-lg">{event.title}</h3>
+            <div className="p-3 sm:p-5">
+                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-base sm:text-lg">{event.title}</h3>
                 <p className="text-sm text-gray-600 mb-1 font-medium">{event.date}</p>
-                <p className="text-sm text-gray-500 mb-4">{event.location}</p>
+                <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 line-clamp-1">{event.location}</p>
 
                 {/* Action Buttons */}
                 {event.status !== "pending_delete" ? (
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1 sm:space-x-2">
                         <Link
                             to={`/organizer/update-event/${event.eventId}`}
-                            className="cursor-pointer p-2 text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all duration-200"
+                            className="cursor-pointer p-1.5 sm:p-2 text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all duration-200"
                         >
-                            <Edit size={16} />
+                            <Edit size={14} className="sm:w-4 sm:h-4" />
                         </Link>
                         <button
                             onClick={onDelete}
-                            className="cursor-pointer p-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                            className="cursor-pointer p-1.5 sm:p-2 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
                         >
-                            <Trash2 size={16} />
+                            <Trash2 size={14} className="sm:w-4 sm:h-4" />
                         </button>
                         <Link
                             to={`/organizer/event-detail/${event.eventId}`}
-                            className="cursor-pointer ml-5 flex-1 btn-gradient text-center shadow-sm"
+                            className="cursor-pointer ml-2 sm:ml-5 flex-1 btn-gradient text-center shadow-sm text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-4 rounded-lg"
                         >
-                            View Details
+                            <span className="hidden xs:inline">View Details</span>
+                            <span className="xs:hidden">Details</span>
                         </Link>
                     </div>
                 ) : (
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1 sm:space-x-2">
                         <Link
                             to={`/organizer/update-event/${event.eventId}`}
-                            className={`p-2 transition-colors rounded-lg ${
+                            className={`p-1.5 sm:p-2 transition-colors rounded-lg ${
                                 event.status === "pending_delete"
                                     ? "cursor-not-allowed opacity-50 pointer-events-none text-gray-400"
                                     : "cursor-pointer hover:text-gray-600 text-gray-400"
                             }`}
                         >
-                            <Edit size={16} />
+                            <Edit size={14} className="sm:w-4 sm:h-4" />
                         </Link>
                         <button
                             disabled={event.status === "pending_delete"}
                             onClick={onDelete}
-                            className={`p-2 transition-colors rounded-lg ${
+                            className={`p-1.5 sm:p-2 transition-colors rounded-lg ${
                                 event.status === "pending_delete"
                                     ? "cursor-not-allowed opacity-50 text-gray-400"
                                     : "cursor-pointer text-gray-400 hover:text-gray-600"
                             }`}
                         >
-                            <Trash2 size={16} />
+                            <Trash2 size={14} className="sm:w-4 sm:h-4" />
                         </button>
                         <Link
                             to={`/organizer/event-detail/${event.eventId}`}
-                            className="cursor-pointer flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors text-center"
+                            className="cursor-pointer flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors text-center ml-2 sm:ml-0"
                         >
-                            View Details
+                            <span className="hidden xs:inline">View Details</span>
+                            <span className="xs:hidden">Details</span>
                         </Link>
                     </div>
                 )}
@@ -124,23 +124,24 @@ function Pagination({ pagination, setCurrentPage }) {
     const isLastPage = pagination.current_page === pagination.last_page;
 
     return (
-        <div className="flex gap-4 items-center justify-center mt-8">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-center justify-center mt-6 sm:mt-8">
             {/* Previous button */}
             <button
                 onClick={() => handlePageChange(pagination.current_page - 1)}
                 disabled={isFirstPage}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 w-full sm:w-auto justify-center ${
                     isFirstPage
                         ? "cursor-not-allowed opacity-50 text-gray-400 border-gray-200 bg-gray-50"
                         : "cursor-pointer text-gray-600 border-gray-300 bg-white hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400"
                 }`}
             >
                 <ChevronLeft size={16} />
-                Previous
+                <span className="hidden xs:inline">Previous</span>
+                <span className="xs:hidden">Prev</span>
             </button>
 
             {/* Display page numbers */}
-            <div className="flex items-center gap-2 space-x-1">
+            <div className="flex items-center gap-1 sm:gap-2 space-x-1 overflow-x-auto max-w-full">
                 {pagination.links.map((link, index) => {
                     if (link.label === "&laquo; Previous" || link.label === "Next &raquo;") {
                         return null;
@@ -150,7 +151,7 @@ function Pagination({ pagination, setCurrentPage }) {
                         <button
                             key={index}
                             onClick={() => handlePageChange(link.label)}
-                            className={`cursor-pointer w-10 h-10 rounded-lg text-sm font-medium transition-all duration-200 ${
+                            className={`cursor-pointer w-8 h-8 sm:w-10 sm:h-10 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex-shrink-0 ${
                                 link.active
                                     ? "bg-purple-600 text-white shadow-sm"
                                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 border border-gray-200"
@@ -167,13 +168,14 @@ function Pagination({ pagination, setCurrentPage }) {
             <button
                 onClick={() => handlePageChange(pagination.current_page + 1)}
                 disabled={isLastPage}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 w-full sm:w-auto justify-center ${
                     isLastPage
                         ? "cursor-not-allowed opacity-50 text-gray-400 border-gray-200 bg-gray-50"
                         : "cursor-pointer text-gray-600 border-gray-300 bg-white hover:bg-gray-50 hover:text-gray-900 hover:border-gray-400"
                 }`}
             >
-                Next
+                <span className="hidden xs:inline">Next</span>
+                <span className="xs:hidden">Next</span>
                 <ChevronRight size={16} />
             </button>
         </div>
@@ -217,6 +219,8 @@ export default function ManageEventsLayout() {
                     category: filters.category,
                 },
             });
+            console.log(res);
+
             setEvents(res.data.data || []);
             setPagination(res.data.meta || {});
         } catch (error) {
@@ -260,12 +264,12 @@ export default function ManageEventsLayout() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
             <div className="flex-1">
-                <main className="p-4 md:p-6">
+                <main className="p-3 sm:p-4 md:p-6">
                     {/* Header */}
-                    <div className="flex flex-col space-y-4 mb-6 md:mb-8">
+                    <div className="flex flex-col space-y-3 sm:space-y-4 mb-4 sm:mb-6 md:mb-8">
                         <div>
-                            <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-1">Manage Events</h2>
-                            <p className="text-sm md:text-base text-gray-600">Create, edit, and manage your events</p>
+                            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-1">Manage Events</h2>
+                            <p className="text-xs sm:text-sm md:text-base text-gray-600">Create, edit, and manage your events</p>
                         </div>
 
                         <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 sm:gap-3">
@@ -304,11 +308,11 @@ export default function ManageEventsLayout() {
                                 {/* Create Event */}
                                 <button
                                     onClick={() => navigate("/organizer/create-event")}
-                                    className="cursor-pointer btn-gradient text-white flex items-center py-2 px-3 sm:px-4 gap-2 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md flex-1 sm:flex-none justify-center sm:justify-start"
+                                    className="cursor-pointer btn-gradient text-white flex items-center py-2 px-3 sm:px-4 gap-2 rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow-md flex-1 sm:flex-none justify-center sm:justify-start text-sm"
                                 >
                                     <Plus size={16} />
                                     <span className="hidden xs:inline">Create Event</span>
-                                    <span className="xs:hidden">New Event</span>
+                                    <span className="xs:hidden">New</span>
                                 </button>
                             </div>
                         </div>
@@ -316,13 +320,13 @@ export default function ManageEventsLayout() {
 
                     <div
                         className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                            filtersOpen ? "max-h-96 opacity-100 mb-6" : "max-h-0 opacity-0"
+                            filtersOpen ? "max-h-96 opacity-100 mb-4 sm:mb-6" : "max-h-0 opacity-0"
                         }`}
                     >
-                        <div className="bg-white border border-gray-200 p-4 md:p-5 rounded-xl shadow-sm">
-                            <div className="flex flex-col gap-4">
+                        <div className="bg-white border border-gray-200 p-3 sm:p-4 md:p-5 rounded-xl shadow-sm">
+                            <div className="flex flex-col gap-3 sm:gap-4">
                                 {/* Filter controls */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <div className="flex flex-col gap-2">
                                         <label className="text-sm font-medium text-gray-700">Status</label>
                                         <select
@@ -372,22 +376,22 @@ export default function ManageEventsLayout() {
 
                     {/* Event List */}
                     {loading && (
-                        <div className="flex items-center justify-center py-12">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                        <div className="flex items-center justify-center py-8 sm:py-12">
+                            <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-purple-600"></div>
                             <span className="ml-3 text-gray-600 text-sm md:text-base">Loading events...</span>
                         </div>
                     )}
                     {!loading && events.length === 0 && (
-                        <div className="text-center py-12">
+                        <div className="text-center py-8 sm:py-12">
                             <div className="text-gray-400 mb-2">
-                                <Filter size={48} className="mx-auto" />
+                                <Filter size={40} className="sm:w-12 sm:h-12 mx-auto" />
                             </div>
-                            <p className="text-gray-600 text-base md:text-lg">No events found.</p>
-                            <p className="text-gray-500 text-sm">Try adjusting your search or filters.</p>
+                            <p className="text-gray-600 text-sm sm:text-base md:text-lg">No events found.</p>
+                            <p className="text-gray-500 text-xs sm:text-sm">Try adjusting your search or filters.</p>
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                         {events.map((event) => (
                             <EventCard key={event.eventId} event={event} onDelete={() => handleDelete(event.eventId)} />
                         ))}

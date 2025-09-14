@@ -12,6 +12,8 @@ class EventController extends Controller
 {
     public function index(Request $request)
     {
+        $user = auth()->user();
+
         $query = Event::with(['organizer', 'approvedByAdmin'])
             ->orderBy('start_at', 'desc');
 
@@ -32,20 +34,58 @@ class EventController extends Controller
             $query->where('category', $request->category);
         }
 
-        $events = $query->paginate(6);
+        if ($user && $user->hasRole('admin')) {
+            $events = $query->paginate(6);
+        } elseif ($user && $user->hasRole('organizer')) {
+            $events = $query->where('organizerId', $user->user_id)->paginate(6);
+        } else {
+            $events = $query->where('status', 'approved')->paginate(6);
+        }
 
         return EventResource::collection($events);
     }
 
-    public function show($id) {
+    public function show($id)
+    {
+        // $user = auth()->user();
         $event = Event::with(['organizer', 'approvedByAdmin'])->where('event_id', $id)->firstOrFail();
-
         if (!$event) {
+
             return response()->json([
                 'message' => 'Event not found'
             ], 404);
         }
-        
+
+        // If user is authenticated
+        // if ($user) {
+        //     if ($user->hasRole('admin')) {
+        //         // Admin can see all events
+        //         // No additional filter needed
+        //     } elseif ($user->hasRole('organizer')) {
+        //         // Organizer can only see their own events
+        //         $query->where('organizerId', $user->user_id);
+        //     } else {
+        //         // Regular users can only see approved events
+        //         $query->where('status', 'approved');
+        //     }
+        // } else {
+        //     // Unauthenticated users can only see approved events
+        //     $query->where('status', 'approved');
+        // }
+
+        // $event = $query->first();
+
+        // if (!$event) {
+        //     return response()->json([
+        //         'message' => 'Event not found or you do not have permission to view this event',
+        //         'debug' => [
+        //             'requested_id' => $id,
+        //             'user_id' => $user ? $user->user_id : null,
+        //             'user_role' => $user ? $user->role : null
+        //         ]
+        //     ], 404);
+        // }
+
         return new EventResource($event);
     }
 
@@ -315,5 +355,17 @@ class EventController extends Controller
         return response()->json([
             'message' => 'Invalid action for current event status.'
         ], 400);
+    }
+
+    public function organizerEvents(Request $request)
+    {
+        $user = auth()->user();
+
+        $events = Event::with(['organizer', 'approvedByAdmin'])
+            ->where('organizerId', $user->user_id)
+            ->orderBy('start_at', 'desc')
+            ->get(['event_id', 'title', 'status', 'organizerId', 'start_at', 'bannerImage']);
+
+        return response()->json($events);
     }
 }

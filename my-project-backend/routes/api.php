@@ -16,6 +16,7 @@ use App\Services\AIClientWithFallback;
 use App\Http\Controllers\CalendarController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Student\EventRegistrationController;
+use App\Http\Controllers\EventApprovalController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -26,6 +27,7 @@ Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
 Route::get('/events/quantity/{quantity}', [EventController::class, 'showWithQuantity']);
+Route::get('/events/{eventId}/available-seats', [EventRegistrationController::class, 'availableSeats']);
 
 // Password reset routes
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
@@ -85,27 +87,37 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
 
     // registration routes
+    Route::get('/events/{eventId}/registration/status', [EventRegistrationController::class, 'status']);
     Route::post('/events/{eventId}/register', [EventRegistrationController::class, 'register']);
     Route::post('/events/{eventId}/cancel', [EventRegistrationController::class, 'cancel']);
-    Route::get('/events/{eventId}/registration/status', [EventRegistrationController::class, 'status']);
     Route::get('/user/registrations', [EventRegistrationController::class, 'myRegistrations']);
     Route::get('/events/{eventId}/seats', [EventRegistrationController::class, 'seats']);
-    Route::get('/events/{id}/available-seats', [EventRegistrationController::class, 'availableSeats']);
 
-});
-//Organizer routes
-Route::middleware(['auth:sanctum', 'role:organizer'])->group(function () {
-    Route::get('/events/{eventId}/registrations', [EventRegistrationController::class, 'listByEvent']);
-    Route::post('/registrations/{id}/attendance', [EventRegistrationController::class, 'markAttendance']);
-
-    // Feedback routes - UPDATED WITH NEW LOGIC
+    // Feedback routes - Available to all authenticated users
     Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);
     Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
     Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
 });
+// Debug route (remove in production)
+Route::middleware(['auth:sanctum'])->get('/debug-auth', function(Request $request) {
+    $user = $request->user();
+    return response()->json([
+        'authenticated' => !!$user,
+        'user' => $user,
+        'role' => $user?->role,
+        'status' => $user?->status,
+        'user_id' => $user?->user_id
+    ]);
+});
+
+//Organizer routes
+Route::middleware(['auth:sanctum', 'role:organizer'])->group(function () {
+    Route::get('/organizer/events', [EventController::class, 'organizerEvents']);
+    Route::get('/events/{eventId}/registrations', [EventRegistrationController::class, 'listByEvent']);
+    Route::post('/registrations/{id}/attendance', [EventRegistrationController::class, 'markAttendance']);
+});
 
 // ===================== ADMIN ROUTES =====================
-
 // Admin routes
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     // Analytics
@@ -120,4 +132,10 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::post('/users/{id}/unban', [UserController::class, 'unban']);
     Route::post('/organizer/{id}/approve', [UserController::class, 'approveOrganizer']);
     Route::get('/organizers', [UserController::class, 'getOrganizers']);
+    
+    // Event approval routes
+    Route::get('/events/pending', [EventApprovalController::class, 'getPendingEvents']);
+    Route::post('/events/{eventId}/approve', [EventApprovalController::class, 'approveEvent']);
+    Route::post('/events/{eventId}/reject', [EventApprovalController::class, 'rejectEvent']);
+    Route::get('/events/{eventId}/approval-history', [EventApprovalController::class, 'getApprovalHistory']);
 });
