@@ -18,40 +18,24 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Student\EventRegistrationController;
 use Illuminate\Support\Facades\Route;
 
-
-// Public routes
-
-
-// Auth
-
-// Public routes
-
-
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 
-
 //Route::apiResource('/events', EventController::class);
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
-
-// Creation and modifications require auth; see authenticated group below
-// Route::post('/events', [EventController::class, 'store']);
-// Route::put('/events/{id}', [EventController::class, 'update']);
-// Route::delete('/events/{id}', [EventController::class, 'destroy']);
-
+Route::get('/events/quantity/{quantity}', [EventController::class, 'showWithQuantity']);
 
 // Calendar routes are protected (only for authenticated users)
 
-// Event routes
-Route::post('/events', [EventController::class, 'store']);
-Route::put('/events/{id}', [EventController::class, 'update']);
-Route::delete('/events/{id}', [EventController::class, 'destroy']);
-
-
 Route::apiResource('/events', EventController::class);
+// Event routes
+//Route::post('/events', [EventController::class, 'store']);
+//Route::put('/events/{id}', [EventController::class, 'update']);
+//Route::delete('/events/{id}', [EventController::class, 'destroy']);
 
+//Route::apiResource('/events', EventController::class);
 
 // Password reset routes
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
@@ -78,20 +62,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', fn(Request $request) => $request->user());
     Route::post('/logout', [AuthController::class, 'logout']);
 
-
     // Email verification routes
-
-    // Email verification
-
-    // Email verification routes
-
     Route::post('/email/verification-notification', [VerificationController::class, 'send'])
         ->middleware(['throttle:6,1'])
         ->name('verification.send');
     Route::post('/email/resend', [VerificationController::class, 'resend'])
         ->middleware(['throttle:6,1']);
     Route::get('/email/verify-status', [VerificationController::class, 'status']);
-
 
     // Profile routes
     Route::prefix('profile')->group(function () {
@@ -116,11 +93,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // Calendar routes
     Route::get('/events/{id}/calendar', [CalendarController::class, 'getCalendarLinks']);
     Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
-    //registration routes
+
+    // registration routes
     Route::post('/events/{eventId}/register', [EventRegistrationController::class, 'register']);
     Route::post('/events/{eventId}/cancel', [EventRegistrationController::class, 'cancel']);
     Route::get('/events/{eventId}/registration/status', [EventRegistrationController::class, 'status']);
     Route::get('/user/registrations', [EventRegistrationController::class, 'myRegistrations']);
+    Route::get('/events/{eventId}/seats', [EventRegistrationController::class, 'seats']);
+    Route::get('/events/{id}/available-seats', [EventRegistrationController::class, 'availableSeats']);
+
 });
 //Organizer routes
 Route::middleware(['auth:sanctum', 'role:organizer'])->group(function () {
@@ -128,19 +109,11 @@ Route::middleware(['auth:sanctum', 'role:organizer'])->group(function () {
     Route::post('/registrations/{id}/attendance', [EventRegistrationController::class, 'markAttendance']);
 
 
-    // Calendar routes (protected)
-    Route::get('/events/{id}/calendar', [CalendarController::class, 'getCalendarLinks']);
-    Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
-
-
-
     // Feedback
-        Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);
-        Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
-        Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
+    Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);
+    Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
+    Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
 });
-
-
 
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
 Route::post('/user/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
@@ -164,6 +137,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users/{id}/ban', [UserController::class, 'ban']);
     Route::post('/users/{id}/unban', [UserController::class, 'unban']);
+    Route::post('/organizer/{id}/approve', [UserController::class, 'approveOrganizer']);
+    Route::get('/organizers', [UserController::class, 'getOrganizers']);
 });
 
 //Route::middleware(['auth:sanctum', 'role:participant'])->group(function () {

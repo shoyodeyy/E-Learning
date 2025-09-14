@@ -1,104 +1,131 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { Link } from "react-router-dom";
 import { Search } from "lucide-react";
+import { apiUrl } from "../services/http.jsx";
+import axios from "axios";
+import { format, addMinutes } from "date-fns";
 
 import Header from "../components/Header.jsx";
 
 // Mock data for events
-const mockEvents = [
-    {
-        id: 1,
-        title: "Global Tech Summit 2024",
-        date: "October 26, 2024",
-        location: "Virtual, Online",
-        totalSlots: 500,
-        availableSlots: 150,
-        category: "Technology",
-        department: "IT",
-        image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop",
-    },
-    {
-        id: 2,
-        title: "Digital Marketing Masterclass",
-        date: "November 10, 2024",
-        location: "Convention Center, Cityville",
-        totalSlots: 100,
-        availableSlots: 30,
-        category: "Marketing",
-        department: "Marketing",
-        image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=400&h=250&fit=crop",
-    },
-    {
-        id: 3,
-        title: "Future of AI in Healthcare",
-        date: "September 15, 2024",
-        location: "Grand Auditorium, Metro City",
-        totalSlots: 200,
-        availableSlots: 5,
-        category: "Healthcare",
-        department: "Medical",
-        image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=250&fit=crop",
-    },
-    {
-        id: 4,
-        title: "Art & Innovation Expo",
-        date: "December 01, 2024",
-        location: "Cultural Arts Center, Metropolis",
-        totalSlots: 300,
-        availableSlots: 200,
-        category: "Arts",
-        department: "Culture",
-        image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=250&fit=crop",
-    },
-    {
-        id: 5,
-        title: "Business Leadership Conference",
-        date: "January 15, 2025",
-        location: "Business Center, Downtown",
-        totalSlots: 250,
-        availableSlots: 80,
-        category: "Business",
-        department: "Management",
-        image: "https://images.unsplash.com/photo-1511578314322-379afb476865?w=400&h=250&fit=crop",
-    },
-    {
-        id: 6,
-        title: "Creative Writing Workshop",
-        date: "February 20, 2025",
-        location: "Library Hall, University",
-        totalSlots: 50,
-        availableSlots: 25,
-        category: "Education",
-        department: "Literature",
-        image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&h=250&fit=crop",
-    },
-    {
-        id: 7,
-        title: "Startup Pitch Competition",
-        date: "March 10, 2025",
-        location: "Innovation Hub, Tech District",
-        totalSlots: 150,
-        availableSlots: 75,
-        category: "Startup",
-        department: "Entrepreneurship",
-        image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=400&h=250&fit=crop",
-    },
-    {
-        id: 8,
-        title: "Cybersecurity Summit",
-        date: "April 05, 2025",
-        location: "Security Center, Capital City",
-        totalSlots: 300,
-        availableSlots: 120,
-        category: "Technology",
-        department: "Security",
-        image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&h=250&fit=crop",
-    },
+// const mockEvents = [
+//     {
+//         id: 1,
+//         title: "Global Tech Summit 2024",
+//         date: "October 26, 2024",
+//         location: "Virtual, Online",
+//         totalSlots: 500,
+//         availableSlots: 150,
+//         category: "Technology",
+//         department: "IT",
+//         image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop",
+//     },
+//     {
+//         id: 2,
+//         title: "Digital Marketing Masterclass",
+//         date: "November 10, 2024",
+//         location: "Convention Center, Cityville",
+//         totalSlots: 100,
+//         availableSlots: 30,
+//         category: "Marketing",
+//         department: "Marketing",
+//         image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=400&h=250&fit=crop",
+//     },
+//     {
+//         id: 3,
+//         title: "Future of AI in Healthcare",
+//         date: "September 15, 2024",
+//         location: "Grand Auditorium, Metro City",
+//         totalSlots: 200,
+//         availableSlots: 5,
+//         category: "Healthcare",
+//         department: "Medical",
+//         image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=250&fit=crop",
+//     },
+//     {
+//         id: 4,
+//         title: "Art & Innovation Expo",
+//         date: "December 01, 2024",
+//         location: "Cultural Arts Center, Metropolis",
+//         totalSlots: 300,
+//         availableSlots: 200,
+//         category: "Arts",
+//         department: "Culture",
+//         image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=250&fit=crop",
+//     },
+//     {
+//         id: 5,
+//         title: "Business Leadership Conference",
+//         date: "January 15, 2025",
+//         location: "Business Center, Downtown",
+//         totalSlots: 250,
+//         availableSlots: 80,
+//         category: "Business",
+//         department: "Management",
+//         image: "https://images.unsplash.com/photo-1511578314322-379afb476865?w=400&h=250&fit=crop",
+//     },
+//     {
+//         id: 6,
+//         title: "Creative Writing Workshop",
+//         date: "February 20, 2025",
+//         location: "Library Hall, University",
+//         totalSlots: 50,
+//         availableSlots: 25,
+//         category: "Education",
+//         department: "Literature",
+//         image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&h=250&fit=crop",
+//     },
+//     {
+//         id: 7,
+//         title: "Startup Pitch Competition",
+//         date: "March 10, 2025",
+//         location: "Innovation Hub, Tech District",
+//         totalSlots: 150,
+//         availableSlots: 75,
+//         category: "Startup",
+//         department: "Entrepreneurship",
+//         image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=400&h=250&fit=crop",
+//     },
+//     {
+//         id: 8,
+//         title: "Cybersecurity Summit",
+//         date: "April 05, 2025",
+//         location: "Security Center, Capital City",
+//         totalSlots: 300,
+//         availableSlots: 120,
+//         category: "Technology",
+//         department: "Security",
+//         image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&h=250&fit=crop",
+//     },
+// ];
+
+const categories = [
+    'All categories',
+    'Cultural Event',
+    'Technical Fests',
+    'Sports Meets',
+    'Annual Day Functions',
+    'Workshops and Seminars',
+    'Intercollegiate Competitions',
 ];
 
-const categories = ["All Categories", "Technology", "Marketing", "Healthcare", "Arts", "Business", "Education", "Startup"];
-const departments = ["All Departments", "IT", "Marketing", "Medical", "Culture", "Management", "Literature", "Entrepreneurship", "Security"];
-const dates = ["All Dates", "This Month", "Next Month", "This Quarter", "Next Quarter"];
+const departments = [
+    "All Departments",
+    "IT", "Marketing",
+    "Medical",
+    "Culture", "Management",
+    "Literature",
+    "Entrepreneurship",
+    "Security"
+];
+
+const dates = [
+    "All Dates",
+    "This Month",
+    "Next Month",
+    "This Quarter",
+    "Next Quarter"
+];
 
 // Search and Filter Component
 const SearchAndFilter = ({
@@ -195,8 +222,80 @@ const SearchAndFilter = ({
     );
 };
 
+// Pagination Component
+function Pagination({ pagination, setCurrentPage }) {
+    if (!pagination || !pagination.links || pagination.last_page <= 1) {
+        return null;
+    }
+
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= pagination.last_page) {
+            setCurrentPage(page);
+        }
+    };
+
+    return (
+        <div className="flex items-center justify-center space-x-2 mt-8">
+            {/* Preview button */}
+            <button
+                onClick={() => handlePageChange(pagination.current_page - 1)}
+                className="cursor-pointer px-3 py-2 text-sm text-gray-600 hover:text-gray-900"
+                disabled={pagination.current_page === 1}
+            >
+                ← Previous
+            </button>
+
+            {/* Display page number */}
+            {pagination.links.map((link, index) => {
+                if (link.label === '&laquo; Previous' || link.label === 'Next &raquo;') {
+                    return null;
+                }
+
+                return (
+                    <button
+                        key={index}
+                        onClick={() => handlePageChange(link.label)}
+                        className={`cursor-pointer w-8 h-8 rounded text-sm font-medium ${link.active ? "bg-purple-600 text-white" : "text-gray-600 hover:text-gray-900"}`}
+                        disabled={link.active}
+                    >
+                        {link.label}
+                    </button>
+                );
+            })}
+
+            {/* Next button */}
+            <button
+                onClick={() => setCurrentPage(pagination.current_page + 1)}
+                className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900"
+                disabled={pagination.current_page === pagination.last_page}
+            >
+                Next →
+            </button>
+        </div>
+    );
+}
+
 // Event Card Component
 const EventCard = ({ event }) => {
+    const formatDate = (dateString) => {
+        try {
+            return format(new Date(dateString), "MMMM dd, yyyy");
+        } catch (error) {
+            return dateString; // fallback nếu có lỗi
+        }
+    };
+
+    // Lấy thời gian kết thúc dựa vào start_at + duration_minutes
+    const formatTimeRange = (start_at, duration_minutes) => {
+        try {
+            const start = new Date(start_at);
+            const end = addMinutes(start, duration_minutes); // cộng phút vào
+            return `${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
+        } catch (error) {
+            return start_at;
+        }
+    };
+
     const getAvailabilityColor = (available, total) => {
         const ratio = available / total;
         if (ratio <= 0.1) return "bg-red-500";
@@ -212,7 +311,7 @@ const EventCard = ({ event }) => {
         <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 min-h-[430px]">
             <div className="relative overflow-hidden">
                 <img
-                    src={event.image || "/placeholder.svg"}
+                    src={event.bannerImage ? `http://localhost:8000${event.bannerImage}` : "/placeholder.svg"}
                     alt={event.title}
                     className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                 />
@@ -224,7 +323,7 @@ const EventCard = ({ event }) => {
                             event.totalSlots
                         )}`}
                     >
-                        {getAvailabilityText(event.availableSlots, event.totalSlots)}
+                        {getAvailabilityText(event.maxParticipants, event.maxParticipants)}
                     </div>
                 </div>
             </div>
@@ -239,19 +338,38 @@ const EventCard = ({ event }) => {
                         <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
                             <span className="text-purple-600 text-xs">📅</span>
                         </div>
-                        <span className="font-medium text-gray-700">{event.date}</span>
+                        <span className="font-medium text-gray-700">
+                            {formatDate(event.start_at)}
+                        </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
+                            <span className="text-purple-600 text-xs">🕒</span>
+                        </div>
+                        <span className="font-medium text-gray-700">
+                            {formatTimeRange(event.start_at, event.duration_minutes)}
+                        </span>
                     </div>
                     <div className="flex items-center space-x-2">
                         <div className="w-5 h-5 bg-pink-100 rounded-full flex items-center justify-center">
-                            <span className="text-pink-600 text-xs">📍</span>
+                            <span className="text-pink-600 text-xs">
+                                📍
+                            </span>
                         </div>
-                        <span className="font-medium text-gray-700">{event.location}</span>
+                        <span className="font-medium text-gray-700">
+                            {event.venue}
+                        </span>
                     </div>
                 </div>
 
-                <Link to="/event/1" className="flex justify-center w-full btn-gradient">
+                <Link
+                    to={`/event/${event.eventId}`}
+                    onClick={() => window.screenTop(0, 0)}
+                    className="flex justify-center w-full btn-gradient"
+                >
                     View Details
                 </Link>
+
             </div>
         </div>
     );
@@ -264,6 +382,36 @@ export default function EventsPage() {
     const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
     const [selectedDate, setSelectedDate] = useState("All Dates");
 
+    const [ events, setEvents ] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pagination, setPagination] = useState({});
+
+    async function fetchEvents(pageNum = 1) {
+        setLoading(true);
+
+        try {
+            const res = await axios.get(`${apiUrl}/events?page=${pageNum}`);
+
+            const filteredEvents = (res.data.data || []).filter(event => [
+                "approved",
+                ].includes(event.status)
+            );
+
+            setEvents(filteredEvents);
+            setPagination(res.data.meta);
+        } catch (error) {
+            console.error("Failed to fetch events:", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchEvents(currentPage);
+        window.scrollTo({ top: 0, behavior: "smooth"});
+    }, [currentPage]);
+
     const handleResetFilters = () => {
         setSearchTerm("");
         setSelectedCategory("All Categories");
@@ -272,12 +420,11 @@ export default function EventsPage() {
     };
 
     // Filter events based on search and filters
-    const filteredEvents = mockEvents.filter((event) => {
+    const filteredEvents = events.filter((event) => {
         const matchesSearch =
             event.title.toLowerCase().includes(searchTerm.toLowerCase()) || event.location.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = selectedCategory === "All Categories" || event.category === selectedCategory;
         const matchesDepartment = selectedDepartment === "All Departments" || event.department === selectedDepartment;
-        // For simplicity, date filter is not implemented with actual logic
 
         return matchesSearch && matchesCategory && matchesDepartment;
     });
@@ -310,7 +457,7 @@ export default function EventsPage() {
                         </h1>
                         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
                             Showing <span className="font-semibold text-purple-600">{filteredEvents.length}</span> of{" "}
-                            <span className="font-semibold text-purple-600">{mockEvents.length}</span> events
+                            <span className="font-semibold text-purple-600">{events.length}</span> events
                         </p>
                     </div>
                 </div>
@@ -333,7 +480,9 @@ export default function EventsPage() {
                             <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto">
                                 <span className="text-4xl">🔍</span>
                             </div>
-                            <div className="text-gray-500 text-xl font-medium">No events found matching your criteria.</div>
+                            <div className="text-gray-500 text-xl font-medium">
+                                No events found matching your criteria.
+                            </div>
                             <button
                                 onClick={handleResetFilters}
                                 className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
@@ -343,6 +492,11 @@ export default function EventsPage() {
                         </div>
                     </div>
                 )}
+
+                <Pagination
+                    pagination={pagination}
+                    setCurrentPage={setCurrentPage}
+                />
             </main>
 
             <style jsx>{`

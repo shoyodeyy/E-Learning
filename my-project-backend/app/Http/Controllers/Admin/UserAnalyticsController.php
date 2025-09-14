@@ -78,8 +78,8 @@ class UserAnalyticsController extends Controller
 
             // Lấy số users bị ban trong khoảng thời gian này
             $bannedUsers = User::whereBetween('created_at', [$date, $nextDate])
-                ->whereNotNull('banned_until')
-                ->where('banned_until', '>', now())
+                ->whereNotNull('ban_until')
+                ->where('ban_until', '>', now())
                 ->count();
 
             $stats[] = [
@@ -107,8 +107,8 @@ class UserAnalyticsController extends Controller
         $totalUsers = User::count();
         $verifiedUsers = User::whereNotNull('email_verified_at')->count();
         $googleUsers = User::whereNotNull('google_id')->count();
-        $bannedUsers = User::whereNotNull('banned_until')
-            ->where('banned_until', '>', now())
+        $bannedUsers = User::whereNotNull('ban_until')
+            ->where('ban_until', '>', now())
             ->count();
 
         // Thống kê theo role
@@ -153,7 +153,7 @@ class UserAnalyticsController extends Controller
     {
         $limit = $request->get('limit', 10);
 
-        $users = User::select(['id', 'name', 'email', 'role', 'google_id', 'email_verified_at', 'banned_until', 'created_at'])
+        $users = User::select(['id', 'name', 'email', 'role', 'google_id', 'email_verified_at', 'ban_until', 'created_at'])
             ->orderBy('created_at', 'desc')
             ->limit($limit)
             ->get()
@@ -165,7 +165,7 @@ class UserAnalyticsController extends Controller
                     'role' => $user->role,
                     'isGoogleUser' => !is_null($user->google_id),
                     'isVerified' => !is_null($user->email_verified_at),
-                    'isBanned' => !is_null($user->banned_until) && $user->banned_until > now(),
+                    'isBanned' => !is_null($user->ban_until) && $user->ban_until > now(),
                     'created_at' => $user->created_at->format('d/m/Y H:i'),
                 ];
             });

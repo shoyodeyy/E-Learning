@@ -1,6 +1,6 @@
 import { useState } from "react";
 import api from "../api/axios";
-import { CalendarDays, CalendarPlus } from "lucide-react";
+import { CalendarDays, CalendarPlus, Download, X } from "lucide-react";
 
 export default function CalendarIntegration({ eventId, variant = "floating" }) {
   const [loading, setLoading] = useState(false);
@@ -27,9 +27,33 @@ export default function CalendarIntegration({ eventId, variant = "floating" }) {
     setShowPopup(false);
   };
 
-  const handleDownloadICS = () => {
-    window.location.href = options.ics_url;
-    setShowPopup(false);
+  const handleDownloadICS = async () => {
+    try {
+      // Use axios instance so Authorization header is included
+      const res = await api.get(`/events/${eventId}/calendar/ics`, { responseType: 'blob' });
+
+      // Try to extract filename from headers; fallback to default
+      const dispo = res.headers?.['content-disposition'] || '';
+      const match = dispo.match(/filename=([^;]+)/i);
+      const filenameFromHeader = match ? match[1].replace(/\"/g, '').trim() : '';
+      const preferred = options?.filename || options?.title || '';
+      const filename = (preferred ? String(preferred).replace(/\s+$/, '') : filenameFromHeader) || `event-${eventId}.ics`;
+
+      const blob = new Blob([res.data], { type: 'text/calendar;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Failed to download ICS', e);
+      alert('Unable to download .ics file. Please try again.');
+    } finally {
+      setShowPopup(false);
+    }
   };
 
   const Trigger = () => {
@@ -38,7 +62,10 @@ export default function CalendarIntegration({ eventId, variant = "floating" }) {
         <button
           onClick={handleClick}
           disabled={loading}
-          className="cursor-pointer flex items-center space-x-2 px-6 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl shadow-lg border border-gray-200 transition-all duration-200 disabled:opacity-50"
+          className="cursor-pointer flex items-center gap-2 px-6 py-3 rounded-xl font-medium shadow-sm border border-gray-200 \
+                     bg-gradient-to-r from-gray-50 to-gray-100 \
+                     hover:from-fuchsia-50 hover:to-pink-50 hover:border-fuchsia-300 \
+                     text-gray-700 transition-all duration-200 disabled:opacity-50"
         >
           <CalendarPlus className="w-5 h-5" />
           <span>Add to Calendar</span>
@@ -63,25 +90,48 @@ export default function CalendarIntegration({ eventId, variant = "floating" }) {
       {/* Popup */}
       {showPopup && options && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          onClick={() => setShowPopup(false)} // click overlay để đóng
+          onClick={() => setShowPopup(false)}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm"
         >
           <div
-            className="bg-white rounded-lg shadow-lg p-6 w-80 animate-fadeIn"
             onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl p-6 w-80 shadow-2xl relative border border-gray-100"
           >
+            {/* Close button */}
+            <button
+              onClick={() => setShowPopup(false)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Title */}
+            <h2 className="text-xl font-bold mb-6 text-center bg-gradient-to-r from-fuchsia-500 to-pink-500 bg-clip-text text-transparent">
+              Add to Calendar
+            </h2>
+
+            {/* Action buttons */}
             <div className="flex flex-col gap-3">
               <button
                 onClick={handleGoogleCalendar}
-                className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition"
+                className="cursor-pointer flex items-center gap-3 w-full py-3 px-4 rounded-xl font-medium shadow-sm border border-gray-200 \
+                           bg-gradient-to-r from-gray-50 to-gray-100 \
+                           hover:from-fuchsia-50 hover:to-pink-50 hover:border-fuchsia-300 \
+                           transition-all duration-200 text-left"
               >
-                Google Calendar
+                <CalendarDays className="text-blue-600 w-5 h-5" />
+                <span>Google Calendar</span>
               </button>
+
               <button
                 onClick={handleDownloadICS}
-                className="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300 transition"
+                className="cursor-pointer flex items-center gap-3 w-full py-3 px-4 rounded-xl font-medium shadow-sm border border-gray-200 \
+                           bg-gradient-to-r from-gray-50 to-gray-100 \
+                           hover:from-fuchsia-50 hover:to-pink-50 hover:border-fuchsia-300 \
+                           transition-all duration-200 text-left"
               >
-                Download .ics
+                <Download className="text-gray-600 w-5 h-5" />
+                <span>Download .ics</span>
               </button>
             </div>
           </div>

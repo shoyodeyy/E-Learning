@@ -37,7 +37,6 @@ class DatabaseSeeder extends Seeder
             UsersTableSeeder::class,
             EventsTableSeeder::class,
             MediaGalleryTableSeeder::class,
-            EventSeeder::class,
         ]);
 
     }
