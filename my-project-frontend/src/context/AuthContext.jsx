@@ -15,15 +15,17 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     useEffect(() => {
-        // Initialize auth state from localStorage
         const storedToken = localStorage.getItem("auth_token");
         const storedUser = localStorage.getItem("user");
 
-        if (storedToken && storedUser) {
+        if (storedToken) {
             setToken(storedToken);
-            setUser(JSON.parse(storedUser));
+            if (storedUser) {
+                setUser(JSON.parse(storedUser));
+            }
         }
         setLoading(false);
     }, []);
@@ -41,11 +43,9 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("auth_token");
         localStorage.removeItem("user");
         localStorage.removeItem("chat_session_id");
-        // Optionally clear other user-specific data from localStorage
     };
 
     const updateUser = (userData) => {
-        // Ensure we preserve important fields
         const updatedUser = {
             ...user,
             ...userData,
@@ -55,8 +55,9 @@ export const AuthProvider = ({ children }) => {
     };
 
     const refreshUser = async () => {
-        if (!token) return;
+        if (!token || isRefreshing) return;
 
+        setIsRefreshing(true);
         try {
             const res = await fetch(`${apiUrl}/user`, {
                 headers: {
@@ -66,22 +67,27 @@ export const AuthProvider = ({ children }) => {
             });
             if (res.ok) {
                 const data = await res.json();
-                updateUser(data);
+                setUser(data);
+                localStorage.setItem("user", JSON.stringify(data));
             }
         } catch (err) {
             console.error("Failed to refresh user:", err);
+        } finally {
+            setIsRefreshing(false);
         }
     };
 
+    useEffect(() => {
+        if (token && !user) {
+            refreshUser();
+        }
+    }, []);
+
     const isAuthenticated = !!token && !!user;
-
-    // Check if user needs email verification (only for non-Google users)
-    const needsEmailVerification = user && !user.email_verified_at && !user.is_google_user;
-
-    // Check if user is pending approval (for organizers)
-    const isPendingApproval = user && user.role === "organizer" && user.status === "pending";
-
-    // Check if user account is banned
+    const needsEmailVerification =
+        user && !user.email_verified_at && !user.is_google_user;
+    const isPendingApproval =
+        user && user.role === "organizer" && user.status === "pending";
     const isBanned = user && user.status === "banned";
 
     const value = {
@@ -98,5 +104,7 @@ export const AuthProvider = ({ children }) => {
         refreshUser,
     };
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    return (
+        <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    );
 };

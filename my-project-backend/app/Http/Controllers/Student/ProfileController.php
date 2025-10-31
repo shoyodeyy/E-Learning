@@ -48,7 +48,7 @@ class ProfileController extends Controller
             $validated = $request->validate($rules, [
                 'phone.regex'  => 'Phone number must start with 0 or +84 and contain 9–10 digits.',
                 'phone.unique' => 'This phone number is already in use.',
-                'avatar.image' => 'The uploaded file must be an image.',
+                'avatar.images' => 'The uploaded file must be an images.',
                 'avatar.mimes' => 'Allowed formats: jpg, jpeg, png, gif.',
                 'avatar.max'   => 'Avatar size must be less than 2MB.',
                 'enrollment_no.digits' => 'Enrollment number must be exactly 6 digits.',
