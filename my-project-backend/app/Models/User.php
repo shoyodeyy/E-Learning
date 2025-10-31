@@ -193,4 +193,11 @@ class User extends Authenticatable
     {
         return $this->role === $role;
     }
+
+    public function participatedEvents()
+    {
+        return $this->belongsToMany(Event::class, 'event_participants', 'user_id', 'event_id')
+            ->withPivot(['role', 'registration_status', 'registered_at'])
+            ->withTimestamps();
+    }
 }

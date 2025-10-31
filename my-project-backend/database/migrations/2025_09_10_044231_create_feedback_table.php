@@ -17,17 +17,21 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->enum('role', ['participant', 'organizer'])->default('participant');
             $table->decimal('rating', 2, 1)
-                  ->comment('Rating from 1.0 to 5.0')
-                  ->check('rating >= 1 AND rating <= 5');
+                ->comment('Rating from 1.0 to 5.0')
+                ->check('rating >= 1 AND rating <= 5');
             $table->text('comments')->nullable();
             $table->boolean('edited')->default(false);
             $table->dateTime('submitted_on')->useCurrent();
+            $table->dateTime('edited_at')->nullable();
 
-            $table->unique(['event_id', 'user_id']);
+            $table->unique(['event_id', 'user_id'], 'unique_user_event_feedback');
             $table->foreign('event_id')->references('event_id')->on('events')->cascadeOnDelete();
             $table->foreign('user_id')->references('user_id')->on('users')->cascadeOnDelete();
-        });
 
+            // Index for performance
+            $table->index(['event_id', 'role']);
+            $table->index('submitted_on');
+        });
     }
 
     /**

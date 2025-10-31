@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import api from "../../api/axios";
 import { toast } from "react-toastify";
-
-// Tạm thời dùng dữ liệu mẫu; đổi sang false khi dùng dữ liệu thật
-const USE_MOCK = true;
 
 const SAMPLE_REGISTRATIONS = [
   {
@@ -69,6 +66,7 @@ const statusColor = (status) => {
 const MyRegistrations = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchData = async () => {
     setLoading(true);
@@ -86,31 +84,15 @@ const MyRegistrations = () => {
         statusColor: statusColor(r.status),
       }));
       setItems(list);
-    } catch (e) {
-      toast.error("Không tải được danh sách đăng ký");
+    } catch (error) {
+      toast.error("Không tải được danh sách đăng ký: ", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (USE_MOCK) {
-      const list = SAMPLE_REGISTRATIONS.map((r) => ({
-        id: r.id,
-        eventId: r.eventId,
-        eventName: r.eventName,
-        date: r.date,
-        location: r.location,
-        registeredOn: r.registeredOn,
-        status: r.rawStatus === "waitlist" ? "Waitlisted" : r.rawStatus.charAt(0).toUpperCase() + r.rawStatus.slice(1),
-        rawStatus: r.rawStatus,
-        statusColor: statusColor(r.rawStatus),
-      }));
-      setItems(list);
-      setLoading(false);
-    } else {
       fetchData();
-    }
   }, []);
 
   const cancelRegistration = async (eventId, id) => {
@@ -220,24 +202,9 @@ const MyRegistrations = () => {
                       </span>
                     </td>
                     <td className="px-3 py-4 text-sm font-medium flex gap-2 justify-center">
-                      <button className="cursor-pointer text-purple-600 hover:text-white bg-purple-100 hover:bg-purple-600 px-3 py-2 rounded-lg transition-all duration-300">
+                      <button onClick={() => navigate(`/event/${registration.eventId}`)} className="cursor-pointer text-purple-600 hover:text-white bg-purple-100 hover:bg-purple-600 px-3 py-2 rounded-lg transition-all duration-300">
                         View Details
                       </button>
-                      {registration.rawStatus === "cancelled" ? (
-                        <button
-                          onClick={() => rejoin(registration.eventId, registration.id)}
-                          className="cursor-pointer text-green-600 hover:text-white bg-green-100 hover:bg-green-600 px-3 py-2 rounded-lg transition-all duration-300"
-                        >
-                          Re-Join
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => cancelRegistration(registration.eventId, registration.id)}
-                          className="cursor-pointer text-red-600 hover:text-white bg-red-100 hover:bg-red-600 px-3 py-2 rounded-lg transition-all duration-300"
-                        >
-                          Cancel
-                        </button>
-                      )}
                     </td>
                   </tr>
                 ))}

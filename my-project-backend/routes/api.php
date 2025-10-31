@@ -9,38 +9,36 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\Chatbot\ChatController;
-use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\Feedback\FeedbackController;
 use App\Http\Controllers\Organizer\EventController;
 use App\Http\Controllers\Student\ProfileController;
 use App\Services\AIClientWithFallback;
 use App\Http\Controllers\CalendarController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Student\EventRegistrationController;
+use App\Http\Controllers\EventApprovalController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Student\DashboardController;
+use App\Http\Controllers\Student\MediaController;
+use App\Http\Controllers\Student\UserSavedMediaController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('auth/google/login', [GoogleController::class, 'loginWithGoogle']);
 
-//Route::apiResource('/events', EventController::class);
+// Public event routes
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{id}', [EventController::class, 'show']);
 Route::get('/events/quantity/{quantity}', [EventController::class, 'showWithQuantity']);
-
-// Calendar routes are protected (only for authenticated users)
-
-Route::apiResource('/events', EventController::class);
-// Event routes
-//Route::post('/events', [EventController::class, 'store']);
-//Route::put('/events/{id}', [EventController::class, 'update']);
-//Route::delete('/events/{id}', [EventController::class, 'destroy']);
-
-//Route::apiResource('/events', EventController::class);
+Route::get('/events/{eventId}/available-seats', [EventRegistrationController::class, 'availableSeats']);
 
 // Password reset routes
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
 Route::post('/user/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 Route::post('/user/verify-reset-token', [ResetPasswordController::class, 'verifyToken']);
+
+// Media
+Route::get('/media', [MediaController::class,'index']);
 
 // Email verification link
 Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
@@ -90,41 +88,45 @@ Route::middleware('auth:sanctum')->group(function () {
     // Change password
     Route::post('/user/change-password', [AuthController::class, 'changePassword']);
 
+    // Saved Media routes
+    Route::get('/saved-media', [UserSavedMediaController::class, 'list']);
+    Route::post('/saved-media', [UserSavedMediaController::class, 'save']);
+    Route::delete('/saved-media/{mediaId}', [UserSavedMediaController::class, 'unsave']);
+
     // Calendar routes
     Route::get('/events/{id}/calendar', [CalendarController::class, 'getCalendarLinks']);
     Route::get('/events/{id}/calendar/ics', [CalendarController::class, 'downloadICS']);
 
     // registration routes
+    Route::get('/events/{eventId}/registration/status', [EventRegistrationController::class, 'status']);
     Route::post('/events/{eventId}/register', [EventRegistrationController::class, 'register']);
     Route::post('/events/{eventId}/cancel', [EventRegistrationController::class, 'cancel']);
-    Route::get('/events/{eventId}/registration/status', [EventRegistrationController::class, 'status']);
     Route::get('/user/registrations', [EventRegistrationController::class, 'myRegistrations']);
     Route::get('/events/{eventId}/seats', [EventRegistrationController::class, 'seats']);
-    Route::get('/events/{id}/available-seats', [EventRegistrationController::class, 'availableSeats']);
 
-});
-//Organizer routes
-Route::middleware(['auth:sanctum', 'role:organizer'])->group(function () {
-    Route::get('/events/{eventId}/registrations', [EventRegistrationController::class, 'listByEvent']);
-    Route::post('/registrations/{id}/attendance', [EventRegistrationController::class, 'markAttendance']);
-
-
-    // Feedback
+    // Feedback routes - Available to all authenticated users
     Route::get('/events/{eventId}/feedbacks', [FeedbackController::class, 'index']);
     Route::post('/events/{eventId}/feedbacks', [FeedbackController::class, 'store']);
     Route::put('/feedbacks/{id}', [FeedbackController::class, 'update']);
 });
+//Dashboard routes
+Route::middleware(['auth:sanctum', 'role:participant,organizer'])->group(function () {
+    //Dashboard routes
+    Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+    Route::get('/dashboard/recent-activities', [DashboardController::class, 'recentActivities']);
+    Route::get('/dashboard/upcoming-events', [DashboardController::class, 'upcomingEvents']);
+});
 
-Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
-Route::post('/user/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
-Route::post('/user/verify-reset-token', [ResetPasswordController::class, 'verifyToken']);
+//==================================Organizer routes======================================
+Route::middleware(['auth:sanctum', 'role:organizer'])->group(function () {
+    Route::get('/organizer/dashboard', [\App\Http\Controllers\Organizer\OrganizerDashboardController::class, 'overview']);
 
-Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
-    ->middleware(['signed', 'throttle:6,1'])
-    ->name('verification.verify');
+    Route::get('/organizer/events', [EventController::class, 'organizerEvents']);
+    Route::get('/events/{eventId}/registrations', [EventRegistrationController::class, 'listByEvent']);
+    Route::post('/registrations/{id}/attendance', [EventRegistrationController::class, 'markAttendance']);
+});
 
 // ===================== ADMIN ROUTES =====================
-
 // Admin routes
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     // Analytics
@@ -139,8 +141,10 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::post('/users/{id}/unban', [UserController::class, 'unban']);
     Route::post('/organizer/{id}/approve', [UserController::class, 'approveOrganizer']);
     Route::get('/organizers', [UserController::class, 'getOrganizers']);
+    
+    // Event approval routes
+    Route::get('/events/pending', [EventApprovalController::class, 'getPendingEvents']);
+    Route::post('/events/{eventId}/approve', [EventApprovalController::class, 'approveEvent']);
+    Route::post('/events/{eventId}/reject', [EventApprovalController::class, 'rejectEvent']);
+    Route::get('/events/{eventId}/approval-history', [EventApprovalController::class, 'getApprovalHistory']);
 });
-
-//Route::middleware(['auth:sanctum', 'role:participant'])->group(function () {
-//    Route::post('media/save-selected', [MediaController::class, 'saveSelected']);
-//});

@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import {Search, Play, Facebook, Twitter, Instagram} from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, {useState, useEffect} from 'react';
+import {Facebook, Twitter, Instagram} from 'lucide-react';
+import {motion} from 'framer-motion';
 import Header from "../components/Header.jsx";
+import axios from "axios";
+import {apiUrl} from "../services/http.jsx";
+import Loading from "../components/Loading.jsx";
 
 // RandomBlob component from homepage
-function RandomBlob({ className, color }) {
-    const [target, setTarget] = useState({ x: 0, y: 0 });
+function RandomBlob({className, color}) {
+    const [target, setTarget] = useState({x: 0, y: 0});
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -19,10 +22,10 @@ function RandomBlob({ className, color }) {
 
     return (
         <motion.div
-            animate={{ x: target.x, y: target.y }}
-            transition={{ duration: 1, ease: "linear" }}
+            animate={{x: target.x, y: target.y}}
+            transition={{duration: 1, ease: "linear"}}
             className={`absolute w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-70 ${className}`}
-            style={{ backgroundColor: color }}
+            style={{backgroundColor: color}}
         />
     );
 }
@@ -31,6 +34,8 @@ const EventSphereGallery = () => {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedMedia, setSelectedMedia] = useState([]);
     const [user, setUser] = useState([]);
+    const [mediaItems, setMediaItems] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
@@ -39,88 +44,36 @@ const EventSphereGallery = () => {
         }
     }, []);
 
+    useEffect(() => {
+        const fetchMedia = async () => {
+            try {
+                const res = await axios.get(`${apiUrl}/media`);
+                setMediaItems(res.data.data);
+            } catch (err) {
+                console.error("Error fetching media:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMedia();
+    }, []);
+
     // Define categories with count
     const categories = [
-        { id: 'all', name: 'All', count: 8 },
-        { id: 'spring-arts', name: 'Spring Arts', count: 1 },
-        { id: 'tech-innovation', name: 'Tech Innovation', count: 1 },
-        { id: 'sports', name: 'Sports', count: 1 },
-        { id: 'academic', name: 'Academic', count: 1 },
-        { id: 'entertainment', name: 'Entertainment', count: 2 },
-        { id: 'community', name: 'Community', count: 2 }
-    ];
-
-    const mediaItems = [
-        {
-            id: 1,
-            title: 'Campus Festivities 2024',
-            date: 'May 15, 2024',
-            category: 'spring-arts',
-            image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop',
-            type: 'image'
-        },
-        {
-            id: 2,
-            title: 'Robotics Challenge Highlight',
-            date: 'April 22, 2024',
-            category: 'tech-innovation',
-            image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&h=300&fit=crop',
-            type: 'video'
-        },
-        {
-            id: 3,
-            title: 'Student Art Showcase',
-            date: 'March 18, 2024',
-            category: 'spring-arts',
-            image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=300&fit=crop',
-            type: 'image'
-        },
-        {
-            id: 4,
-            title: 'Intramural Basketball Finals',
-            date: 'February 28, 2024',
-            category: 'sports',
-            image: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=400&h=300&fit=crop',
-            type: 'image'
-        },
-        {
-            id: 5,
-            title: 'Live Music Concert',
-            date: 'January 25, 2024',
-            category: 'entertainment',
-            image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop',
-            type: 'video'
-        },
-        {
-            id: 6,
-            title: 'Guest Lecture Series: Future Tech',
-            date: 'December 12, 2023',
-            category: 'academic',
-            image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop',
-            type: 'image'
-        },
-        {
-            id: 7,
-            title: 'Community Service Day',
-            date: 'November 30, 2023',
-            category: 'community',
-            image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&h=300&fit=crop',
-            type: 'image'
-        },
-        {
-            id: 8,
-            title: 'Annual Theater Production',
-            date: 'October 15, 2023',
-            category: 'entertainment',
-            image: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=400&h=300&fit=crop',
-            type: 'video'
-        }
+        { id: "all", name: "All", count: mediaItems.length },
+        ...Array.from(new Set(mediaItems.map(item => item.event.category)))
+            .map(category => ({
+                id: category,
+                name: category,
+                count: mediaItems.filter(item => item.event.category === category).length
+            }))
     ];
 
     // Filter media items based on selected category
     const filteredMedia = selectedCategory === 'all'
         ? mediaItems
-        : mediaItems.filter(item => item.category === selectedCategory);
+        : mediaItems.filter(item => item.event.category === selectedCategory);
 
     const toggleMediaSelection = (id) => {
         setSelectedMedia(prev =>
@@ -138,32 +91,24 @@ const EventSphereGallery = () => {
         alert("Media duoc chon: " + selectedMedia.join(", "));
     };
 
-    const MediaCard = ({ item, index }) => (
+    const MediaCard = ({item, index}) => (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
+            initial={{opacity: 0, y: 20}}
+            animate={{opacity: 1, y: 0}}
+            transition={{duration: 0.5, delay: index * 0.1}}
             className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-purple-100"
         >
             {/* Media Thumbnail */}
             <div className="relative overflow-hidden">
                 <img
-                    src={item.image}
-                    alt={item.title}
+                    src={`http://localhost:8000${item.file_url}`}
+                    alt={item.caption}
                     className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                 />
 
                 {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                {/* Video play button */}
-                {item.type === 'video' && (
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl">
-                            <Play className="w-8 h-8 text-purple-600 ml-1" />
-                        </div>
-                    </div>
-                )}
+                <div
+                    className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                 {/* Selection checkbox */}
                 {user?.role === "participant" && (
@@ -180,9 +125,9 @@ const EventSphereGallery = () => {
                 {/* Type badge */}
                 <div className="absolute top-4 right-4">
                     <div className={`px-3 py-1.5 rounded-full text-white text-xs font-semibold shadow-lg ${
-                        item.type === 'video' ? 'bg-gradient-to-r from-red-500 to-pink-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                        item.file_type === 'video' ? 'bg-gradient-to-r from-red-500 to-pink-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'
                     }`}>
-                        {item.type === 'video' ? '📹 Video' : '🖼️ Image'}
+                        {item.file_type === 'video' ? '📹 Video' : '🖼️ Image'}
                     </div>
                 </div>
             </div>
@@ -190,7 +135,7 @@ const EventSphereGallery = () => {
             {/* Content */}
             <div className="p-6 space-y-4">
                 <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-purple-600 transition-colors duration-200">
-                    {item.title}
+                    {item.caption}
                 </h3>
 
                 <div className="space-y-2 text-sm">
@@ -198,13 +143,14 @@ const EventSphereGallery = () => {
                         <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
                             <span className="text-purple-600 text-xs">📅</span>
                         </div>
-                        <span className="font-medium">{item.date}</span>
+                        <span className="font-medium">{item.event_year}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-gray-600">
-                        <div className="w-5 h-5 bg-pink-100 rounded-full flex items-center justify-center">
-                            <span className="text-pink-600 text-xs">🏷️</span>
+                        <div className="px-4 py-2 bg-pink-100 rounded-full flex items-center justify-center">
+                            <span className="text-pink-600 text-xs">🏷️ {item.department}</span>
                         </div>
-                        <span className="font-medium">{categories.find(cat => cat.id === item.category)?.name || item.category}</span>
+                        <span
+                            className="font-medium">{categories.find(cat => cat.id === item.category)?.name || item.category}</span>
                     </div>
                 </div>
             </div>
@@ -216,7 +162,8 @@ const EventSphereGallery = () => {
             <Header />
 
             {/* Hero Section */}
-            <section className="bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100 py-16 relative overflow-hidden">
+            <section
+                className="bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100 py-16 relative overflow-hidden">
                 <div className="absolute inset-0 overflow-hidden">
                     <RandomBlob className="-top-40 -right-40" color="#c084fc" />
                     <RandomBlob className="-bottom-40 -left-40" color="#f9a8d4" />
@@ -225,20 +172,23 @@ const EventSphereGallery = () => {
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center space-y-6">
-                        <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg">
+                        <div
+                            className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg">
                             <span className="text-sm font-semibold text-purple-600">📸 Media Gallery</span>
                         </div>
 
                         <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
                             Explore Our
                             <br />
-                            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                            <span
+                                className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Media Collection
               </span>
                         </h1>
 
                         <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                            Discover amazing photos and videos from events across campus. Filter by category, event, date, or media type.
+                            Discover amazing photos and videos from events across campus. Filter by category, event,
+                            date, or media type.
                         </p>
                     </div>
                 </div>
@@ -254,7 +204,7 @@ const EventSphereGallery = () => {
                             <button
                                 key={category.id}
                                 onClick={() => setSelectedCategory(category.id)}
-                                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
+                                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 cursor-pointer ${
                                     selectedCategory === category.id
                                         ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
                                         : 'bg-white text-gray-600 hover:text-purple-600 border-2 border-purple-100 hover:border-purple-300'
@@ -283,31 +233,26 @@ const EventSphereGallery = () => {
                     )}
                 </div>
 
-                {/* Media Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {filteredMedia.map((item, index) => (
-                        <MediaCard key={item.id} item={item} index={index} />
-                    ))}
-                </div>
-
-                {/* Empty State */}
-                {filteredMedia.length === 0 && (
-                    <div className="text-center py-16">
-                        <div className="text-gray-400 mb-4">
-                            <span className="text-6xl">📷</span>
+                {loading ? <Loading /> : (
+                    <>
+                        {/* Media Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                            {filteredMedia.map((item, index) => (
+                                <MediaCard key={index} item={item} index={index} />
+                            ))}
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-600 mb-2">No media found</h3>
-                        <p className="text-gray-500">Try selecting a different category</p>
-                    </div>
-                )}
 
-                {/* Load More Button */}
-                {filteredMedia.length > 0 && (
-                    <div className="text-center mt-16">
-                        <button className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-                            Load More Media
-                        </button>
-                    </div>
+                        {/* Empty State */}
+                        {filteredMedia.length === 0 && (
+                            <div className="text-center py-16">
+                                <div className="text-gray-400 mb-4">
+                                    <span className="text-6xl">📷</span>
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-600 mb-2">No media found</h3>
+                                <p className="text-gray-500">Try selecting a different category</p>
+                            </div>
+                        )}
+                    </>
                 )}
             </main>
 
@@ -316,19 +261,25 @@ const EventSphereGallery = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="flex flex-col sm:flex-row justify-between items-center">
                         <div className="flex space-x-6 mb-4 sm:mb-0">
-                            <a href="#" className="text-gray-600 hover:text-purple-600 font-medium transition-colors duration-200">About</a>
-                            <a href="#" className="text-gray-600 hover:text-purple-600 font-medium transition-colors duration-200">Resources</a>
-                            <a href="#" className="text-gray-600 hover:text-purple-600 font-medium transition-colors duration-200">Contact</a>
+                            <a href="#"
+                               className="text-gray-600 hover:text-purple-600 font-medium transition-colors duration-200">About</a>
+                            <a href="#"
+                               className="text-gray-600 hover:text-purple-600 font-medium transition-colors duration-200">Resources</a>
+                            <a href="#"
+                               className="text-gray-600 hover:text-purple-600 font-medium transition-colors duration-200">Contact</a>
                         </div>
 
                         <div className="flex space-x-4">
-                            <a href="#" className="text-purple-400 hover:text-purple-600 transition-colors duration-200 p-2 bg-purple-50 rounded-lg hover:bg-purple-100">
+                            <a href="#"
+                               className="text-purple-400 hover:text-purple-600 transition-colors duration-200 p-2 bg-purple-50 rounded-lg hover:bg-purple-100">
                                 <Facebook className="w-5 h-5" />
                             </a>
-                            <a href="#" className="text-purple-400 hover:text-purple-600 transition-colors duration-200 p-2 bg-purple-50 rounded-lg hover:bg-purple-100">
+                            <a href="#"
+                               className="text-purple-400 hover:text-purple-600 transition-colors duration-200 p-2 bg-purple-50 rounded-lg hover:bg-purple-100">
                                 <Twitter className="w-5 h-5" />
                             </a>
-                            <a href="#" className="text-purple-400 hover:text-purple-600 transition-colors duration-200 p-2 bg-purple-50 rounded-lg hover:bg-purple-100">
+                            <a href="#"
+                               className="text-purple-400 hover:text-purple-600 transition-colors duration-200 p-2 bg-purple-50 rounded-lg hover:bg-purple-100">
                                 <Instagram className="w-5 h-5" />
                             </a>
                         </div>

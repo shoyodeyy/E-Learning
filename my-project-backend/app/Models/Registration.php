@@ -15,7 +15,13 @@ class Registration extends Model
         'user_id',
         'status',
         'attendance_status',
-        'qr_code'
+        'qr_code',
+        'registered_on'
+    ];
+
+    protected $casts = [
+        'attendance_status' => 'boolean',
+        'registered_on' => 'datetime',
     ];
 
     // Quan hệ

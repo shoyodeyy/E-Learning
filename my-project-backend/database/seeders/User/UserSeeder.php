@@ -29,11 +29,12 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password123'),
                 'profile' => 'Organizer system',
                 'role' => 'organizer',
+                'status' => 'pending',
                 'google_id' => null,
                 'email_verified_at' => $createdDate,
                 'ban_reason' => null,
                 'ban_until' => null,
-                'department' => $faker->randomElement(['IT', 'Business', 'Design', 'Engineering']),
+                'department' =>  null,
                 'enrollment_no' => 'ORG' . str_pad($i + 1, 6, '0', STR_PAD_LEFT),
                 'created_at' => $createdDate,
                 'updated_at' => $createdDate,
@@ -56,7 +57,11 @@ class UserSeeder extends Seeder
             $banReason = null;
             $banUntil = null;
 
+            $isBanned = $faker->boolean(3);
+            $status = 'active';
+
             if ($isBanned) {
+                $status = 'banned';
                 $banReasons = [
                     'Violation of community guidelines',
                     'Content spam',
@@ -85,6 +90,7 @@ class UserSeeder extends Seeder
                 'password' => $hasGoogleId ? null : Hash::make('password123'),
                 'profile' => $faker->randomElement($profiles),
                 'role' => 'participant',
+                'status' => $status,
                 'google_id' => $googleId,
                 'email_verified_at' => $emailVerifiedAt,
                 'ban_reason' => $banReason,
@@ -171,20 +177,21 @@ class UserSeeder extends Seeder
             $isVerified = $hasGoogleId || $faker->boolean(90);
 
             User::create([
-                'name' => $faker->name,
-                'email' => $faker->unique()->safeEmail,
-                'password' => $hasGoogleId ? null : Hash::make('password123'),
-                'profile' => 'new user',
-                'role' => 'participant',
-                'google_id' => $googleId,
-                'email_verified_at' => $isVerified ? $createdDate : null,
+                'name' => 'Admin ' . ($i + 1),
+                'email' => 'admin' . ($i + 1) . '@example.com',
+                'password' => Hash::make('admin123'),
+                'profile' => 'System administrator',
+                'role' => 'admin',
+                'status' => 'active',
+                'google_id' => null,
+                'email_verified_at' => now(),
                 'ban_reason' => null,
                 'ban_until' => null,
-                'department' => $faker->randomElement(['IT', 'Business', 'Design', 'Engineering']),
-                'enrollment_no' => 'STU' . strtoupper(uniqid()),
-                'created_at' => $createdDate,
-                'updated_at' => $createdDate,
-            ]);
+                'department' => 'Management',
+                'enrollment_no' => 'ADM' . str_pad($i + 1, 6, '0', STR_PAD_LEFT),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);            
         }
 
 

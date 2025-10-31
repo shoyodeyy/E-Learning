@@ -7,6 +7,7 @@ import UpdateEventForm from "../pages/Organizer/Event/UpdateEvent.jsx";
 import CreateEventForm from "../pages/Organizer/Event/CreateEvent.jsx";
 
 import DetailEvent from "../pages/Organizer/Event/DetailEvent.jsx";
+import ManageEventRegistrations from "../pages/Organizer/Event/ManageEventRegistrations.jsx";
 
 import ChangePassword from "../pages/ChangePassword.jsx";
 import Overview from "../pages/Organizer/Overview.jsx";
@@ -25,6 +26,7 @@ export default function OrganizerRouter() {
                     <Route path="create-event" element={<CreateEventForm />} />
                     <Route path="update-event/:id" element={<UpdateEventForm />} />
                     <Route path="event-detail/:id" element={<DetailEvent />} />
+                    <Route path="event-registrations/:eventId" element={<ManageEventRegistrations />} />
 
                     <Route path="profile" element={<Profile />} />
                     <Route path="edit-profile" element={<EditProfile />} />

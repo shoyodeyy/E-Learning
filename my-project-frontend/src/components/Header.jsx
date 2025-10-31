@@ -231,6 +231,7 @@ export default function Header() {
                                     onClick={() => {
                                         if (user.role === "participant") navigate("/user/dashboard");
                                         else if (user.role === "organizer") navigate("/organizer/dashboard");
+                                        else if (user.role === "admin") navigate("/admin/dashboard");
                                         setMobileMenuOpen(false);
                                     }}
                                     className=" cursor-pointer flex items-center w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors duration-200"
@@ -284,8 +285,9 @@ export default function Header() {
                 open={confirmOpen}
                 message="Are you sure you want to logout?"
                 onCancel={() => setConfirmOpen(false)}
-                onConfirm={() => {
-                    logout(), navigate("/");
+                onConfirm={async () => {
+                    await logout();
+                    navigate("/", { replace: true });
                     setConfirmOpen(false);
                 }}
             />

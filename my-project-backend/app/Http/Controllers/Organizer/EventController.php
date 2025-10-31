@@ -10,26 +10,84 @@ use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $events = Event::with(['organizer', 'approvedByAdmin'])
-            ->orderBy('start_at', 'desc')
-            ->paginate(6);
+        $user = auth()->user();
+
+        $query = Event::with(['organizer', 'approvedByAdmin'])
+            ->orderBy('start_at', 'desc');
+
+        // Search toàn bộ (title + venue + description)
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('venue', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter (status, category)
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+        if ($request->has('category') && $request->category !== 'all') {
+            $query->where('category', $request->category);
+        }
+
+        if ($user && $user->hasRole('admin')) {
+            $events = $query->paginate(6);
+        } elseif ($user && $user->hasRole('organizer')) {
+            $events = $query->where('organizerId', $user->user_id)->paginate(6);
+        } else {
+            if (!($request->has('status') && $request->status !== 'all')) {
+                $query->where('status', 'approved');
+            }
+            $events = $query->paginate(6);
+        }
 
         return EventResource::collection($events);
     }
 
     public function show($id)
     {
-        $event = Event::with(['organizer', 'approvedByAdmin'])
-            ->where('event_id', $id)
-            ->first();
-
+        // $user = auth()->user();
+        $event = Event::with(['organizer', 'approvedByAdmin'])->where('event_id', $id)->firstOrFail();
         if (!$event) {
+
             return response()->json([
                 'message' => 'Event not found'
             ], 404);
         }
+
+        // If user is authenticated
+        // if ($user) {
+        //     if ($user->hasRole('admin')) {
+        //         // Admin can see all events
+        //         // No additional filter needed
+        //     } elseif ($user->hasRole('organizer')) {
+        //         // Organizer can only see their own events
+        //         $query->where('organizerId', $user->user_id);
+        //     } else {
+        //         // Regular users can only see approved events
+        //         $query->where('status', 'approved');
+        //     }
+        // } else {
+        //     // Unauthenticated users can only see approved events
+        //     $query->where('status', 'approved');
+        // }
+
+        // $event = $query->first();
+
+        // if (!$event) {
+        //     return response()->json([
+        //         'message' => 'Event not found or you do not have permission to view this event',
+        //         'debug' => [
+        //             'requested_id' => $id,
+        //             'user_id' => $user ? $user->user_id : null,
+        //             'user_role' => $user ? $user->role : null
+        //         ]
+        //     ], 404);
+        // }
 
         return new EventResource($event);
     }
@@ -79,13 +137,14 @@ class EventController extends Controller
             $file = $request->file('bannerImage');
             $fileName = $event->event_id . '.' . $file->getClientOriginalExtension();
 
+            // Lưu vào thư mục images/MediaGallery
             $path = $file->storeAs(
-                'events/banners',
+                'images/MediaGallery',
                 $fileName,
                 'public'
             );
 
-            $event->bannerImage = asset('storage/' . $path);
+            $event->bannerImage = '/storage/' . $path;
             $event->save();
         }
 
@@ -97,6 +156,14 @@ class EventController extends Controller
     public function update(Request $request, $id)
     {
         $event = Event::findOrFail($id);
+
+        // Kiểm tra authentication trước
+        if (!auth()->check()) {
+            return response()->json([
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
+
         $user = auth()->user();
 
         // Debug log để xem chi tiết khi lỗi 403
@@ -115,9 +182,10 @@ class EventController extends Controller
         }
 
         // check role (chỉ admin hoặc chính organizer mới được sửa)
-        // 👉 Lưu ý: phải đồng bộ với store(), nếu store lưu organizerId = user_id thì check user_id,
-        // nếu store lưu organizerId = id thì check id.
-        if (!$user->hasRole('admin') && $user->user_id !== $event->organizerId) {
+        // Kiểm tra hasRole method có tồn tại không
+        $isAdmin = method_exists($user, 'hasRole') ? $user->hasRole('admin') : ($user->role === 'admin');
+
+        if (!$isAdmin && $user->user_id !== $event->organizerId) {
             return response()->json([
                 'message' => 'You can only update your own events'
             ], 403);
@@ -148,7 +216,8 @@ class EventController extends Controller
         if ($request->hasFile('bannerImage')) {
             // xoá file cũ nếu tồn tại
             if ($event->bannerImage) {
-                $oldPath = str_replace(asset('storage/'), '', $event->bannerImage);
+                // Loại bỏ '/storage/' từ đường dẫn để có đường dẫn thật trong storage
+                $oldPath = str_replace('/storage/', '', $event->bannerImage);
                 if (Storage::disk('public')->exists($oldPath)) {
                     Storage::disk('public')->delete($oldPath);
                 }
@@ -157,19 +226,20 @@ class EventController extends Controller
             $file = $request->file('bannerImage');
             $fileName = $event->event_id . '.' . $file->getClientOriginalExtension();
 
+            // Sử dụng cùng thư mục với store() - images/MediaGallery
             $path = $file->storeAs(
-                'events/banners',
+                'images/MediaGallery',
                 $fileName,
                 'public'
             );
 
-            $event->bannerImage = asset('storage/' . $path);
+            $event->bannerImage = '/storage/' . $path;
         }
 
         $event->save();
 
         // Nếu organizer sửa event đã được duyệt → reset lại pending để chờ duyệt lại
-        if (!$user->hasRole('admin') && $originalStatus === 'approved' && $event->wasChanged()) {
+        if (!$isAdmin && $originalStatus === 'approved' && $event->wasChanged()) {
             $event->update([
                 'status' => 'pending_update',
                 'approvedBy' => null
@@ -179,7 +249,7 @@ class EventController extends Controller
         }
 
         // Nếu organizer sửa event đã được duyệt và đang pending_update
-        if (!$user->hasRole('admin') && $originalStatus === 'pending_update' && $event->wasChanged()) {
+        if (!$isAdmin && $originalStatus === 'pending_update' && $event->wasChanged()) {
             $event->update([
                 'status' => 'pending_update',
                 'approvedBy' => null
@@ -189,7 +259,7 @@ class EventController extends Controller
         }
 
         // Nếu organizer sửa event chưa được duyệt
-        if (!$user->hasRole('admin') && $originalStatus === 'pending_create' && $event->wasChanged()) {
+        if (!$isAdmin && $originalStatus === 'pending_create' && $event->wasChanged()) {
             $event->update([
                 'status' => 'pending_create',
                 'approvedBy' => null
@@ -199,7 +269,7 @@ class EventController extends Controller
         }
 
         // Nếu organizer sửa event đang đc pending_delete
-        if (!$user->hasRole('admin') && $originalStatus === 'pending_delete' && $event->wasChanged()) {
+        if (!$isAdmin && $originalStatus === 'pending_delete' && $event->wasChanged()) {
             return response()->json([
                 'message' => 'You can not update the event in pending_delete status'
             ], 403);
@@ -216,17 +286,35 @@ class EventController extends Controller
     public function destroy(Request $request, $id)
     {
         $event = Event::findOrFail($id);
+
+        // Kiểm tra authentication trước
+        if (!auth()->check()) {
+            return response()->json([
+                'message' => 'Unauthenticated'
+            ], 401);
+        }
+
         $user = auth()->user();
 
         // check status
-        if (!$user->hasRole('admin') && $event->status === 'completed' ) {
+        $isAdmin = method_exists($user, 'hasRole') ? $user->hasRole('admin') : ($user->role === 'admin');
+
+        if (!$isAdmin && $event->status === 'completed') {
             return response()->json([
                 'message' => 'Completed events cannot be deleted.'
             ], 403);
         }
 
         // check role
-        if ($user->hasRole('admin')) {
+        if ($isAdmin) {
+            // Xóa file banner nếu có
+            if ($event->bannerImage) {
+                $filePath = str_replace('/storage/', '', $event->bannerImage);
+                if (Storage::disk('public')->exists($filePath)) {
+                    Storage::disk('public')->delete($filePath);
+                }
+            }
+
             $event->delete();
 
             return response()->json([
@@ -241,6 +329,14 @@ class EventController extends Controller
         }
 
         if ($event->status === 'pending_create') {
+            // Xóa file banner nếu có
+            if ($event->bannerImage) {
+                $filePath = str_replace('/storage/', '', $event->bannerImage);
+                if (Storage::disk('public')->exists($filePath)) {
+                    Storage::disk('public')->delete($filePath);
+                }
+            }
+
             $event->delete();
 
             return response()->json([
@@ -262,5 +358,38 @@ class EventController extends Controller
         return response()->json([
             'message' => 'Invalid action for current event status.'
         ], 400);
+    }
+
+    public function organizerEvents(Request $request)
+    {
+        $user = auth()->user();
+
+        $query = Event::with(['organizer', 'approvedByAdmin'])
+            ->where('organizerId', $user->user_id)
+            ->orderBy('start_at', 'desc');
+
+        // optional filters
+        if ($search = $request->query('search')) {
+            $query->where('title', 'like', "%{$search}%");
+        }
+
+        if ($status = $request->query('status') and $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        if ($category = $request->query('category') and $category !== 'all') {
+            $query->where('category', $category);
+        }
+
+        $events = $query->paginate(8, [
+            'event_id',
+            'title',
+            'status',
+            'organizerId',
+            'start_at',
+            'bannerImage'
+        ]);
+
+        return response()->json($events);
     }
 }
