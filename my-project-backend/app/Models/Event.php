@@ -30,6 +30,7 @@ class Event extends Model
         'start_at',
         'duration_minutes',
         'venue',
+        'timezone',
         'organizerId',
         'approvedBy',
         'maxParticipants',
