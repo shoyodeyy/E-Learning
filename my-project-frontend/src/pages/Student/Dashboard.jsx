@@ -116,7 +116,7 @@ function UpcomingEvents({ events }) {
                 {events.length > 0 ? (
                     events.map((event) => (
                         <div key={event.id} className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow duration-200">
-                            <img src={`http://localhost:8000/${event.image}`} alt={event.title} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                            <img src={`http://localhost:8000${event.image}`} alt={event.title} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
                             <div className="flex-1 min-w-0">
                                 <h4 className="text-sm font-semibold text-gray-900 mb-1">{event.title}</h4>
                                 <p className="text-xs text-gray-600 mb-1">📅 {event.date}</p>

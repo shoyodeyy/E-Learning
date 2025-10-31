@@ -5,6 +5,7 @@ import { Calendar, Clock, MapPin, Users, Share2, Heart, User, Star, Send } from 
 import axios from "axios";
 import { format, addMinutes } from "date-fns";
 import { toast } from "react-toastify";
+import { formatInTimeZone } from "date-fns-tz";
 
 import { apiUrl } from "../services/http.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -558,13 +559,16 @@ const EventDetailPage = () => {
         return format(d, "MMMM dd, yyyy");
     };
 
-    const formatTimeRange = (start_at, duration_minutes) => {
-        if (!start_at || !duration_minutes) return "N/A";
-        const start = new Date(start_at);
-        if (isNaN(start)) return start_at;
-        const end = addMinutes(start, duration_minutes);
-        return `${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
-    };
+    
+const formatTimeRange = (start_at, duration_minutes) => {
+    if (!start_at || !duration_minutes) return "N/A";
+    const start = new Date(start_at);
+    if (isNaN(start)) return start_at;
+
+    const end = addMinutes(start, duration_minutes);
+    // Nếu muốn hiển thị theo UTC
+    return `${formatInTimeZone(start, "UTC", "HH:mm")} - ${formatInTimeZone(end, "UTC", "HH:mm")}`;
+};
 
     const formatDurationTime = (duration_minutes) => {
         try {

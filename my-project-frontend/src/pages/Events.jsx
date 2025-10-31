@@ -301,10 +301,20 @@ export default function EventsPage() {
 
     // Filter events based on search and filters
     const filteredEvents = events.filter((event) => {
+        const title = event?.title?.toLowerCase() || "";
+        const location = event?.location?.toLowerCase() || "";
+        const search = searchTerm?.toLowerCase() || "";
+
         const matchesSearch =
-            event.title.toLowerCase().includes(searchTerm.toLowerCase()) || event?.venue.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = selectedCategory === "All Categories" || event.category === selectedCategory;
-        const matchesDepartment = selectedDepartment === "All Departments" || event.department === selectedDepartment;
+            title.includes(search) || location.includes(search);
+
+        const matchesCategory =
+            selectedCategory.toLowerCase().includes("all") ||
+            event.category?.toLowerCase() === selectedCategory?.toLowerCase();
+
+        const matchesDepartment =
+            selectedDepartment.toLowerCase().includes("all") ||
+            event.department?.toLowerCase() === selectedDepartment?.toLowerCase();
 
         return matchesSearch && matchesCategory && matchesDepartment;
     });
@@ -375,12 +385,12 @@ export default function EventsPage() {
                             </div>
                         )}
 
-                        <Pagination pagination={pagination} setCurrentPage={setCurrentPage} />
+                        {filteredEvents.length > 0 && <Pagination pagination={pagination} setCurrentPage={setCurrentPage} />}
                     </>
                 )}
             </main>
 
-            <style jsx="true">{`
+            <style>{`
                 @keyframes fade-in {
                     from {
                         opacity: 0;

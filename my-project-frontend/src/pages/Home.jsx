@@ -112,6 +112,7 @@ const EventCard = ({ event }) => {
         try {
             return format(new Date(dateString), "MMMM dd, yyyy");
         } catch (error) {
+            console.error(error);
             return dateString; // fallback nếu có lỗi
         }
     };
@@ -123,6 +124,7 @@ const EventCard = ({ event }) => {
             const end = addMinutes(start, duration_minutes); // cộng phút vào
             return `${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
         } catch (error) {
+            console.error(error);
             return start_at;
         }
     };
@@ -150,11 +152,10 @@ const EventCard = ({ event }) => {
                 <div className="absolute top-4 right-4">
                     <div
                         className={`px-3 py-1.5 rounded-full text-white text-sm font-semibold shadow-lg ${getAvailabilityColor(
-                            event.availableSlots,
-                            event.totalSlots
+                            124
                         )}`}
                     >
-                        {getAvailabilityText(event.availableSlots, event.totalSlots)}
+                        {getAvailabilityText(124, event.maxParticipants)}
                     </div>
                 </div>
             </div>
@@ -269,6 +270,7 @@ export default function Home() {
             setLoadingFeatured(true);
 
             const events = await fetchFeaturedEvents();
+            console.log(events)
 
             setFeaturedEvents(events);
             setLoadingFeatured(false);

@@ -19,6 +19,7 @@ use App\Http\Controllers\Student\EventRegistrationController;
 use App\Http\Controllers\EventApprovalController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Student\DashboardController;
+use App\Http\Controllers\Student\MediaController;
 use App\Http\Controllers\Student\UserSavedMediaController;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -35,6 +36,9 @@ Route::get('/events/{eventId}/available-seats', [EventRegistrationController::cl
 Route::post('/user/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
 Route::post('/user/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 Route::post('/user/verify-reset-token', [ResetPasswordController::class, 'verifyToken']);
+
+// Media
+Route::get('/media', [MediaController::class,'index']);
 
 // Email verification link
 Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
