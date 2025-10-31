@@ -1,9 +1,22 @@
 // utils/shareLinks.js
 export function generateShareLinks(event, baseUrl) {
-  const eventUrl = `${baseUrl}/event/${event?.id}`;
-  const when = event?.date ? `${event.date}` : '';
-  const where = event?.venue || event?.location || '';
-  const message = `🎉 ${event?.title || 'Event'}\n${when ? `📅 ${when}` : ''} ${where ? `at ${where}` : ''}\n\n👉 View details: ${eventUrl}`.trim();
+  const resolvedEvent =
+    event && typeof event === "object"
+      ? event
+      : { id: event };
+
+  const eventId =
+    resolvedEvent?.id ??
+    resolvedEvent?.eventId ??
+    resolvedEvent?.event_id ??
+    resolvedEvent?.slug ??
+    resolvedEvent?.slugId;
+
+  const eventUrl = eventId ? `${baseUrl}/event/${eventId}` : baseUrl;
+
+  const when = resolvedEvent?.date ? `${resolvedEvent.date}` : '';
+  const where = resolvedEvent?.venue || resolvedEvent?.location || '';
+  const message = `🎉 ${resolvedEvent?.title || 'Event'}\n${when ? `📅 ${when}` : ''} ${where ? `at ${where}` : ''}\n\n👉 View details: ${eventUrl}`.trim();
 
   return {
     facebook: {
@@ -24,7 +37,7 @@ export function generateShareLinks(event, baseUrl) {
     },
     email: {
       name: "Email",
-      url: `mailto:?subject=${encodeURIComponent("Event Invitation: " + event.title)}&body=${encodeURIComponent(message)}`
+      url: `mailto:?subject=${encodeURIComponent("Event Invitation: " + (resolvedEvent?.title || "Event"))}&body=${encodeURIComponent(message)}`
     }
   };
 }
