@@ -177,6 +177,7 @@ const EventCard = ({ event }) => {
         try {
             return format(new Date(dateString), "MMMM dd, yyyy");
         } catch (error) {
+            console.error(error)
             return dateString; // fallback nếu có lỗi
         }
     };
@@ -188,6 +189,7 @@ const EventCard = ({ event }) => {
             const end = addMinutes(start, duration_minutes); // cộng phút vào
             return `${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
         } catch (error) {
+            console.error(error)
             return start_at;
         }
     };
@@ -204,7 +206,7 @@ const EventCard = ({ event }) => {
     };
 
     return (
-        <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 min-h-[430px]">
+        <div className="group h-[500px] bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 min-h-[430px]">
             <div className="relative overflow-hidden">
                 <img
                     src={event.bannerImage ? `http://localhost:8000${event.bannerImage}` : "/placeholder.svg"}
@@ -225,11 +227,11 @@ const EventCard = ({ event }) => {
             </div>
 
             <div className="p-6 space-y-4">
-                <h3 className="text-xl font-bold text-gray-900 line-clamp-2 group-hover:text-purple-600 transition-colors duration-200">
+                <h3 className="text-xl font-bold text-gray-900 line-clamp-2 group-hover:text-purple-600 transition-colors duration-200 h-[56px]">
                     {event.title}
                 </h3>
 
-                <div className="space-y-3 text-sm text-gray-600">
+                <div className="space-y-3 text-sm text-gray-600 h-[104px]">
                     <div className="flex items-center space-x-2">
                         <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
                             <span className="text-purple-600 text-xs">📅</span>
@@ -246,7 +248,7 @@ const EventCard = ({ event }) => {
                         <div className="w-5 h-5 bg-pink-100 rounded-full flex items-center justify-center">
                             <span className="text-pink-600 text-xs">📍</span>
                         </div>
-                        <span className="font-medium text-gray-700">{event.venue}</span>
+                        <span className="font-medium text-gray-700 line-clamp-2">{event.venue}</span>
                     </div>
                 </div>
 

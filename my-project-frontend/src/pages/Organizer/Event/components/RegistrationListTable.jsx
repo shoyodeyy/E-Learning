@@ -61,6 +61,7 @@ const RegistrationListTable = ({ registrations, onAttendanceToggle, loading }) =
         );
     }
 
+    console.log(registrations)
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -79,8 +80,7 @@ const RegistrationListTable = ({ registrations, onAttendanceToggle, loading }) =
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="flex items-center">
                                     <img
-                                        src={
-                                            registration.user.avatar ||
+                                        src={registration.user.avatar_url !== null ? `http://localhost:8000${registration.user.avatar_url}` :
                                             `https://ui-avatars.com/api/?name=${registration.user.name}&background=8b5cf6&color=ffffff`
                                         }
                                         alt={registration.user.name}

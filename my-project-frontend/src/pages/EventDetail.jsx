@@ -215,7 +215,6 @@ const FeedbackSection = ({ eventId, userRole, eventStatus }) => {
     }
 
     const isDeadlinePassed = feedbackDeadline && new Date() > new Date(feedbackDeadline);
-
     return (
         <div className="space-y-8">
             <div className="flex justify-between items-center">
@@ -372,7 +371,7 @@ const FeedbackSection = ({ eventId, userRole, eventStatus }) => {
                         >
                             <div className="flex items-start space-x-4">
                                 <img
-                                    src={feedback.user.avatar || "https://ui-avatars.com/api/?name=" + feedback.user.name}
+                                    src={`http://localhost:8000${feedback.user.avatar_url}` || "https://ui-avatars.com/api/?name=" + feedback.user.name}
                                     alt={feedback.user.name}
                                     className="w-12 h-12 rounded-full object-cover"
                                 />
@@ -559,16 +558,17 @@ const EventDetailPage = () => {
         return format(d, "MMMM dd, yyyy");
     };
 
-    
-const formatTimeRange = (start_at, duration_minutes) => {
-    if (!start_at || !duration_minutes) return "N/A";
-    const start = new Date(start_at);
-    if (isNaN(start)) return start_at;
 
-    const end = addMinutes(start, duration_minutes);
-    // Nếu muốn hiển thị theo UTC
-    return `${formatInTimeZone(start, "UTC", "HH:mm")} - ${formatInTimeZone(end, "UTC", "HH:mm")}`;
-};
+    const formatTimeRange = (start_at, duration_minutes) => {
+        if (!start_at || !duration_minutes) return "N/A";
+        const start = new Date(start_at);
+        if (isNaN(start)) return start_at;
+
+        const end = addMinutes(start, duration_minutes);
+
+        // Hiển thị theo múi giờ Việt Nam (Asia/Ho_Chi_Minh)
+        return `${formatInTimeZone(start, "Asia/Ho_Chi_Minh", "HH:mm")} - ${formatInTimeZone(end, "Asia/Ho_Chi_Minh", "HH:mm")}`;
+    };
 
     const formatDurationTime = (duration_minutes) => {
         try {
@@ -802,7 +802,13 @@ const formatTimeRange = (start_at, duration_minutes) => {
                                         </div>
 
                                         {/* Register Button */}
-                                        {!user ? (
+                                        {events.status === "completed" || new Date(events.end_at).getTime() < Date.now() ? (
+                                            <button
+                                                className="w-full inline-flex justify-center items-center px-6 py-3 rounded-lg font-semibold text-gray-500 bg-gray-200 cursor-default"
+                                            >
+                                                The event has ended.
+                                            </button>
+                                        ) : !user ? (
                                             <Link to="/login" className="w-full inline-flex justify-center btn-gradient-l">
                                                 Login to Register
                                             </Link>
@@ -820,6 +826,7 @@ const formatTimeRange = (start_at, duration_minutes) => {
                                                 </button>
                                             </div>
                                         )}
+
 
                                         <p className="text-xs text-gray-500 text-center">Taxes and fees may apply.</p>
 

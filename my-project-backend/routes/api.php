@@ -119,6 +119,8 @@ Route::middleware(['auth:sanctum', 'role:participant,organizer'])->group(functio
 
 //==================================Organizer routes======================================
 Route::middleware(['auth:sanctum', 'role:organizer'])->group(function () {
+    Route::get('/organizer/dashboard', [\App\Http\Controllers\Organizer\OrganizerDashboardController::class, 'overview']);
+
     Route::get('/organizer/events', [EventController::class, 'organizerEvents']);
     Route::get('/events/{eventId}/registrations', [EventRegistrationController::class, 'listByEvent']);
     Route::post('/registrations/{id}/attendance', [EventRegistrationController::class, 'markAttendance']);

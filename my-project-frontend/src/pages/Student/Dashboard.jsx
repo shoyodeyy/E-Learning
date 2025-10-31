@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios.js"; // axios instance bạn đã setup
 import { useAuth } from "../../context/AuthContext.jsx";
+import {useNavigate} from "react-router-dom";
 
 export default function ParticipantDashboard() {
     const { user } = useAuth();
@@ -18,16 +19,19 @@ export default function ParticipantDashboard() {
 
     useEffect(() => {
         api.get("/dashboard/stats")
-            .then(res => setStats(res.data))
+            .then(res => {
+                setStats(res.data)
+            })
             .catch(err => console.error("Stats error:", err));
 
         api.get("/dashboard/recent-activities")
-            .then(res => setActivities(res.data))
+            .then(res => {
+                setActivities(res.data)
+            })
             .catch(err => console.error("Recent activities error:", err));
 
         api.get("/dashboard/upcoming-events")
             .then(res => {
-                console.log("Upcoming events data:", res.data);
                 setUpcomingEvents(res.data ?? []);
             })
             .catch(err => {
@@ -108,7 +112,7 @@ function RecentActivity({ activities }) {
 }
 
 function UpcomingEvents({ events }) {
-
+    const navigate = useNavigate();
     return (
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 min-h-[300px]">
             <h3 className="text-xl font-bold text-gray-900 mb-6">Upcoming Events</h3>
@@ -118,7 +122,7 @@ function UpcomingEvents({ events }) {
                         <div key={event.id} className="flex items-start space-x-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow duration-200">
                             <img src={`http://localhost:8000${event.image}`} alt={event.title} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
                             <div className="flex-1 min-w-0">
-                                <h4 className="text-sm font-semibold text-gray-900 mb-1">{event.title}</h4>
+                                <h4 onClick={() => navigate(`/event/${event.id}`)} className="cursor-pointer hover:underline transation duration-200 text-sm font-semibold text-gray-900 mb-1">{event.title}</h4>
                                 <p className="text-xs text-gray-600 mb-1">📅 {event.date}</p>
                                 <p className="text-xs text-gray-600 mb-1">⏰ {event.time}</p>
                                 <p className="text-xs text-gray-600">📍 {event.location}</p>

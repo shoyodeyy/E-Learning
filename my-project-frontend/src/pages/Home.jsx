@@ -270,7 +270,6 @@ export default function Home() {
             setLoadingFeatured(true);
 
             const events = await fetchFeaturedEvents();
-            console.log(events)
 
             setFeaturedEvents(events);
             setLoadingFeatured(false);

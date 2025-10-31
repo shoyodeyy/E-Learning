@@ -45,7 +45,7 @@ function EventCard({ event, onDelete }) {
 
             {/* Event Details */}
             <div className="p-3 sm:p-5">
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-base sm:text-lg">{event.title}</h3>
+                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-base sm:text-lg h-[56px]">{event.title}</h3>
                 <p className="text-sm text-gray-600 mb-1 font-medium">{event.date}</p>
                 <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 line-clamp-1">{event.location}</p>
 
@@ -53,7 +53,7 @@ function EventCard({ event, onDelete }) {
                 {event.status !== "pending_delete" ? (
                     <div className="flex items-center space-x-1 sm:space-x-2">
                         <Link
-                            to={`/organizer/update-event/${event.eventId}`}
+                            to={`/organizer/update-event/${event.event_id}`}
                             className="cursor-pointer p-1.5 sm:p-2 text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all duration-200"
                         >
                             <Edit size={14} className="sm:w-4 sm:h-4" />
@@ -65,7 +65,7 @@ function EventCard({ event, onDelete }) {
                             <Trash2 size={14} className="sm:w-4 sm:h-4" />
                         </button>
                         <Link
-                            to={`/organizer/event-detail/${event.eventId}`}
+                            to={`/organizer/event-detail/${event.event_id}`}
                             className="cursor-pointer ml-2 sm:ml-5 flex-1 btn-gradient text-center shadow-sm text-xs sm:text-sm py-1.5 sm:py-2 px-2 sm:px-4 rounded-lg"
                         >
                             <span className="hidden xs:inline">View Details</span>
@@ -75,7 +75,7 @@ function EventCard({ event, onDelete }) {
                 ) : (
                     <div className="flex items-center space-x-1 sm:space-x-2">
                         <Link
-                            to={`/organizer/update-event/${event.eventId}`}
+                            to={`/organizer/update-event/${event.event_id}`}
                             className={`p-1.5 sm:p-2 transition-colors rounded-lg ${
                                 event.status === "pending_delete"
                                     ? "cursor-not-allowed opacity-50 pointer-events-none text-gray-400"
@@ -96,7 +96,7 @@ function EventCard({ event, onDelete }) {
                             <Trash2 size={14} className="sm:w-4 sm:h-4" />
                         </button>
                         <Link
-                            to={`/organizer/event-detail/${event.eventId}`}
+                            to={`/organizer/event-detail/${event.event_id}`}
                             className="cursor-pointer flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors text-center ml-2 sm:ml-0"
                         >
                             <span className="hidden xs:inline">View Details</span>
@@ -211,19 +211,21 @@ export default function ManageEventsLayout() {
     async function fetchEvents(pageNum = 1) {
         setLoading(true);
         try {
-            const res = await axios.get(`${apiUrl}/events`, {
+            const res = await axios.get(`${apiUrl}/organizer/events`, {
                 params: {
                     page: pageNum,
                     search: searchQuery,
                     status: filters.status,
                     category: filters.category,
                 },
+                headers: {
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
             });
-            console.log(res);
-
             setEvents(res.data.data || []);
             setPagination(res.data.meta || {});
         } catch (error) {
+            console.error(error)
             toast.error("Failed to fetch events");
         } finally {
             setLoading(false);
@@ -253,8 +255,8 @@ export default function ManageEventsLayout() {
         }
     }
 
-    const handleDelete = (eventId) => {
-        setSelectedEventId(eventId);
+    const handleDelete = (event_id) => {
+        setSelectedEventId(event_id);
         setConfirmOpen(true);
     };
 
@@ -393,7 +395,7 @@ export default function ManageEventsLayout() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                         {events.map((event) => (
-                            <EventCard key={event.eventId} event={event} onDelete={() => handleDelete(event.eventId)} />
+                            <EventCard key={event.event_id} event={event} onDelete={() => handleDelete(event.event_id)} />
                         ))}
                     </div>
 

@@ -26,7 +26,7 @@ class EventController extends Controller
             });
         }
 
-        // Filter (ví dụ: status, category)
+        // Filter (status, category)
         if ($request->has('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
@@ -39,7 +39,10 @@ class EventController extends Controller
         } elseif ($user && $user->hasRole('organizer')) {
             $events = $query->where('organizerId', $user->user_id)->paginate(6);
         } else {
-            $events = $query->where('status', 'approved')->paginate(6);
+            if (!($request->has('status') && $request->status !== 'all')) {
+                $query->where('status', 'approved');
+            }
+            $events = $query->paginate(6);
         }
 
         return EventResource::collection($events);
@@ -361,10 +364,31 @@ class EventController extends Controller
     {
         $user = auth()->user();
 
-        $events = Event::with(['organizer', 'approvedByAdmin'])
+        $query = Event::with(['organizer', 'approvedByAdmin'])
             ->where('organizerId', $user->user_id)
-            ->orderBy('start_at', 'desc')
-            ->get(['event_id', 'title', 'status', 'organizerId', 'start_at', 'bannerImage']);
+            ->orderBy('start_at', 'desc');
+
+        // optional filters
+        if ($search = $request->query('search')) {
+            $query->where('title', 'like', "%{$search}%");
+        }
+
+        if ($status = $request->query('status') and $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        if ($category = $request->query('category') and $category !== 'all') {
+            $query->where('category', $category);
+        }
+
+        $events = $query->paginate(8, [
+            'event_id',
+            'title',
+            'status',
+            'organizerId',
+            'start_at',
+            'bannerImage'
+        ]);
 
         return response()->json($events);
     }
