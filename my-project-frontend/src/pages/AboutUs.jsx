@@ -135,11 +135,17 @@ const AboutUsPage = () => {
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
-                            <Link to="/event" className="cursor-pointer bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center space-x-2">
+                            <Link
+                                to="/event"
+                                className="cursor-pointer !bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center space-x-2"
+                            >
                                 <span>Join Our Team</span>
                                 <ArrowRight className="w-5 h-5" />
                             </Link>
-                            <Link to="/" className="cursor-pointer bg-transparent border-2 border-white text-white hover:bg-white hover:text-purple-600 px-8 py-4 rounded-xl font-bold transition-all duration-200">
+                            <Link
+                                to="/"
+                                className="cursor-pointer bg-transparent border-2 border-white text-white hover:bg-white hover:text-purple-600 px-8 py-4 rounded-xl font-bold transition-all duration-200"
+                            >
                                 <span>Home</span>
                             </Link>
                         </div>
@@ -331,24 +337,6 @@ const AboutUsPage = () => {
                     </div>
                 </div>
             </div>
-
-            {/* CTA Section */}
-            {/* <div className="bg-gradient-to-r from-purple-600 to-pink-600 py-24">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-4xl font-bold text-white mb-6">Ready to Create Something Amazing Together?</h2>
-                    <p className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
-                        Join thousands of organizations worldwide who trust EventSphere to bring their visions to life
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button className="cursor-pointer bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
-                            Start Your Event
-                        </button>
-                        <button className="cursor-pointer bg-transparent border-2 border-white text-white hover:bg-white hover:text-purple-600 px-8 py-4 rounded-xl font-bold transition-all duration-200">
-                            Contact Us
-                        </button>
-                    </div>
-                </div>
-            </div> */}
         </div>
     );
 };

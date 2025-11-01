@@ -50,6 +50,7 @@ export default function Profile() {
                 {/* Page Header */}
                 <div className="mb-8">
 
+
                     <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
                         {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ""} Profile
                     </h1>
@@ -58,10 +59,10 @@ export default function Profile() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                     {/* Personal Information */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h2 className="text-xl font-bold text-gray-900 mb-6">Personal Information</h2>
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h2>
 
-                        <div className="flex items-start space-x-4 mb-6">
+                        <div className="flex items-start space-x-4 mb-4">
                             <Avatar size={80} />
 
                             <div className="flex-1">
@@ -71,6 +72,7 @@ export default function Profile() {
                                 </div>
                                 <div>
 
+ 9bfaa92813859b92548a93f7ce30d08ac1f6ec49
                                     <label className="block text-sm font-medium text-gray-600 mb-1">
                                         Gender
                                     </label>
@@ -88,8 +90,8 @@ export default function Profile() {
                     </div>
 
                     {/* Contact Details */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h2 className="text-xl font-bold text-gray-900 mb-6">Contact Details</h2>
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">Contact Details</h2>
 
                         <div className="space-y-4">
                             <div>
@@ -127,8 +129,8 @@ export default function Profile() {
 
                     {/* Organizational Details */}
                     {["organizer", "admin"].includes(user?.role) && (
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                            <h2 className="text-xl font-bold text-gray-900 mb-6">Organizational Details</h2>
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                            <h2 className="text-xl font-bold text-gray-900 mb-4">Organizational Details</h2>
 
                             <div className="space-y-4">
                                 <div>
@@ -145,8 +147,8 @@ export default function Profile() {
                     )}
 
                     {/* Actions */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h2 className="text-xl font-bold text-gray-900 mb-6">Actions</h2>
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">Actions</h2>
 
                         <div className="space-y-3">
                             <button

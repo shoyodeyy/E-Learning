@@ -1,20 +1,17 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { apiUrl } from "../services/http.jsx";
-
-import Header from "../components/Header";
 import { addMinutes, format } from "date-fns";
+
+import { apiUrl } from "../services/http.jsx";
+import Header from "../components/Header";
 
 async function fetchFeaturedEvents() {
     try {
         const res = await axios.get(`${apiUrl}/events/quantity/6`);
 
-        const filteredFeaturedEvents = (res.data.data || []).filter(event => [
-                "approved",
-            ].includes(event.status)
-        );
+        const filteredFeaturedEvents = (res.data.data || []).filter((event) => ["approved"].includes(event.status));
 
         return filteredFeaturedEvents || [];
     } catch (error) {
@@ -48,6 +45,7 @@ function RandomBlob({ className, color }) {
 
 // Hero Section Component
 const HeroSection = () => {
+    const navigate = useNavigate();
     return (
         <section className="bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100 py-20 relative overflow-hidden">
             <div className="absolute inset-0 overflow-hidden">
@@ -77,9 +75,8 @@ const HeroSection = () => {
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <button className="btn-gradient-l">Explore Events</button>
-                            <button className="cursor-pointer bg-white/80 backdrop-blur-sm hover:bg-white text-purple-600 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border border-purple-200">
-                                Watch Demo
+                            <button onClick={() => navigate("/event")} className="btn-gradient-l">
+                                Explore Events
                             </button>
                         </div>
                     </div>
@@ -115,6 +112,7 @@ const EventCard = ({ event }) => {
         try {
             return format(new Date(dateString), "MMMM dd, yyyy");
         } catch (error) {
+            console.error(error);
             return dateString; // fallback nếu có lỗi
         }
     };
@@ -126,21 +124,10 @@ const EventCard = ({ event }) => {
             const end = addMinutes(start, duration_minutes); // cộng phút vào
             return `${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
         } catch (error) {
+            console.error(error);
             return start_at;
         }
     };
-
-    // const getStatusColor = (status, seats) => {
-    //     if (seats <= 20) return "bg-gradient-to-r from-red-500 to-pink-500";
-    //     if (seats <= 75) return "bg-gradient-to-r from-yellow-500 to-orange-500";
-    //     return "bg-gradient-to-r from-green-500 to-emerald-500";
-    // };
-    //
-    // const getStatusText = (seats) => {
-    //     if (seats <= 20) return `${seats} Left`;
-    //     if (seats <= 75) return `${seats} Left`;
-    //     return `${seats} Available`;
-    // };
 
     const getAvailabilityColor = (available, total) => {
         const ratio = available / total;
@@ -154,7 +141,7 @@ const EventCard = ({ event }) => {
     };
 
     return (
-        <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 min-h-[450px] flex-col justify-between">
+        <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 min-h-[500px] flex flex-col">
             <div className="relative overflow-hidden">
                 <img
                     src={event.bannerImage ? `http://localhost:8000${event.bannerImage}` : "/placeholder.svg"}
@@ -165,16 +152,15 @@ const EventCard = ({ event }) => {
                 <div className="absolute top-4 right-4">
                     <div
                         className={`px-3 py-1.5 rounded-full text-white text-sm font-semibold shadow-lg ${getAvailabilityColor(
-                            event.availableSlots,
-                            event.totalSlots
+                            124
                         )}`}
                     >
-                        {getAvailabilityText(event.maxParticipants, event.maxParticipants)}
+                        {getAvailabilityText(124, event.maxParticipants)}
                     </div>
                 </div>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 flex-grow flex flex-col">
                 <h3 className="text-xl font-bold text-gray-900 line-clamp-2 group-hover:text-purple-600 transition-colors duration-200">
                     {event.title}
                 </h3>
@@ -190,9 +176,7 @@ const EventCard = ({ event }) => {
                         <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
                             <span className="text-purple-600 text-xs">🕒</span>
                         </div>
-                        <span className="font-medium text-gray-700">
-                            {formatTimeRange(event.start_at, event.duration_minutes)}
-                        </span>
+                        <span className="font-medium text-gray-700">{formatTimeRange(event.start_at, event.duration_minutes)}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                         <div className="w-5 h-5 bg-pink-100 rounded-full flex items-center justify-center">
@@ -202,19 +186,22 @@ const EventCard = ({ event }) => {
                     </div>
                 </div>
 
-                <Link
-                    to={`/event/${event.eventId}`}
-                    onClick={() => window.screenTop(0, 0)}
-                    className="flex justify-center w-full btn-gradient">
-                    View Details
-                </Link>
+                <div className="mt-auto pt-4">
+                    <Link
+                        to={`/event/${event.eventId}`}
+                        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                        className="flex justify-center w-full btn-gradient"
+                    >
+                        View Details
+                    </Link>
+                </div>
             </div>
         </div>
     );
 };
 
 // Featured Events Section Component
-const FeaturedEvents = ({ events }) => {
+const FeaturedEvents = ({ events, loading }) => {
     return (
         <section className="py-20 bg-gradient-to-b from-white to-purple-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -231,14 +218,18 @@ const FeaturedEvents = ({ events }) => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {events.map((event, index) => (
-                        <div key={event.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
-                            <EventCard
-                                key={event.eventId}
-                                event={event} />
+                <div className="min-h-[600px]">
+                    {loading ? (
+                        <LoadingSpinner />
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {events.map((event, index) => (
+                                <div key={event.eventId} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+                                    <EventCard key={event.eventId} event={event} />
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    )}
                 </div>
 
                 <div className="text-center mt-12">
@@ -251,6 +242,19 @@ const FeaturedEvents = ({ events }) => {
     );
 };
 
+const LoadingSpinner = () => {
+    return (
+        <div className="flex items-center justify-center py-20">
+            <div className="relative">
+                <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+                <div
+                    className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-pink-400 rounded-full animate-spin"
+                    style={{ animationDirection: "reverse", animationDuration: "1.5s" }}
+                ></div>
+            </div>
+        </div>
+    );
+};
 
 // Main Dashboard Component
 export default function Home() {
@@ -302,7 +306,7 @@ export default function Home() {
                 {/* Main Content */}
                 <main>
                     <HeroSection />
-                    <FeaturedEvents events={featuredEvents} />
+                    <FeaturedEvents events={featuredEvents} loading={loadingFeatured} />
                 </main>
             </div>
         </div>

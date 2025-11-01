@@ -49,7 +49,7 @@ class User extends Authenticatable
     protected $appends = ['has_password', 'avatar_url'];
 
     /**
-     * Các field ẩn khi trả về JSON.
+     * Các field ẩn khi trả về JSON
      */
     protected $hidden = [
         'password',
@@ -57,8 +57,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Cast các field đặc biệt.
-     * Tên cột 'ban_until' đã khớp với DB.
+     * Cast các field đặc biệt
      */
     protected function casts(): array
     {
@@ -70,7 +69,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Gửi email reset password.
+     * Gửi email reset password
      */
     public function sendPasswordResetNotification($token): void
     {
@@ -78,7 +77,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check nếu là user login qua Google.
+     * Check nếu là user login qua Google
      */
     public function isGoogleUser(): bool
     {
@@ -86,7 +85,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Check nếu user cần verify email.
+     * Check nếu user cần verify email
      */
     public function needsEmailVerification(): bool
     {
@@ -97,15 +96,16 @@ class User extends Authenticatable
     }
 
     /**
-     * Check email đã verify chưa.
+     * Check email đã verify chưa
      */
     public function hasVerifiedEmail(): bool
     {
         return !is_null($this->email_verified_at);
     }
 
+
     /**
-     * Check nếu user bị ban.
+     * Check nếu user bị ban
      */
     public function isBanned(): bool
     {
@@ -121,7 +121,7 @@ class User extends Authenticatable
     }
 
     /**
-     * ✅ Trả về URL đầy đủ cho avatar.
+     * ✅ Trả về URL đầy đủ cho avatar
      */
     public function getAvatarUrlAttribute(): ?string
     {
@@ -132,13 +132,12 @@ class User extends Authenticatable
 
     /**
      * ===============================
-     * 🎯 Các hàm liên quan đến participant
+     * 🎯 Các hàm liên quan đến STUDENT
      * ===============================
      */
 
     /**
-     * Kiểm tra user có phải participant không.
-     * Đã đổi tên hàm từ isparticipant() thành isParticipant().
+     * Kiểm tra user có phải student không
      */
     public function isParticipant(): bool
     {
@@ -146,7 +145,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Các field mà participant có thể edit.
+     * Các field mà student có thể edit
      */
     public function participantEditableFields(): array
     {
@@ -162,8 +161,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Scope: chỉ lấy user có role participant.
-     * Đã đổi tên scope từ scopeparticipants() thành scopeParticipants().
+     * Scope: chỉ lấy user có role student
      */
     public function scopeParticipants($query)
     {
@@ -192,5 +190,17 @@ class User extends Authenticatable
     public function hasRole($role): bool
     {
         return $this->role === $role;
+    }
+
+
+    public function participatedEvents()
+    {
+        return $this->belongsToMany(Event::class, 'event_participants', 'user_id', 'event_id')
+            ->withPivot(['role', 'registration_status', 'registered_at'])
+            ->withTimestamps();
+    }
+    public function isOrganizerPending(): bool
+    {
+        return $this->role === 'organizer' && !$this->is_approved;
     }
 }

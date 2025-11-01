@@ -1,131 +1,25 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search } from "lucide-react";
-import { apiUrl } from "../services/http.jsx";
 import axios from "axios";
 import { format, addMinutes } from "date-fns";
 
+import { apiUrl } from "../services/http.jsx";
 import Header from "../components/Header.jsx";
 
-// Mock data for events
-// const mockEvents = [
-//     {
-//         id: 1,
-//         title: "Global Tech Summit 2024",
-//         date: "October 26, 2024",
-//         location: "Virtual, Online",
-//         totalSlots: 500,
-//         availableSlots: 150,
-//         category: "Technology",
-//         department: "IT",
-//         image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop",
-//     },
-//     {
-//         id: 2,
-//         title: "Digital Marketing Masterclass",
-//         date: "November 10, 2024",
-//         location: "Convention Center, Cityville",
-//         totalSlots: 100,
-//         availableSlots: 30,
-//         category: "Marketing",
-//         department: "Marketing",
-//         image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=400&h=250&fit=crop",
-//     },
-//     {
-//         id: 3,
-//         title: "Future of AI in Healthcare",
-//         date: "September 15, 2024",
-//         location: "Grand Auditorium, Metro City",
-//         totalSlots: 200,
-//         availableSlots: 5,
-//         category: "Healthcare",
-//         department: "Medical",
-//         image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=250&fit=crop",
-//     },
-//     {
-//         id: 4,
-//         title: "Art & Innovation Expo",
-//         date: "December 01, 2024",
-//         location: "Cultural Arts Center, Metropolis",
-//         totalSlots: 300,
-//         availableSlots: 200,
-//         category: "Arts",
-//         department: "Culture",
-//         image: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=250&fit=crop",
-//     },
-//     {
-//         id: 5,
-//         title: "Business Leadership Conference",
-//         date: "January 15, 2025",
-//         location: "Business Center, Downtown",
-//         totalSlots: 250,
-//         availableSlots: 80,
-//         category: "Business",
-//         department: "Management",
-//         image: "https://images.unsplash.com/photo-1511578314322-379afb476865?w=400&h=250&fit=crop",
-//     },
-//     {
-//         id: 6,
-//         title: "Creative Writing Workshop",
-//         date: "February 20, 2025",
-//         location: "Library Hall, University",
-//         totalSlots: 50,
-//         availableSlots: 25,
-//         category: "Education",
-//         department: "Literature",
-//         image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&h=250&fit=crop",
-//     },
-//     {
-//         id: 7,
-//         title: "Startup Pitch Competition",
-//         date: "March 10, 2025",
-//         location: "Innovation Hub, Tech District",
-//         totalSlots: 150,
-//         availableSlots: 75,
-//         category: "Startup",
-//         department: "Entrepreneurship",
-//         image: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=400&h=250&fit=crop",
-//     },
-//     {
-//         id: 8,
-//         title: "Cybersecurity Summit",
-//         date: "April 05, 2025",
-//         location: "Security Center, Capital City",
-//         totalSlots: 300,
-//         availableSlots: 120,
-//         category: "Technology",
-//         department: "Security",
-//         image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&h=250&fit=crop",
-//     },
-// ];
-
 const categories = [
-    'All categories',
-    'Cultural Event',
-    'Technical Fests',
-    'Sports Meets',
-    'Annual Day Functions',
-    'Workshops and Seminars',
-    'Intercollegiate Competitions',
+    "All categories",
+    "Cultural Event",
+    "Technical Fests",
+    "Sports Meets",
+    "Annual Day Functions",
+    "Workshops and Seminars",
+    "Intercollegiate Competitions",
 ];
 
-const departments = [
-    "All Departments",
-    "IT", "Marketing",
-    "Medical",
-    "Culture", "Management",
-    "Literature",
-    "Entrepreneurship",
-    "Security"
-];
+const departments = ["All Departments", "IT", "Marketing", "Medical", "Culture", "Management", "Literature", "Entrepreneurship", "Security"];
 
-const dates = [
-    "All Dates",
-    "This Month",
-    "Next Month",
-    "This Quarter",
-    "Next Quarter"
-];
+const dates = ["All Dates", "This Month", "Next Month", "This Quarter", "Next Quarter"];
 
 // Search and Filter Component
 const SearchAndFilter = ({
@@ -247,7 +141,7 @@ function Pagination({ pagination, setCurrentPage }) {
 
             {/* Display page number */}
             {pagination.links.map((link, index) => {
-                if (link.label === '&laquo; Previous' || link.label === 'Next &raquo;') {
+                if (link.label === "&laquo; Previous" || link.label === "Next &raquo;") {
                     return null;
                 }
 
@@ -255,7 +149,9 @@ function Pagination({ pagination, setCurrentPage }) {
                     <button
                         key={index}
                         onClick={() => handlePageChange(link.label)}
-                        className={`cursor-pointer w-8 h-8 rounded text-sm font-medium ${link.active ? "bg-purple-600 text-white" : "text-gray-600 hover:text-gray-900"}`}
+                        className={`cursor-pointer w-8 h-8 rounded text-sm font-medium ${
+                            link.active ? "bg-purple-600 text-white" : "text-gray-600 hover:text-gray-900"
+                        }`}
                         disabled={link.active}
                     >
                         {link.label}
@@ -281,6 +177,7 @@ const EventCard = ({ event }) => {
         try {
             return format(new Date(dateString), "MMMM dd, yyyy");
         } catch (error) {
+            console.error(error)
             return dateString; // fallback nếu có lỗi
         }
     };
@@ -292,6 +189,7 @@ const EventCard = ({ event }) => {
             const end = addMinutes(start, duration_minutes); // cộng phút vào
             return `${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
         } catch (error) {
+            console.error(error)
             return start_at;
         }
     };
@@ -308,7 +206,7 @@ const EventCard = ({ event }) => {
     };
 
     return (
-        <div className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 min-h-[430px]">
+        <div className="group h-[500px] bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border border-gray-100 min-h-[430px]">
             <div className="relative overflow-hidden">
                 <img
                     src={event.bannerImage ? `http://localhost:8000${event.bannerImage}` : "/placeholder.svg"}
@@ -329,47 +227,34 @@ const EventCard = ({ event }) => {
             </div>
 
             <div className="p-6 space-y-4">
-                <h3 className="text-xl font-bold text-gray-900 line-clamp-2 group-hover:text-purple-600 transition-colors duration-200">
+                <h3 className="text-xl font-bold text-gray-900 line-clamp-2 group-hover:text-purple-600 transition-colors duration-200 h-[56px]">
                     {event.title}
                 </h3>
 
-                <div className="space-y-3 text-sm text-gray-600">
+                <div className="space-y-3 text-sm text-gray-600 h-[104px]">
                     <div className="flex items-center space-x-2">
                         <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
                             <span className="text-purple-600 text-xs">📅</span>
                         </div>
-                        <span className="font-medium text-gray-700">
-                            {formatDate(event.start_at)}
-                        </span>
+                        <span className="font-medium text-gray-700">{formatDate(event.start_at)}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                         <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center">
                             <span className="text-purple-600 text-xs">🕒</span>
                         </div>
-                        <span className="font-medium text-gray-700">
-                            {formatTimeRange(event.start_at, event.duration_minutes)}
-                        </span>
+                        <span className="font-medium text-gray-700">{formatTimeRange(event.start_at, event.duration_minutes)}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                         <div className="w-5 h-5 bg-pink-100 rounded-full flex items-center justify-center">
-                            <span className="text-pink-600 text-xs">
-                                📍
-                            </span>
+                            <span className="text-pink-600 text-xs">📍</span>
                         </div>
-                        <span className="font-medium text-gray-700">
-                            {event.venue}
-                        </span>
+                        <span className="font-medium text-gray-700 line-clamp-2">{event.venue}</span>
                     </div>
                 </div>
 
-                <Link
-                    to={`/event/${event.eventId}`}
-                    onClick={() => window.screenTop(0, 0)}
-                    className="flex justify-center w-full btn-gradient"
-                >
+                <Link to={`/event/${event.eventId}`} onClick={() => window.screenTop(0, 0)} className="flex justify-center w-full btn-gradient">
                     View Details
                 </Link>
-
             </div>
         </div>
     );
@@ -382,7 +267,7 @@ export default function EventsPage() {
     const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
     const [selectedDate, setSelectedDate] = useState("All Dates");
 
-    const [ events, setEvents ] = useState([]);
+    const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [pagination, setPagination] = useState({});
@@ -393,10 +278,7 @@ export default function EventsPage() {
         try {
             const res = await axios.get(`${apiUrl}/events?page=${pageNum}`);
 
-            const filteredEvents = (res.data.data || []).filter(event => [
-                "approved",
-                ].includes(event.status)
-            );
+            const filteredEvents = (res.data.data || []).filter((event) => ["approved"].includes(event.status));
 
             setEvents(filteredEvents);
             setPagination(res.data.meta);
@@ -409,7 +291,7 @@ export default function EventsPage() {
 
     useEffect(() => {
         fetchEvents(currentPage);
-        window.scrollTo({ top: 0, behavior: "smooth"});
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }, [currentPage]);
 
     const handleResetFilters = () => {
@@ -421,10 +303,20 @@ export default function EventsPage() {
 
     // Filter events based on search and filters
     const filteredEvents = events.filter((event) => {
+        const title = event?.title?.toLowerCase() || "";
+        const location = event?.location?.toLowerCase() || "";
+        const search = searchTerm?.toLowerCase() || "";
+
         const matchesSearch =
-            event.title.toLowerCase().includes(searchTerm.toLowerCase()) || event.location.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = selectedCategory === "All Categories" || event.category === selectedCategory;
-        const matchesDepartment = selectedDepartment === "All Departments" || event.department === selectedDepartment;
+            title.includes(search) || location.includes(search);
+
+        const matchesCategory =
+            selectedCategory.toLowerCase().includes("all") ||
+            event.category?.toLowerCase() === selectedCategory?.toLowerCase();
+
+        const matchesDepartment =
+            selectedDepartment.toLowerCase().includes("all") ||
+            event.department?.toLowerCase() === selectedDepartment?.toLowerCase();
 
         return matchesSearch && matchesCategory && matchesDepartment;
     });
@@ -462,44 +354,45 @@ export default function EventsPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {filteredEvents.map((event, index) => (
-                        <div
-                            key={event.id}
-                            className="opacity-0 animate-fade-in"
-                            style={{ animationDelay: `${index * 50}ms`, animationFillMode: "forwards" }}
-                        >
-                            <EventCard event={event} />
+                {loading ? (
+                    <LoadingSpinner />
+                ) : (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                            {filteredEvents.map((event, index) => (
+                                <div
+                                    key={event.eventId}
+                                    className="opacity-0 animate-fade-in"
+                                    style={{ animationDelay: `${index * 50}ms`, animationFillMode: "forwards" }}
+                                >
+                                    <EventCard event={event} />
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
 
-                {filteredEvents.length === 0 && (
-                    <div className="text-center py-20">
-                        <div className="space-y-4">
-                            <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto">
-                                <span className="text-4xl">🔍</span>
+                        {filteredEvents.length === 0 && (
+                            <div className="text-center py-20">
+                                <div className="space-y-4">
+                                    <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto">
+                                        <span className="text-4xl">🔍</span>
+                                    </div>
+                                    <div className="text-gray-500 text-xl font-medium">No events found matching your criteria.</div>
+                                    <button
+                                        onClick={handleResetFilters}
+                                        className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                                    >
+                                        Clear all filters
+                                    </button>
+                                </div>
                             </div>
-                            <div className="text-gray-500 text-xl font-medium">
-                                No events found matching your criteria.
-                            </div>
-                            <button
-                                onClick={handleResetFilters}
-                                className="cursor-pointer bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                            >
-                                Clear all filters
-                            </button>
-                        </div>
-                    </div>
+                        )}
+
+                        {filteredEvents.length > 0 && <Pagination pagination={pagination} setCurrentPage={setCurrentPage} />}
+                    </>
                 )}
-
-                <Pagination
-                    pagination={pagination}
-                    setCurrentPage={setCurrentPage}
-                />
             </main>
 
-            <style jsx>{`
+            <style>{`
                 @keyframes fade-in {
                     from {
                         opacity: 0;
@@ -518,3 +411,17 @@ export default function EventsPage() {
         </div>
     );
 }
+
+const LoadingSpinner = () => {
+    return (
+        <div className="flex items-center justify-center py-20">
+            <div className="relative">
+                <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+                <div
+                    className="absolute inset-0 w-16 h-16 border-4 border-transparent border-r-pink-400 rounded-full animate-spin"
+                    style={{ animationDirection: "reverse", animationDuration: "1.5s" }}
+                ></div>
+            </div>
+        </div>
+    );
+};

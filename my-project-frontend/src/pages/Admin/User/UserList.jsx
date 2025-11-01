@@ -434,7 +434,7 @@ export default function UserList() {
                                     <div className="flex justify-end">
                                         {u.banned_until ? (
                                             <button
-                                                onClick={() => handleUnban(u.id)}
+                                                onClick={() => handleUnban(u.user_id)}
                                                 className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-green-700 hover:text-green-900 hover:bg-green-50 rounded-lg transition-colors duration-200"
                                             >
                                                 <Undo className="w-4 h-4" /> Unban

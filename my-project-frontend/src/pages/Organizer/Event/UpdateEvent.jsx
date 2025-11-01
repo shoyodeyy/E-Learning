@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { apiUrl } from "../../../services/http.jsx";
 import { useAuth } from "../../../context/AuthContext.jsx";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 
 export default function UpdateEventForm() {
     const navigate = useNavigate();
@@ -21,16 +21,18 @@ export default function UpdateEventForm() {
         venue: "",
         maxParticipants: "",
         registrationDeadline: "",
-        bannerImage: null
+        bannerImage: null,
     });
 
+    const [currentBannerUrl, setCurrentBannerUrl] = useState(""); // Lưu URL ảnh hiện tại
+
     const categories = [
-        'Cultural Event',
-        'Technical Fests',
-        'Sports Meets',
-        'Annual Day Functions',
-        'Workshops and Seminars',
-        'Intercollegiate Competitions'
+        "Cultural Event",
+        "Technical Fests",
+        "Sports Meets",
+        "Annual Day Functions",
+        "Workshops and Seminars",
+        "Intercollegiate Competitions",
     ];
 
     const [loading, setLoading] = useState(true);
@@ -41,9 +43,11 @@ export default function UpdateEventForm() {
         const fetchEvent = async () => {
             try {
                 const res = await axios.get(`${apiUrl}/events/${id}`, {
-                    headers: token ? {
-                        Authorization: `Bearer ${token}`
-                    } : {}
+                    headers: token
+                        ? {
+                              Authorization: `Bearer ${token}`,
+                          }
+                        : {},
                 });
 
                 const event = res.data.data;
@@ -52,23 +56,26 @@ export default function UpdateEventForm() {
                     title: event.title || "",
                     category: event.category || "",
                     description: event.description || "",
-                    startAt: event.start_at
-                        ? event.start_at.replace(" ", "T").slice(0, 16)
-                        : "",
+                    startAt: event.start_at ? event.start_at.replace(" ", "T").slice(0, 16) : "",
                     duration_minutes: event.duration_minutes || "",
                     venue: event.venue || "",
                     maxParticipants: event.maxParticipants || "",
-                    registrationDeadline: event.registrationDeadline
-                        ? event.registrationDeadline.replace(" ", "T").slice(0, 16)
-                        : "",
-                    bannerImage: event.bannerImage || null
+                    registrationDeadline: event.registrationDeadline ? event.registrationDeadline.replace(" ", "T").slice(0, 16) : "",
+                    bannerImage: null, // Không set file cũ, chỉ để hiển thị
                 });
+
+                // Set URL ảnh hiện tại để hiển thị
+                if (event.bannerImage) {
+                    // Nếu bannerImage đã có http thì dùng luôn, không thì thêm domain
+                    const imageUrl = event.bannerImage.startsWith("http") ? event.bannerImage : `http://localhost:8000/${event.bannerImage}`;
+                    setCurrentBannerUrl(imageUrl);
+                }
             } catch (error) {
                 console.log("Failed to fetch event: ", error);
             } finally {
                 setLoading(false);
             }
-        }
+        };
 
         fetchEvent();
     }, [id, token]);
@@ -76,7 +83,7 @@ export default function UpdateEventForm() {
     const handleInputChange = (field, value) => {
         setFormData((prev) => ({
             ...prev,
-            [field]: value
+            [field]: value,
         }));
     };
 
@@ -104,8 +111,22 @@ export default function UpdateEventForm() {
         if (files.length > 0) {
             setFormData((prev) => ({
                 ...prev,
-                bannerImage: files[0]
+                bannerImage: files[0],
             }));
+        }
+    };
+
+    // Helper function để lấy URL hiển thị ảnh
+    const getImageDisplayUrl = () => {
+        if (formData.bannerImage instanceof File) {
+            // Ảnh mới được chọn
+            return URL.createObjectURL(formData.bannerImage);
+        } else if (currentBannerUrl) {
+            // Ảnh cũ từ database
+            return currentBannerUrl;
+        } else {
+            // Ảnh mặc định
+            return "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=300&fit=crop";
         }
     };
 
@@ -116,56 +137,56 @@ export default function UpdateEventForm() {
 
         // Title
         if (!formData.title.trim()) {
-            newErrors.title = 'Title is required.';
+            newErrors.title = "Title is required.";
             isValid = false;
         }
 
         // StartAt
         if (!formData.startAt) {
-            newErrors.startAt = 'Event date and time is required.';
+            newErrors.startAt = "Event date and time is required.";
             isValid = false;
         } else {
             const startAtDate = new Date(formData.startAt);
 
             if (startAtDate <= new Date()) {
-                newErrors.startAt = 'Event date and time must be in the future.';
+                newErrors.startAt = "Event date and time must be in the future.";
                 isValid = false;
             }
         }
 
         // Duration
         if (!formData.duration_minutes) {
-            newErrors.duration_minutes = 'Duration is required.';
+            newErrors.duration_minutes = "Duration is required.";
             isValid = false;
         } else if (formData.duration_minutes <= 0) {
-            newErrors.duration_minutes = 'Duration must be greater than 0.';
+            newErrors.duration_minutes = "Duration must be greater than 0.";
             isValid = false;
         } else if (formData.duration_minutes > 1440) {
-            newErrors.duration_minutes = 'Duration cannot exceed 1440 minutes (24 hours).';
+            newErrors.duration_minutes = "Duration cannot exceed 1440 minutes (24 hours).";
             isValid = false;
         }
 
         // Venue
         if (!formData.venue.trim()) {
-            newErrors.venue = 'Venue is required.';
+            newErrors.venue = "Venue is required.";
             isValid = false;
         }
 
         // Max Participants
         if (!formData.maxParticipants) {
-            newErrors.maxParticipants = 'Max participants is required.';
+            newErrors.maxParticipants = "Max participants is required.";
             isValid = false;
         } else if (formData.maxParticipants <= 0) {
-            newErrors.maxParticipants = 'Max participants must be greater than 0.';
+            newErrors.maxParticipants = "Max participants must be greater than 0.";
             isValid = false;
         } else if (formData.maxParticipants > 100000) {
-            newErrors.maxParticipants = 'Max participants cannot exceed 100000.';
+            newErrors.maxParticipants = "Max participants cannot exceed 100000.";
             isValid = false;
         }
 
         // Registration Deadline
         if (!formData.registrationDeadline) {
-            newErrors.registrationDeadline = 'Registration deadline is required.';
+            newErrors.registrationDeadline = "Registration deadline is required.";
             isValid = false;
         } else {
             const regDeadline = new Date(formData.registrationDeadline);
@@ -173,29 +194,14 @@ export default function UpdateEventForm() {
             const startAtDate = formData.startAt ? new Date(formData.startAt) : null;
 
             if (regDeadline <= now) {
-                newErrors.registrationDeadline = 'Registration deadline must be in the future.';
+                newErrors.registrationDeadline = "Registration deadline must be in the future.";
                 isValid = false;
             }
             if (startAtDate && regDeadline >= startAtDate) {
-                newErrors.registrationDeadline = 'Registration deadline must be before the event date and time.';
+                newErrors.registrationDeadline = "Registration deadline must be before the event date and time.";
                 isValid = false;
             }
         }
-
-        // Banner Image
-        // if (!formData.bannerImage) {
-        //     newErrors.bannerImage = 'Banner image is required.';
-        //     isValid = false;
-        // } else {
-        //     const allowedExtensions = ['jpeg', 'png', 'jpg', 'gif', 'svg'];
-        //     const fileName = formData.bannerImage.name || '';
-        //     const fileExt = fileName.split('.').pop().toLowerCase();
-        //
-        //     if (!allowedExtensions.includes(fileExt)) {
-        //         newErrors.bannerImage = 'Banner image must be a jpeg, jpg, png, gif, or svg file.';
-        //         isValid = false;
-        //     }
-        // }
 
         setErrors(newErrors);
         return isValid;
@@ -211,8 +217,7 @@ export default function UpdateEventForm() {
         }
 
         const startAtFormatted = formData.startAt.replace("T", " ") + ":00";
-        const registrationDeadlineFormatted =
-            formData.registrationDeadline.replace("T", " ") + ":00";
+        const registrationDeadlineFormatted = formData.registrationDeadline.replace("T", " ") + ":00";
 
         const data = new FormData();
         data.append("title", formData.title);
@@ -233,10 +238,12 @@ export default function UpdateEventForm() {
             await axios.post(`${apiUrl}/events/${id}?_method=PUT`, data, {
                 headers: {
                     "Content-Type": "multipart/form-data",
-                    ...(token ? {
-                        Authorization: `Bearer ${token}`
-                    } : {})
-                }
+                    ...(token
+                        ? {
+                              Authorization: `Bearer ${token}`,
+                          }
+                        : {}),
+                },
             });
 
             toast.success("Event updated successfully!");
@@ -263,9 +270,7 @@ export default function UpdateEventForm() {
                 </div>
                 {/* Form Content */}
                 <div className="p-4">
-                    <form
-                        onSubmit={handleSubmit}
-                        className="bg-white rounded-lg border border-gray-200 p-6">
+                    <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6">
                         <div className="space-y-6">
                             <div>
                                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Event Information</h3>
@@ -276,9 +281,7 @@ export default function UpdateEventForm() {
 
                             {/* Banner Image */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Banner Image
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Banner Image</label>
                                 <div
                                     className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                                         dragActive ? "border-purple-400 bg-purple-50" : "border-gray-300 bg-gray-50"
@@ -287,104 +290,66 @@ export default function UpdateEventForm() {
                                     onDragLeave={handleDragLeave}
                                     onDrop={handleDrop}
                                 >
-                                    {formData.bannerImage ? (
-                                        <div className="space-y-2">
-                                            <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-                                                <img
-                                                    src={
-                                                        formData.bannerImage instanceof File
-                                                            ? URL.createObjectURL(formData.bannerImage)
-                                                            : formData.bannerImage
-                                                    }
-                                                    alt="Event banner"
-                                                    className="w-full h-full object-cover rounded-lg"
-                                                />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-2">Drag 'n' drop a file here, or click to select</p>
-                                                <p className="text-xs text-gray-500">Max file size: 5MB</p>
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleFileSelect}
-                                                    className="hidden"
-                                                    id="file-upload"
-                                                />
-                                                <label
-                                                    htmlFor="file-upload"
-                                                    className="inline-block mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
-                                                >
-                                                    Change Image
-                                                </label>
-                                            </div>
+                                    <div className="space-y-2">
+                                        <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                                            <img
+                                                src={getImageDisplayUrl()}
+                                                alt="Event banner"
+                                                className="w-full h-full object-cover rounded-lg"
+                                                onError={(e) => {
+                                                    // Fallback nếu ảnh không load được
+                                                    e.target.src =
+                                                        "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=300&fit=crop";
+                                                }}
+                                            />
                                         </div>
-                                    ) : (
-                                        <div className="space-y-4">
-                                            <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-                                                <img
-                                                    src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=300&fit=crop"
-                                                    alt="Current event banner"
-                                                    className="w-full h-full object-cover rounded-lg"
-                                                />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-600 mb-2">Drag 'n' drop a file here, or click to select</p>
-                                                <p className="text-xs text-gray-500">Max file size: 5MB</p>
-                                                <input type="file" accept="image/*" onChange={handleFileSelect} className="hidden" id="file-upload" />
-                                                <label
-                                                    htmlFor="file-upload"
-                                                    className="inline-block mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
-                                                >
-                                                    Choose File
-                                                </label>
-                                            </div>
+                                        <div>
+                                            <p className="text-sm text-gray-600 mb-2">
+                                                {formData.bannerImage instanceof File
+                                                    ? "New image selected"
+                                                    : "Current image (drag 'n' drop or click to change)"}
+                                            </p>
+                                            <p className="text-xs text-gray-500">Max file size: 2MB</p>
+                                            <input type="file" accept="image/*" onChange={handleFileSelect} className="hidden" id="file-upload" />
+                                            <label
+                                                htmlFor="file-upload"
+                                                className="inline-block mt-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors"
+                                            >
+                                                {formData.bannerImage instanceof File ? "Change Image" : "Upload New Image"}
+                                            </label>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Title */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Title
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
                                 <input
                                     type="text"
                                     value={formData.title}
                                     onChange={(e) => handleInputChange("title", e.target.value)}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
                                 />
-                                {errors.title && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                        {errors.title}
-                                    </p>
-                                )}
+                                {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
                             </div>
 
                             {/* Description */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Description
-                                </label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                                 <textarea
                                     value={formData.description}
                                     onChange={(e) => handleInputChange("description", e.target.value)}
                                     rows={4}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
                                 />
-                                {errors.description && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                        {errors.description}
-                                    </p>
-                                )}
+                                {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
                             </div>
 
                             {/* Category and Event Date and Time */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Category
-                                    </label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                                     <div className="relative">
                                         <select
                                             value={formData.category}
@@ -397,19 +362,13 @@ export default function UpdateEventForm() {
                                                 </option>
                                             ))}
                                         </select>
-                                        {errors.category && (
-                                            <p className="text-red-500 text-xs mt-1">
-                                                {errors.category}
-                                            </p>
-                                        )}
+                                        {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category}</p>}
                                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label
-                                        htmlFor="startAt"
-                                        className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label htmlFor="startAt" className="block text-sm font-medium text-gray-700 mb-2">
                                         Event Date and Time
                                     </label>
                                     <div className="relative">
@@ -418,25 +377,17 @@ export default function UpdateEventForm() {
                                             id="startAt"
                                             name="startAt"
                                             value={formData.startAt}
-                                            onChange={(e) =>
-                                                handleInputChange("startAt", e.target.value)
-                                            }
+                                            onChange={(e) => handleInputChange("startAt", e.target.value)}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
                                         />
                                     </div>
-                                    {errors.startAt && (
-                                        <p className="text-red-500 text-xs mt-1">
-                                            {errors.startAt}
-                                        </p>
-                                    )}
+                                    {errors.startAt && <p className="text-red-500 text-xs mt-1">{errors.startAt}</p>}
                                 </div>
                             </div>
 
                             {/* Duration (minutes) */}
                             <div>
-                                <label
-                                    htmlFor="duration_minutes"
-                                    className="block text-sm font-medium text-gray-700 mb-2">
+                                <label htmlFor="duration_minutes" className="block text-sm font-medium text-gray-700 mb-2">
                                     Duration (minutes)
                                 </label>
                                 <input
@@ -446,16 +397,10 @@ export default function UpdateEventForm() {
                                     min="1"
                                     max="1440"
                                     value={formData.duration_minutes}
-                                    onChange={(e) =>
-                                        handleInputChange("duration_minutes", e.target.value)
-                                    }
+                                    onChange={(e) => handleInputChange("duration_minutes", e.target.value)}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
                                 />
-                                {errors.duration_minutes && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                        {errors.duration_minutes}
-                                    </p>
-                                )}
+                                {errors.duration_minutes && <p className="text-red-500 text-xs mt-1">{errors.duration_minutes}</p>}
                             </div>
 
                             {/* Venue */}
@@ -467,11 +412,7 @@ export default function UpdateEventForm() {
                                     onChange={(e) => handleInputChange("venue", e.target.value)}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
                                 />
-                                {errors.venue && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                        {errors.venue}
-                                    </p>
-                                )}
+                                {errors.venue && <p className="text-red-500 text-xs mt-1">{errors.venue}</p>}
                             </div>
 
                             {/* Max Participants and Registration Deadline */}
@@ -484,11 +425,7 @@ export default function UpdateEventForm() {
                                         onChange={(e) => handleInputChange("maxParticipants", e.target.value)}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
                                     />
-                                    {errors.maxParticipants && (
-                                        <p className="text-red-500 text-xs mt-1">
-                                            {errors.maxParticipants}
-                                        </p>
-                                    )}
+                                    {errors.maxParticipants && <p className="text-red-500 text-xs mt-1">{errors.maxParticipants}</p>}
                                 </div>
 
                                 <div>
@@ -500,11 +437,7 @@ export default function UpdateEventForm() {
                                             onChange={(e) => handleInputChange("registrationDeadline", e.target.value)}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
                                         />
-                                        {errors.registrationDeadline && (
-                                            <p className="text-red-500 text-xs mt-1">
-                                                {errors.registrationDeadline}
-                                            </p>
-                                        )}
+                                        {errors.registrationDeadline && <p className="text-red-500 text-xs mt-1">{errors.registrationDeadline}</p>}
                                     </div>
                                 </div>
                             </div>

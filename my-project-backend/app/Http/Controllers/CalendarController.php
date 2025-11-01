@@ -12,33 +12,23 @@ class CalendarController extends Controller
     public function getCalendarLinks($id)
     {
         $event = Event::findOrFail($id);
-        $startLocal = $event->start_at instanceof Carbon
-            ? (clone $event->start_at)
-            : Carbon::parse($event->start_at);
-        $endAttr = $event->getAttribute('end_at');
-        if ($endAttr instanceof Carbon) {
-            $endLocal = (clone $endAttr);
-        } else {
-            $duration = (int)($event->duration_minutes ?? 60);
-            $endLocal = (clone $startLocal)->addMinutes(max($duration, 1));
-        }
-
-        $startLocalStr = (clone $startLocal)->format('Ymd\THis');
-        $endLocalStr = (clone $endLocal)->format('Ymd\THis');
-
+        
+        $eventTz = $event->timezone ?? 'Asia/Ho_Chi_Minh';
+        $start = Carbon::parse($event->start_at)->setTimezone($eventTz);
+        $end = $start->copy()->addMinutes($event->duration_minutes ?? 60);
+        
+        $googleStart = $start->utc()->format('Ymd\THis\Z');
+        $googleEnd = $end->utc()->format('Ymd\THis\Z');
+        
         $description = $event->description ? strip_tags($event->description) : '';
-
-        $rawTitle = $event->title ?: ("event-" . $event->event_id);
-        $safeTitle = preg_replace('/[\x00-\x1F\x7F<>:\"\\\\\/\|\?\*]+/u', '_', $rawTitle);
-        $filename = trim($safeTitle) !== '' ? ($safeTitle . '.ics') : ("event-{$event->event_id}.ics");
-
+        $filename = preg_replace('/[^\w\-.]/', '_', $event->title) . '.ics';
+        
         $googleUrl = "https://calendar.google.com/calendar/render?action=TEMPLATE"
             . "&text=" . urlencode($event->title)
-            . "&dates={$startLocalStr}/{$endLocalStr}"
+            . "&dates={$googleStart}/{$googleEnd}"
             . "&details=" . urlencode($description)
-            . "&location=" . urlencode($event->venue ?? '')
-            . "&sf=true&output=xml";
-
+            . "&location=" . urlencode($event->venue ?? '');
+        
         return response()->json([
             "google_url" => $googleUrl,
             "ics_url" => url("/api/events/{$event->event_id}/calendar/ics"),
@@ -50,43 +40,29 @@ class CalendarController extends Controller
     public function downloadICS($id)
     {
         $event = Event::findOrFail($id);
-
-        $startLocal = $event->start_at instanceof Carbon
-            ? (clone $event->start_at)
-            : Carbon::parse($event->start_at);
-        $endAttr = $event->getAttribute('end_at');
-        if ($endAttr instanceof Carbon) {
-            $endLocal = (clone $endAttr);
-        } else {
-            $duration = (int)($event->duration_minutes ?? 60);
-            $endLocal = (clone $startLocal)->addMinutes(max($duration, 1));
-        }
-
-        $dtstartLocal = (clone $startLocal)->format('Ymd\THis');
-        $dtendLocal = (clone $endLocal)->format('Ymd\THis');
-
+        
+        $eventTz = $event->timezone ?? 'Asia/Ho_Chi_Minh';
+        $start = Carbon::parse($event->start_at)->setTimezone($eventTz);
+        $end = $start->copy()->addMinutes($event->duration_minutes ?? 60);
+        
         $description = $event->description ? strip_tags($event->description) : '';
-
-        $ics = "BEGIN:VCALENDAR\r\n";
-        $ics .= "VERSION:2.0\r\n";
-        $ics .= "PRODID:-//EventSphere//Calendar//EN\r\n";
-        $ics .= "CALSCALE:GREGORIAN\r\n";
-        $ics .= "METHOD:PUBLISH\r\n";
-        $ics .= "BEGIN:VEVENT\r\n";
-        $ics .= "UID:event-" . $event->event_id . "@eventsphere.com\r\n";
-        $ics .= "DTSTAMP:" . gmdate('Ymd\THis\Z') . "\r\n";
-        $ics .= "DTSTART:$dtstartLocal\r\n";
-        $ics .= "DTEND:$dtendLocal\r\n";
-        $ics .= "SUMMARY:" . addslashes($event->title) . "\r\n";
-        $ics .= "DESCRIPTION:" . addslashes($description) . "\r\n";
-        $ics .= "LOCATION:" . addslashes($event->venue ?? '') . "\r\n";
-        $ics .= "END:VEVENT\r\nEND:VCALENDAR\r\n";
-
-        // Use same safe filename logic here as well
-        $rawTitle = $event->title ?: ("event-" . $event->event_id);
-        $safeTitle = preg_replace('/[\x00-\x1F\x7F<>:\"\\\\\/\|\?\*]+/u', '_', $rawTitle);
-        $filename = trim($safeTitle) !== '' ? ($safeTitle . '.ics') : ("event-{$event->event_id}.ics");
-
+        
+        $ics = "BEGIN:VCALENDAR\r\n"
+            . "VERSION:2.0\r\n"
+            . "PRODID:-//EventSphere//Calendar//EN\r\n"
+            . "BEGIN:VEVENT\r\n"
+            . "UID:event-{$event->event_id}@eventsphere.com\r\n"
+            . "DTSTAMP:" . gmdate('Ymd\THis\Z') . "\r\n"
+            . "DTSTART;TZID={$eventTz}:" . $start->format('Ymd\THis') . "\r\n"
+            . "DTEND;TZID={$eventTz}:" . $end->format('Ymd\THis') . "\r\n"
+            . "SUMMARY:" . addslashes($event->title) . "\r\n"
+            . "DESCRIPTION:" . addslashes($description) . "\r\n"
+            . "LOCATION:" . addslashes($event->venue ?? '') . "\r\n"
+            . "END:VEVENT\r\n"
+            . "END:VCALENDAR\r\n";
+        
+        $filename = preg_replace('/[^\w\-.]/', '_', $event->title) . '.ics';
+        
         return response($ics)
             ->header('Content-Type', 'text/calendar; charset=utf-8')
             ->header('Content-Disposition', "attachment; filename=\"{$filename}\"");
