@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\EventApproval;
+use App\Models\Notification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -81,6 +82,15 @@ class EventApprovalController extends Controller
                 'approved_at' => now()
             ]);
 
+            // Tạo thông báo cho organizer
+            Notification::create([
+                'user_id' => $event->organizerId,
+                'event_id' => $event->event_id,
+                'type' => 'event_approved',
+                'message' => "Your event '{$event->title}' has been approved!",
+                'is_read' => false
+            ]);
+
             DB::commit();
 
             return response()->json([
@@ -135,6 +145,15 @@ class EventApprovalController extends Controller
                 'approval_type' => $approvalType,
                 'notes' => $request->input('notes'),
                 'approved_at' => now()
+            ]);
+
+            // Tạo thông báo cho organizer
+            Notification::create([
+                'user_id' => $event->organizerId,
+                'event_id' => $event->event_id,
+                'type' => 'event_rejected',
+                'message' => "Your event '{$event->title}' has been rejected. Reason: {$request->input('notes')}",
+                'is_read' => false
             ]);
 
             DB::commit();

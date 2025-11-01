@@ -119,6 +119,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/saved-media', [UserSavedMediaController::class, 'list']);
     Route::post('/saved-media', [UserSavedMediaController::class, 'save']);
     Route::delete('/saved-media/{mediaId}', [UserSavedMediaController::class, 'unsave']);
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
 });
 
 // ===================== DASHBOARD ROUTES =====================
