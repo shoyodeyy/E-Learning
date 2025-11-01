@@ -68,7 +68,11 @@ class UserController extends Controller
             'status' => "banned"
         ]);
 
-        Mail::to($user->email)->send(new UserBannedMail($user, $request->reason));
+        try {
+            Mail::to($user->email)->send(new UserBannedMail($user, $request->reason));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send ban email: ' . $e->getMessage());
+        }
 
         return response()->json(['message' => 'User banned successfully.']);
     }
