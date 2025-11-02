@@ -3,6 +3,7 @@
     import { Link, useNavigate } from "react-router-dom";
     import { apiUrl } from "../../../services/http.jsx";
     import axios from "axios";
+    import { getImageUrl } from "../../../api/axios.js";
     import { useAuth } from "../../../context/AuthContext.jsx";
 
     // Event Card Component
@@ -11,7 +12,7 @@
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-200">
                 {/* Event Image */}
                 <div className="relative">
-                    <img src={`http://localhost:8000${event.bannerImage}`} alt={event.title} className="w-full h-48 object-cover" />
+                    <img src={getImageUrl(event.bannerImage)} alt={event.title} className="w-full h-48 object-cover" />
                     <div className="absolute top-3 left-3">
                         <span className={`px-2 py-1 text-xs font-medium text-white rounded ${event.statusColor}`}>{event.status}</span>
                     </div>

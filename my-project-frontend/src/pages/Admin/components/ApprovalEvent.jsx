@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useParams } from "react-router-dom";
-import api from "../../../api/axios.js";
+import api, { getImageUrl } from "../../../api/axios.js";
 
 const ApprovalEvent = () => {
     const [events, setEvents] = useState([]);
@@ -82,13 +82,11 @@ const ApprovalEvent = () => {
                                 className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition flex flex-col"
                             >
                                 {/* Banner Image */}
-                                {event.bannerImage && (
-                                    <img
-                                        src={event.bannerImage}
-                                        alt={event.title}
-                                        className="w-full h-40 object-cover"
-                                    />
-                                )}
+                                <img
+                                    src={getImageUrl(event.bannerImage)}
+                                    alt={event.title}
+                                    className="w-full h-40 object-cover"
+                                />
 
                                 <div className="p-4 flex-1 flex flex-col">
                                     <h3 className="text-lg font-semibold text-gray-900">{event.title}</h3>

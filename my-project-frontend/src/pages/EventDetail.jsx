@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { formatInTimeZone } from "date-fns-tz";
 
 import { apiUrl } from "../services/http.jsx";
+import { getImageUrl } from "../api/axios.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import Header from "../components/Header";
 import CalendarIntegration from "../components/CalendarIntegration";
@@ -609,7 +610,7 @@ const EventDetailPage = () => {
                 <div className="relative">
                     <div className="h-96 overflow-hidden">
                         <img
-                            src={events.bannerImage ? `http://localhost:8000${events.bannerImage}` : "/placeholder.svg"}
+                            src={getImageUrl(events.bannerImage)}
                             alt={events.title}
                             className="w-full h-full object-cover"
                         />
