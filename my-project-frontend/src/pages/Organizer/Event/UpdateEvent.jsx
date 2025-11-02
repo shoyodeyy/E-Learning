@@ -56,11 +56,11 @@ export default function UpdateEventForm() {
                     title: event.title || "",
                     category: event.category || "",
                     description: event.description || "",
-                    startAt: event.start_at ? event.start_at.replace(" ", "T").slice(0, 16) : "",
+                    startAt: event.start_at,
                     duration_minutes: event.duration_minutes || "",
                     venue: event.venue || "",
                     maxParticipants: event.maxParticipants || "",
-                    registrationDeadline: event.registrationDeadline ? event.registrationDeadline.replace(" ", "T").slice(0, 16) : "",
+                    registrationDeadline: event.registrationDeadline,
                     bannerImage: null, // Không set file cũ, chỉ để hiển thị
                 });
 
@@ -261,6 +261,19 @@ export default function UpdateEventForm() {
         }
     };
 
+    function formatDateTimeLocal(dateString) {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 flex">
             {/* Main Content */}
@@ -376,7 +389,7 @@ export default function UpdateEventForm() {
                                             type="datetime-local"
                                             id="startAt"
                                             name="startAt"
-                                            value={formData.startAt}
+                                            value={formatDateTimeLocal(formData.startAt)}
                                             onChange={(e) => handleInputChange("startAt", e.target.value)}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
                                         />
@@ -433,7 +446,7 @@ export default function UpdateEventForm() {
                                     <div className="relative">
                                         <input
                                             type="datetime-local"
-                                            value={formData.registrationDeadline}
+                                            value={formatDateTimeLocal(formData.registrationDeadline)}
                                             onChange={(e) => handleInputChange("registrationDeadline", e.target.value)}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50"
                                         />
