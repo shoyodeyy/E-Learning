@@ -278,7 +278,7 @@ export default function EventsPage() {
         try {
             const res = await axios.get(`${apiUrl}/events?page=${pageNum}`);
 
-            const filteredEvents = (res.data.data || []).filter((event) => ["approved"].includes(event.status));
+            const filteredEvents = (res.data.data || []).filter((event) => ["approved", "completed"].includes(event.status));
 
             setEvents(filteredEvents);
             setPagination(res.data.meta);
@@ -387,7 +387,7 @@ export default function EventsPage() {
                             </div>
                         )}
 
-                        {filteredEvents.length > 0 && <Pagination pagination={pagination} setCurrentPage={setCurrentPage} />}
+                        {filteredEvents.length > 5 && <Pagination pagination={pagination} setCurrentPage={setCurrentPage} />}
                     </>
                 )}
             </main>

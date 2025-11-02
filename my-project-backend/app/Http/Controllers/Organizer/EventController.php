@@ -40,9 +40,6 @@ class EventController extends Controller
         } elseif ($user && $user->hasRole('organizer')) {
             $events = $query->where('organizerId', $user->user_id)->paginate(6);
         } else {
-            if (!($request->has('status') && $request->status !== 'all')) {
-                $query->where('status', 'approved');
-            }
             $events = $query->paginate(6);
         }
 
@@ -59,6 +56,13 @@ class EventController extends Controller
             return response()->json([
                 'message' => 'Event not found'
             ], 404);
+        }
+
+        $now = now();
+
+        if ($event->end_at && $event->end_at < $now && $event->status !== 'completed') {
+            $event->status = 'completed';
+            $event->save(); // Lưu lại thay đổi
         }
 
         // If user is authenticated

@@ -9,11 +9,10 @@ use App\Models\Registration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use App\Http\Controllers\Controller;
 
 class FeedbackController extends Controller
 {
-    public function index(Request $request, $eventId)
+    public function index($eventId)
     {
         $user = Auth::user();
         $event = Event::findOrFail($eventId);

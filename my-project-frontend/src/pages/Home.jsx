@@ -11,7 +11,7 @@ async function fetchFeaturedEvents() {
     try {
         const res = await axios.get(`${apiUrl}/events/quantity/6`);
 
-        const filteredFeaturedEvents = (res.data.data || []).filter((event) => ["approved"].includes(event.status));
+        const filteredFeaturedEvents = (res.data.data || []).filter((event) => ["approved", "completed"].includes(event.status));
 
         return filteredFeaturedEvents || [];
     } catch (error) {
@@ -277,6 +277,8 @@ export default function Home() {
 
         getEvents();
     }, []);
+
+    console.log(featuredEvents);
 
     return (
         <div className="min-h-screen bg-gray-50">

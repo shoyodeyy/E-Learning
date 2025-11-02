@@ -17,6 +17,7 @@ class Notification extends Model
         "type",
         "is_read",
         "created_at",
+        "updated_at",
     ];
 
     protected $casts = [

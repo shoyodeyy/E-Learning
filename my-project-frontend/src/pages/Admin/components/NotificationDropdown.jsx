@@ -119,7 +119,7 @@ export default function NotificationDropdown() {
                         setShowOnLogin(false);
                     }
                 }}
-                className="relative p-2 rounded-lg hover:bg-gray-100 transition"
+                className="relative p-2 rounded-lg hover:bg-gray-100 transition cursor-pointer"
             >
                 <Bell className="w-6 h-6 text-gray-700" />
                 {unreadCount > 0 && (

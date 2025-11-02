@@ -18,7 +18,13 @@ function EventCard({ event, onDelete }) {
                 />
                 <div className="absolute top-3 left-3">
                     <span
-                        className={`px-2 py-1 text-xs font-medium text-white rounded ${event.statusColor}`}
+                        className={`px-2 py-1 text-xs font-medium text-white rounded ${
+                            event.status.includes("pending")
+                                ? "bg-yellow-400"
+                                : event.status === "approved" || event.status === "completed"
+                                    ? "bg-green-400"
+                                    : "bg-red-400"
+                        }`}
                     >
                         {event.status}
                     </span>
@@ -44,7 +50,7 @@ function EventCard({ event, onDelete }) {
                 <div className="flex items-center space-x-2">
                     <button
                         onClick={onDelete}
-                        className="cursor-pointer p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                        className="cursor-pointer text-red-500 p-2 hover:text-red-600 transition-colors"
                     >
                         <Trash2 size={16} />
                     </button>
