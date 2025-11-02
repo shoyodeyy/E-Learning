@@ -3,6 +3,7 @@ import { ChevronDown, Users } from "lucide-react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { apiUrl } from "../../../services/http.jsx";
+import { getImageUrl } from "../../../api/axios.js";
 import { useAuth } from "../../../context/AuthContext.jsx";
 
 export default function DetailEvent() {
@@ -60,7 +61,7 @@ export default function DetailEvent() {
                             <label className="block text-sm font-medium text-gray-700 mb-2">Banner Image</label>
                             <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
                                 <img
-                                    src={`http://localhost:8000${event.bannerImage}`}
+                                    src={getImageUrl(event.bannerImage)}
                                     alt="Event banner"
                                     className="w-full h-full object-cover rounded-lg"
                                 />
