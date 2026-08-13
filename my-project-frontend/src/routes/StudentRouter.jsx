@@ -1,27 +1,30 @@
-import {Route, Routes, Navigate} from "react-router-dom";
+import { Route } from "react-router-dom";
 
-import Login from "../pages/Login.jsx";
-import Register from "../pages/Register.jsx";
-import Dashboard from "../pages/Dashboard.jsx";
-import PrivateRoute from "./PrivateRoute.jsx";
-import ForgotPassword from "../pages/ForgotPassword.jsx";
-import ResetPassword from "../pages/ResetPassword.jsx";
+import ProtectedRoute from "./ProtectedRoute.jsx";
+import Dashboard from "../pages/Student/Dashboard.jsx";
+import MyRegistrations from "../pages/Student/MyRegistrations.jsx";
+import Profile from "../pages/Student/Profile.jsx";
+import UserLayout from "../pages/Student/UserLayout.jsx";
+import EditProfile from "../pages/Student/EditProfile.jsx";
+import SeatLayout from "../pages/Organizer/Event/SeatLayout.jsx";
+import ChangePassword from "../pages/ChangePassword.jsx";
+import Gallery from "../pages/Gallery.jsx";
 
 export default function StudentRouter() {
     return (
-        <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
+        <>
+            <Route element={<ProtectedRoute />}>
+                <Route path="/user" element={<UserLayout />}>
+                    <Route path="profile" element={<Profile />} />
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="registration" element={<MyRegistrations />} />
 
-            {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/user/forgot-password" element={<ForgotPassword />} />
-            <Route path="/user/reset-password" element={<ResetPassword />} />
-
-            {/* Private routes */}
-            <Route element={<PrivateRoute />}>
-                <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="edit-profile" element={<EditProfile />} />
+                    <Route path="change-password" element={<ChangePassword />} />
+                </Route>
+                <Route path="/media-gallery" element={<Gallery />} />
+                <Route path="/event/:id/seat" element={<SeatLayout />} />
             </Route>
-        </Routes>
-    )
+        </>
+    );
 }

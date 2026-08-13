@@ -1,34 +1,60 @@
-import { useState } from "react"
-import { toast } from "react-toastify"
-import { useNavigate } from "react-router-dom"
-import {GoogleLogin} from "@react-oauth/google";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"
+import { useState, useRef } from "react";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
-import { apiUrl } from "../services/http"
+import { apiUrl } from "../services/http";
+import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
-    const [showPassword, setShowPassword] = useState(false)
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-    const [processing, setProcessing] = useState(false)
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [processing, setProcessing] = useState(false);
     const [data, setData] = useState({
         name: "",
         email: "",
         password: "",
         password_confirmation: "",
-        role: "student",
-    })
+        role: "participant",
+    });
 
-    const navigate = useNavigate()
+    const nameRef = useRef(null);
+    const emailRef = useRef(null);
+    const passwordRef = useRef(null);
+    const passwordConfirmRef = useRef(null);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
+    const navigate = useNavigate();
+    const { login } = useAuth();
 
-        if (data.password !== data.password_confirmation) {
-            toast.error("Passwords do not match")
-            return
+    const navigateByRole = (userRole, userStatus) => {
+        if (userStatus === "pending" && userRole === "organizer") {
+            navigate("/organizer/pending-approval");
+            return;
         }
 
-        setProcessing(true)
+        switch (userRole) {
+            case "admin":
+                navigate("/admin/dashboard");
+                break;
+            case "organizer":
+            case "participant":
+            default:
+                navigate("/");
+                break;
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (data.password !== data.password_confirmation) {
+            toast.error("Passwords do not match");
+            passwordConfirmRef.current?.focus();
+            return;
+        }
+
+        setProcessing(true);
 
         try {
             const response = await fetch(`${apiUrl}/register`, {
@@ -44,53 +70,55 @@ export default function Register() {
                     password_confirmation: data.password_confirmation,
                     role: data.role,
                 }),
-            })
+            });
 
-            const result = await response.json()
+            const result = await response.json();
 
             if (response.ok) {
-                // Store token in localStorage
-                localStorage.setItem("auth_token", result.token)
-                localStorage.setItem("user", JSON.stringify(result.user))
+                // Use AuthContext login method
+                login(result.user, result.token);
 
-                toast.success("Registration successful!")
+                toast.success(result.message);
 
-                navigate("/dashboard")
+                navigate("/verify-email");
             } else {
                 // Handle validation errors
                 if (result.errors) {
-                    Object.keys(result.errors).forEach((key) => {
-                        result.errors[key].forEach((error) => {
-                            toast.error(error)
-                        })
-                    })
+                    const firstField = Object.keys(result.errors)[0];
+                    const firstError = result.errors[firstField][0];
+                    toast.error(firstError);
+
+                    if (firstField === "name") nameRef.current?.focus();
+                    if (firstField === "email") emailRef.current?.focus();
+                    if (firstField === "password") passwordRef.current?.focus();
+                    if (firstField === "password_confirmation") passwordConfirmRef.current?.focus();
                 } else if (result.message) {
-                    toast.error(result.message)
+                    toast.error(result.message);
                 } else {
-                    toast.error("Registration failed. Please try again.")
+                    toast.error("Registration failed. Please try again.");
                 }
             }
         } catch (error) {
-            console.error("Registration error:", error)
-            toast.error("Network error. Please check your connection.")
+            console.error("Registration error:", error);
+            toast.error("Network error. Please check your connection.");
         } finally {
-            setProcessing(false)
+            setProcessing(false);
         }
-    }
+    };
 
     const handleInputChange = (field, value) => {
         setData((prev) => ({
             ...prev,
             [field]: value,
-        }))
-    }
+        }));
+    };
 
     const handleGoogleSuccess = async (credentialResponse) => {
         try {
             const response = await fetch(`${apiUrl}/auth/google/login`, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     credential: credentialResponse.credential,
@@ -100,27 +128,26 @@ export default function Register() {
             const result = await response.json();
 
             if (result.status === 200) {
-                const userInfo = {
-                    ...result.user,
-                    token: result.token,
-                };
+                // Use AuthContext login method
+                login(result.user, result.token);
 
-                localStorage.setItem('auth_token', result.token);
-                localStorage.setItem('user', JSON.stringify(result.user));
+                toast.success("Registration successful!");
 
-                navigate("/dashboard");
-                toast.success('Login successful!');
+                const userRole = result.user?.role || "participant";
+                const userStatus = result.user?.status || "active";
+
+                navigateByRole(userRole, userStatus);
             } else {
-                toast.error(result.message || 'Google login failed');
+                toast.error(result.message || "Google registration failed");
             }
         } catch (error) {
-            console.error('Error during Google login:', error);
-            toast.error('An error occurred during Google login');
+            console.error("Error during Google registration:", error);
+            toast.error("An error occurred during Google registration");
         }
     };
 
     const handleGoogleError = () => {
-        toast.error('Google login failed');
+        toast.error("Google registration failed");
     };
 
     return (
@@ -135,12 +162,12 @@ export default function Register() {
             <div className="w-full max-w-md relative z-10 bg-white shadow-2xl">
                 <div className="text-center pb-6 pt-6 px-6">
                     <img src="/images/logo.webp" alt="Udemy Logo" className="mx-auto h-10 mb-4" />
-                    <h1 className="text-2xl font-bold text-gray-900 mb-1">Join Udemy Business</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-1">Join FPT Aptech</h1>
                     <p className="text-gray-600 text-sm">(fpl.udemy.com)</p>
                 </div>
 
                 <div className="space-y-4 px-6 pb-6">
-                    <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError}/>
+                    <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
 
                     {/* Divider */}
                     <div className="relative">
@@ -159,6 +186,7 @@ export default function Register() {
                                 Full Name
                             </label>
                             <input
+                                ref={nameRef}
                                 id="name"
                                 type="text"
                                 value={data.name}
@@ -175,6 +203,7 @@ export default function Register() {
                                 Email address
                             </label>
                             <input
+                                ref={emailRef}
                                 id="email"
                                 type="email"
                                 value={data.email}
@@ -192,6 +221,7 @@ export default function Register() {
                             </label>
                             <div className="relative">
                                 <input
+                                    ref={passwordRef}
                                     id="password"
                                     type={showPassword ? "text" : "password"}
                                     value={data.password}
@@ -204,7 +234,7 @@ export default function Register() {
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700"
+                                        className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700 cursor-pointer"
                                     >
                                         {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                                     </button>
@@ -219,6 +249,7 @@ export default function Register() {
                             </label>
                             <div className="relative">
                                 <input
+                                    ref={passwordConfirmRef}
                                     id="password_confirmation"
                                     type={showConfirmPassword ? "text" : "password"}
                                     value={data.password_confirmation}
@@ -231,7 +262,7 @@ export default function Register() {
                                     <button
                                         type="button"
                                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700"
+                                        className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700 cursor-pointer"
                                     >
                                         {showConfirmPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                                     </button>
@@ -245,34 +276,30 @@ export default function Register() {
                             <div className="grid grid-cols-2 gap-3">
                                 <button
                                     type="button"
-                                    onClick={() => handleInputChange("role", "student")}
-                                    className={`p-3 rounded-lg border-2 text-sm font-medium transition-colors ${
-                                        data.role === "student"
+                                    onClick={() => handleInputChange("role", "participant")}
+                                    className={`p-3 rounded-lg border-2 text-sm font-medium transition-colors cursor-pointer ${
+                                        data.role === "participant"
                                             ? "border-purple-600 bg-purple-50 text-purple-700"
                                             : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
                                     }`}
                                 >
-                                    Student
+                                    Participant
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => handleInputChange("role", "instructor")}
-                                    className={`p-3 rounded-lg border-2 text-sm font-medium transition-colors ${
-                                        data.role === "instructor"
+                                    onClick={() => handleInputChange("role", "organizer")}
+                                    className={`p-3 rounded-lg border-2 text-sm font-medium transition-colors cursor-pointer ${
+                                        data.role === "organizer"
                                             ? "border-purple-600 bg-purple-50 text-purple-700"
                                             : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
                                     }`}
                                 >
-                                    Instructor
+                                    Organizer
                                 </button>
                             </div>
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
+                        <button type="submit" disabled={processing} className="w-full btn-gradient">
                             {processing ? "Creating account..." : "Create Account"}
                         </button>
 
@@ -281,7 +308,7 @@ export default function Register() {
                             <button
                                 type="button"
                                 onClick={() => navigate("/login")}
-                                className="text-purple-600 hover:text-purple-700 font-medium"
+                                className="text-purple-600 hover:text-purple-700 font-medium cursor-pointer"
                             >
                                 Sign in
                             </button>
@@ -290,5 +317,5 @@ export default function Register() {
                 </div>
             </div>
         </div>
-    )
+    );
 }
